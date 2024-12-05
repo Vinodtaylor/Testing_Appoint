@@ -164,14 +164,14 @@ export const Walkin: React.FC = () => {
   </div>
 
   {/* Consultancy Fee */}
-  <div className="text-base mb-4 text-gray-700 font-medium">
+  <div className="text-base mb-4 text-gray-700  font-medium">
     <p className="flex items-center">
       Consultancy Fee - <span className="ml-1 font-semibold">₹900</span>
     </p>
   </div>
 
   {/* Dropdowns */}
-  <div className="flex flex-col items-center gap-4  mb-4 lg:gap-8 justify-center">
+  <div className="flex flex-col lg:flex-row items-center gap-4  mb-4 lg:gap-8 justify-center">
     <SelectDropDown
       value={dropdownValues.method}
       onChange={(value) => handleSelectChange("method", value)}
@@ -308,7 +308,7 @@ export const Walkin: React.FC = () => {
     </div>
 
     {/* Dropdowns */}
-    <div className="flex lg:flex-row flex-col items-center gap-4 lg:gap-8">
+    <div className="flex lg:flex-row  flex-col items-center gap-4 lg:gap-8">
       <div className="w-full   lg:max-w-3xl">
         <label htmlFor="method">Payment Method</label>
         <SelectDropDown

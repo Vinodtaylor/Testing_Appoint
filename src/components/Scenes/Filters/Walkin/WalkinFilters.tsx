@@ -70,8 +70,8 @@ const WalkinFilters: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex  flex-wrap lg:flex-wrap sm:gap-4 md:gap-8 lg:gap-10 items-center">
-        <div className="flex lg:w-1/5 w-full lg:mb-0 mb-4 lg:flex-row flex-col lg:items-center gap-2"> 
+      <div className="flex  flex-wrap lg:flex-wrap gap-4 sm:gap-4 md:gap-8  lg:gap-10 items-center">
+        <div className="flex  w-full lg:max-w-sm  lg:mb-0 mb-4 lg:flex-row flex-col lg:items-center gap-2"> 
           <label className="font-medium mb-1">Bookings:</label>
           <SelectDropdown
           id="booking"
@@ -85,7 +85,7 @@ const WalkinFilters: React.FC = () => {
           />
         </div>
 
-        <div className="flex lg:w-1/6 w-full  lg:flex-row flex-col lg:items-center gap-2">
+        <div className="flex  w-full lg:max-w-xs   lg:flex-row flex-col lg:items-center gap-2">
           <label className="font-medium mb-1">Gender:</label>
           <SelectDropdown
           id="gender"
@@ -101,7 +101,7 @@ const WalkinFilters: React.FC = () => {
 
 
        {/* Date Filters */}
-       <div className="flex w-full lg:flex-row flex-col lg:items-center gap-4 space-y-2 lg:max-w-md mb-4">
+       <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-4 space-y-2 lg:max-w-sm mb-4">
           <p>Date:</p>
           <div className="flex  lg:flex-row flex-col items-center gap-4 w-full">
             {/* Start Date Picker */}
@@ -156,7 +156,7 @@ const WalkinFilters: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex lg:w-1/6 w-full lg:flex-row flex-col lg:items-center gap-2">
+        <div className="flex  lg:max-w-xs  w-full lg:flex-row flex-col lg:items-center gap-2">
           <label className="font-medium mb-1">Speciality:</label>
           <SelectDropdown
           id="speciality"
