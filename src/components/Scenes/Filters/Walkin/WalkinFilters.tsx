@@ -9,9 +9,10 @@ import { VscTriangleDown, VscTriangleUp } from "react-icons/vsc";
 import Region from "../../../../../public/region.png";
 import { Calendar } from "@/components/ui/calendar";
 import {  WalkintableData } from "@/constants/data";
-import { SiMicrosoftexcel } from "react-icons/si";
 import * as XLSX from "xlsx";
 import SelectDropdown from "@/components/Scenes/Select/Select"; 
+import { PiMicrosoftExcelLogo } from "react-icons/pi";
+
 
 const Regions = [
   { name: "Bangalore", icon: Region, doctorCount: 24 },
@@ -65,7 +66,7 @@ const WalkinFilters: React.FC = () => {
           className="p-3 whitespace-nowrap bg-[#1A91FF] shadow-md border rounded-full flex items-center gap-2"
           onClick={exportToExcel}
         >
-          Export as Excel <SiMicrosoftexcel size={20} />
+          Export as Excel <PiMicrosoftExcelLogo size={20} />
         </button>
       </div>
 

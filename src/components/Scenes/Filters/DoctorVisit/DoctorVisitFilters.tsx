@@ -14,8 +14,9 @@ import Region from '../../../../../public/region.png';
 import { Calendar } from "@/components/ui/calendar";
 import * as XLSX from 'xlsx';
 import { DoctorVisittableData } from "@/constants/data";
-import { SiMicrosoftexcel } from "react-icons/si";
 import SelectDropDown from "../../Select/Select"; 
+import { PiMicrosoftExcelLogo } from "react-icons/pi";
+
 
 // Define the regions
 const Regions = [
@@ -66,7 +67,7 @@ const DoctorVisitFilters: React.FC = () => {
       <div className="flex lg:flex-row gap-4 flex-col lg:items-center lg:justify-between">
         <h1 className="text-lg font-bold border-b-2 border-white">Filters</h1>
         <button onClick={exportToExcel} className="p-3 whitespace-nowrap bg-[#1A91FF] shadow-md border rounded-full flex items-center gap-2">
-          Export as Excel <SiMicrosoftexcel size={20} />
+          Export as Excel <PiMicrosoftExcelLogo size={20} />
         </button>
       </div>
 

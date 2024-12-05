@@ -6,8 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Servicesdata, ServicetableData } from "@/constants/data";
-import { SiMicrosoftexcel } from "react-icons/si";
 import SelectDropDown from "../../Select/Select"; 
+import { PiMicrosoftExcelLogo } from "react-icons/pi";
+
 import * as XLSX from "xlsx";
 
 const ServicesFilters: React.FC = () => {
@@ -41,7 +42,7 @@ const ServicesFilters: React.FC = () => {
           className="p-3 whitespace-nowrap bg-[#1A91FF] shadow-md border rounded-full flex items-center gap-2"
           onClick={exportToExcel}
         >
-          Export as Excel <SiMicrosoftexcel size={20} />
+          Export as Excel <PiMicrosoftExcelLogo size={20} />
         </button>
       </div>
 

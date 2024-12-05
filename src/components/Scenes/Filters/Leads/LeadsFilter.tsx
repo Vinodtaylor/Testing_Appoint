@@ -6,9 +6,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { LeadtableData, Pagesdata } from "@/constants/data";
-import { SiMicrosoftexcel } from "react-icons/si";
 import SelectDropDown from "../../Select/Select"; 
 import * as XLSX from "xlsx";
+import { PiMicrosoftExcelLogo } from "react-icons/pi";
+
 
 const LeadsFilters: React.FC = () => {
   const [startDate, setStartDate] = useState<Date | undefined>();
@@ -43,7 +44,7 @@ const LeadsFilters: React.FC = () => {
           className="p-3 whitespace-nowrap bg-[#1A91FF] shadow-md border rounded-full flex items-center gap-2"
           onClick={exportToExcel}
         >
-          Export as Excel <SiMicrosoftexcel size={20} />
+          Export as Excel <PiMicrosoftExcelLogo size={20} />
         </button>
       </div>
 
