@@ -103,21 +103,18 @@ body {
 }
 
 
-.drop {
-  -webkit-appearance: none; /* For Safari/Chrome */
-  -moz-appearance: none; /* For Firefox */
-  appearance: none; /* Standard */
-  background: transparent; /* Optional: to remove default background */
-  border: 1px solid #ccc; /* Optional: style the border */
-  padding-right: 20px; /* Optional: ensure the padding accommodates the custom arrow if you add one */
-}
 
-/* Optional: custom arrow */
-.drop::after {
-  content: ' ▼'; /* You can change this to any arrow icon */
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
+
+
+@layer utilities {
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* For Firefox */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }

@@ -49,7 +49,7 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
       {label && (
         <label
           htmlFor={id}
-          className={`block text-base font-medium  ${labelClassName || ''}`}
+          className={`block  font-medium  ${labelClassName || ''}`}
         >
           {label}
         </label>
@@ -59,12 +59,12 @@ const SelectDropDown: React.FC<SelectDropDownProps> = ({
         className={`mt-1 cursor-pointer border px-3 py-2 flex justify-between items-center ${inputClassName || ''}`}
         id={id}
       >
-        <span className='text-base whitespace-nowrap px-4'>{value || placeholder || 'Select an option'}</span>
+        <span className=' whitespace-nowrap px-4'>{value || placeholder || 'Select an option'}</span>
         {isOpen ? CustomIconUp : CustomIconDown}
       </div>
       {isOpen && (
         <div
-          className={`absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg ${dropdownClassName || ''}`}
+          className={`absolute z-10  mt-1 bg-white border border-gray-300 rounded-lg shadow-lg ${dropdownClassName || ''}`}
         >
           {options.map((option) => (
             <div

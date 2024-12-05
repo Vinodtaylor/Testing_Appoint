@@ -56,7 +56,7 @@ const DoctorFilter: React.FC = () => {
     <div className="p-8 mb-8  text-white rounded-tl-lg rounded-tr-lg space-y-4 bg-[#1A91FF]">
       <div className="flex lg:flex-row gap-4 flex-col lg:items-center lg:justify-between">
         <h1 className="text-lg font-bold border-b-2 border-white">Filters</h1>
-        <button onClick={exportToExcel} className="p-3 whitespace-nowrap bg-[#1A91FF] shadow-md border rounded-full flex items-center gap-2">
+        <button onClick={exportToExcel} className="p-3  justify-center whitespace-nowrap bg-[#1A91FF] shadow-md border rounded-full flex items-center gap-2">
           Export as Excel <PiMicrosoftExcelLogo size={20} />
         </button>
       </div>

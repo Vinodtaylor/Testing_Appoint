@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/TableAlert";
 import SelectDropDown from "../../Select/Select";
 import EditDoctor from "../../Forms/DoctorDetails/EditDoctor";
+import { AlertDialogDescription } from "@radix-ui/react-alert-dialog";
 
 const daysOfWeek: string[] = [
   "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
@@ -156,42 +157,42 @@ const Doctor: React.FC = () => {
                       <Calendar size={20} />
                     </button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="max-w-2xl">
+                  <AlertDialogContent className="w-full  max-h-full overflow-scroll  max-w-lg sm:max-w-xl lg:max-w-3xl rounded-lg ">
                     <AlertDialogHeader>
                       <AlertDialogTitle>Schedule</AlertDialogTitle>
                     </AlertDialogHeader>
 
                     <form action="">
-                      <div className="flex gap-8 mb-6">
+                      <div className="flex flex-col md:flex-row lg:flex-row  gap-8 mb-6">
                         <SelectDropDown
                           value={dropdownValues.startYear}
                           onChange={(value) => handleSelectChange('startYear', value)}
                           options={['Year 1', 'Year 2']}
-                          icon={[<Calendar key="down" />, <Calendar key="up" />]}
+                          icon={[<Calendar key="down" size={20}/>, <Calendar key="up" size={20} />]}
                           placeholder="Select Start year"
                           label="Start Year"
                           id="start-year"
-                          inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md"
-                          containerClassName="w-full text-sm"
+                          inputClassName="outline-none    text-sm rounded-lg bg-transparent h-[48px] shadow-md"
+                          containerClassName=" text-sm "
                           dropdownClassName="text-[#000000] bg-transparent"
                         />
                         <SelectDropDown
                           value={dropdownValues.EndYear}
                           onChange={(value) => handleSelectChange('EndYear', value)}
                           options={['Year 1', 'Year 2']}
-                          icon={[<Calendar key="down" />, <Calendar key="up" />]}
-                          placeholder="Select Endyear"
+                          icon={[<Calendar key="down"  size={20} />, <Calendar key="up"  size={20}/>]}
+                          placeholder="Select End year"
                           label="End Year"
                           id="end-year"
-                          inputClassName="outline-none rounded-lg bg-transparent h-[48px] shadow-md"
-                          containerClassName="w-full"
+                          inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md"
+                          containerClassName="  text-sm"
                           dropdownClassName="text-[#000000] bg-transparent"
                         />
                       </div>
 
                       <div className="mb-6">
-                        <h2 className="mb-2">Select Days</h2>
-                        <div className="grid grid-cols-3 gap-2">
+                        <h2 className="mb-2 text-sm ">Select Days</h2>
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                           {daysOfWeek.map((day) => (
                             <div key={day} className="flex items-center space-x-2">
                               <input
@@ -201,7 +202,7 @@ const Doctor: React.FC = () => {
                                 onChange={() => handleCheckboxChange(day)}
                                 className="form-checkbox"
                               />
-                              <label htmlFor={day} className="text-base">
+                              <label htmlFor={day} className="text-sm">
                                 {day}
                               </label>
                             </div>
@@ -209,47 +210,49 @@ const Doctor: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex gap-8">
+                      <div className="flex flex-col md:flex-row lg:flex-row gap-8">
                         <SelectDropDown
                           value={dropdownValues.StartTime}
                           onChange={(value) => handleSelectChange('StartTime', value)}
-                          options={['Slot', 'Slot 2']}
+                          options={['Slot 1', 'Slot 2','Slot 3','Slot 4']}
                           placeholder="Select Start time"
                           label="Start time"
-                          icon={[<Clock key="up" />, <Clock key="down" />]}
+                          icon={[<Clock key="up"  size={20} />, <Clock key="down"   size={20}/>]}
                           id="start-time"
-                          inputClassName="outline-none rounded-lg bg-transparent h-[48px] shadow-md"
-                          containerClassName="w-full"
+                          inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md"
+                          containerClassName="w-full text-sm"
                           dropdownClassName="text-[#000000] bg-transparent"
                         />
                         <SelectDropDown
                           value={dropdownValues.EndTime}
                           onChange={(value) => handleSelectChange('EndTime', value)}
-                          options={['Slot 1', 'Slot 2']}
+                          options={['Slot 1', 'Slot 2','Slot 3','Slot 4']}
                           placeholder="Select EndTime"
                           label="End Time"
-                          icon={[<Clock key="up" />, <Clock key="down" />]}
+                          icon={[<Clock key="up"  size={20} />, <Clock key="down"  size={20} />]}
                           id="end-time"
-                          inputClassName="outline-none rounded-lg bg-transparent h-[48px] shadow-md"
-                          containerClassName="w-full"
+                          inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md"
+                          containerClassName="w-full text-sm"
                           dropdownClassName="text-[#000000] bg-transparent"
                         />
                       </div>
                     </form>
 
-                    <AlertDialogFooter>
-                      <AlertDialogCancel onClick={closeDialogs} className="w-full">
+                    <AlertDialogFooter className="">
+                      <div className="flex items-center gap-4">
+                      <AlertDialogCancel onClick={closeDialogs} className="w-full rounded-full">
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        className="w-full bg-blue-500"
+                        className=" rounded-full w-full bg-blue-500"
                         onClick={() => {
-                          // Handle schedule logic here
                           closeDialogs();
                         }}
                       >
                         Confirm
                       </AlertDialogAction>
+                      </div>
+                      
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -257,22 +260,30 @@ const Doctor: React.FC = () => {
               <TableCell className="px-3 py-2 text-gray-900 text-sm">
                 <AlertDialog>
                   <AlertDialogTrigger>
-                    <button onClick={() => openDeleteDialog(doctor)}>
+                    <button onClick={() => openDeleteDialog(doctor)} className="text-red-500">
                       <Trash size={20} />
                     </button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="w-full   max-w-lg sm:max-w-xl lg:max-w-3xl rounded-lg ">
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete this data
+                        and remove your data from our servers.
+                      </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel onClick={closeDialogs}>Cancel</AlertDialogCancel>
+
+                      <div className="flex gap-4 items-center">
+                      <AlertDialogCancel onClick={closeDialogs} className="w-full rounded-full">Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDelete}
-                        className="bg-red-600"
+                        className="bg-blue-500 w-full rounded-full"
                       >
                         Delete
                       </AlertDialogAction>
+                      </div>
+              
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
