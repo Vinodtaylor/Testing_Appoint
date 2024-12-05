@@ -39,9 +39,9 @@ const Navbar: React.FC = () => {
         { link: "/hospitals", name: "Hospitals" },
 
 
-        { link: "/", name: "Lab Appointment" },
-        { link: "/", name: "Services Appointment" },
-        { link: "/", name: "Leads" },
+        // { link: "/", name: "Lab Appointment" },
+        // { link: "/", name: "Services Appointment" },
+        // { link: "/", name: "Leads" },
       ],
     },
   ];
