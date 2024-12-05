@@ -71,7 +71,7 @@ const WalkinFilters: React.FC = () => {
       </div>
 
       <div className="flex  flex-wrap lg:flex-wrap gap-4 sm:gap-4 md:gap-8  lg:gap-10 items-center">
-        <div className="flex  w-full lg:max-w-sm  lg:mb-0 mb-4 lg:flex-row flex-col lg:items-center gap-2"> 
+        <div className="flex  w-full lg:max-w-xs  lg:mb-0 mb-4 lg:flex-row flex-col lg:items-center gap-2"> 
           <label className="font-medium mb-1">Bookings:</label>
           <SelectDropdown
           id="booking"

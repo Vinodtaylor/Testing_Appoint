@@ -1,17 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Calendar1Icon } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+
 import Image from "next/image";
 import { VscTriangleDown, VscTriangleUp } from "react-icons/vsc";
 import Region from '../../../../../public/region.png';
-import { Calendar } from "@/components/ui/calendar";
 import * as XLSX from 'xlsx';
 import { DoctorVisittableData } from "@/constants/data";
 import SelectDropDown from "../../Select/Select"; 
@@ -28,15 +21,12 @@ const Regions = [
   { name: "Jayanagar", icon: Region, doctorCount: 15 },
 ];
 
-const DoctorVisitFilters: React.FC = () => {
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
+const DoctorFilter: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>("Bangalore");
   const [dropdownValues, setDropdownValues] = useState({
-    bookings: '',
     gender: '',
     doctor: '',
-    city: '',
+    dept: '',
   });
   
   const handleSelectChange = (key: string, value: string) => {
@@ -71,26 +61,26 @@ const DoctorVisitFilters: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex p-4 flex-wrap sm:gap-4 md:gap-8 lg:gap-20 items-center">
+      <div className="flex p-4 lg:flex-row flex-col sm:gap-4 md:gap-8 lg:gap-20 items-center">
         {/* Bookings */}
-        <div className="flex lg:max-w-sm w-full lg:flex-row flex-col lg:items-center gap-2 mb-4">
-          <label className="font-medium mb-1">Bookings:</label>
+       
+
+        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 mb-4">
+          <label className="font-medium mb-1">Department:</label>
           <SelectDropDown
-  value={dropdownValues.bookings}
-  onChange={(value) => handleSelectChange('bookings', value)}
-  options={['Online', 'Offline', 'All']}
-  placeholder="Select Booking Type"
-  id="booking-type"
-  
-  inputClassName="outline-none   rounded-lg bg-transparent h-[48px] shadow-md"  
-  containerClassName="w-full"    
-  dropdownClassName="text-[#000000] bg-transparent"              
-/>
+             value={dropdownValues.dept}
 
+           onChange={(value) => handleSelectChange('city', value)}
+           options={['Dept1', 'Dept2']}            placeholder="Select Department"
+            id="dept"
+            inputClassName="outline-none border-white border-1 rounded-lg bg-transparent h-[48px] shadow-md"  
+            containerClassName="w-full"    
+            dropdownClassName="text-[#000000] bg-transparent"
+            
+          />
         </div>
-
         {/* Gender */}
-        <div className="flex lg:w-1/6 w-full  lg:flex-row flex-col lg:items-center gap-2 mb-4">
+        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 mb-4">
           <label className="font-medium mb-1">Gender:</label>
           <SelectDropDown
               value={dropdownValues.gender}
@@ -104,72 +94,18 @@ const DoctorVisitFilters: React.FC = () => {
           />
         </div>
 
-        {/* Date Filters */}
-        <div className="flex  w-full lg:flex-row flex-col lg:items-center gap-4 space-y-2 lg:w-96 mb-4">
-          <p>Date:</p>
-          <div className="flex  lg:flex-row flex-col items-center gap-4 w-full">
-            {/* Start Date Picker */}
-            <Popover >
-              <PopoverTrigger asChild className="">
-                <div className="relative w-full">
-                  <Input
-                    placeholder="Start Date"
-                    value={startDate ? startDate.toLocaleDateString() : ""}
-                    className="pr-10 text-sm shadow-md cursor-pointer h-[48px] placeholder:text-white outline-none"
-                    readOnly
-                  />
-                  <Calendar1Icon className="absolute right-3 text-white top-1/2 transform -translate-y-1/2" />
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-
-            <span className="text-white">to</span>
-
-            {/* End Date Picker */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <div className="relative  w-full">
-                  <Input
-                    placeholder="End Date"
-                    value={endDate ? endDate.toLocaleDateString() : ""}
-                    className="pr-10 text-sm cursor-pointer h-[48px] placeholder:text-white outline-none shadow-md"
-                    readOnly
-                  />
-                  <Calendar1Icon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white" />
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
+        
       </div>
 
       <div className="flex w-full transform lg:-translate-y-0 -translate-y-8 p-4 flex-wrap gap-4 md:gap-8 lg:gap-10 items-center">
         {/* Doctor */}
-        <div className="flex w-full lg:w-1/3 lg:flex-row flex-col lg:items-center gap-4 mb-4 lg:mb-0">
+        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-4 mb-4 lg:mb-0">
           <label className="font-medium mb-1">Doctor:</label>
           <SelectDropDown
   value={dropdownValues.doctor}
   onChange={(value) => handleSelectChange('doctor', value)}
   options={['Jane', 'Smith']}
-  placeholder="Enter Doctor Name"
+  placeholder="Select Doctor Name"
   icon={[<VscTriangleDown size={20} key="down" />, <VscTriangleUp key="up" size={20}/>]}
   id="doctor-name"
   inputClassName="outline-none rounded-full bg-white text-[#000000] h-[48px] shadow-md"  
@@ -180,20 +116,7 @@ const DoctorVisitFilters: React.FC = () => {
         </div>
 
         {/* City */}
-        <div className="flex lg:w-1/6 w-full items-center gap-2 lg:mb-0 mb-4">
-          <label className="font-medium mb-1">City:</label>
-          <SelectDropDown
-             value={dropdownValues.city}
-
-           onChange={(value) => handleSelectChange('city', value)}
-           options={['Chennai', 'Bangalore']}            placeholder="Select City"
-            id="city"
-            inputClassName="outline-none border-white border-1 rounded-lg bg-transparent h-[48px] shadow-md"  
-            containerClassName="w-full"    
-            dropdownClassName="text-[#000000] bg-transparent"
-            
-          />
-        </div>
+      
       </div>
 
       {/* Region */}
@@ -233,10 +156,9 @@ const DoctorVisitFilters: React.FC = () => {
         </div>
       </div>
 
-      {/* Custom Select for an Option */}
      
     </div>
   );
 };
 
-export default DoctorVisitFilters;
+export default DoctorFilter;
