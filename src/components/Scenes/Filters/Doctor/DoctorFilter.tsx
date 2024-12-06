@@ -75,7 +75,7 @@ const DoctorFilter: React.FC = () => {
             id="dept"
             inputClassName="outline-none border-white border-1 rounded-lg bg-transparent h-[48px] shadow-md"  
             containerClassName="w-full"    
-            dropdownClassName="text-[#000000] bg-transparent"
+            dropdownClassName="text-[#000000] bg-transparent w-full"
             
           />
         </div>
@@ -89,7 +89,7 @@ const DoctorFilter: React.FC = () => {
             placeholder="Select Gender"
             inputClassName="outline-none rounded-lg bg-transparent h-[48px] shadow-md"  
             containerClassName="w-full"    
-            dropdownClassName="text-[#000000] bg-transparent"       
+            dropdownClassName="text-[#000000] bg-transparent w-full"       
             id="gender"
           />
         </div>
@@ -110,7 +110,7 @@ const DoctorFilter: React.FC = () => {
   id="doctor-name"
   inputClassName="outline-none rounded-full bg-white text-[#000000] h-[48px] shadow-md"  
   containerClassName="w-full"    
-  dropdownClassName="text-[#000000] bg-transparent"    
+  dropdownClassName="text-[#000000] bg-transparent w-full"    
 />
 
         </div>
