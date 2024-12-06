@@ -35,8 +35,8 @@ const Navbar: React.FC = () => {
       Navlinks: [
         { link: "/", name: "Doctor Visit" },
         { link: "/walkin", name: "Walk-in Patient" },
-        { link: "/", name: "Doctors" },
-        { link: "/", name: "Hospitals" },
+        { link: "/doctors", name: "Doctors" },
+        { link: "/hospitals", name: "Hospitals" },
 
 
         // { link: "/", name: "Lab Appointment" },
