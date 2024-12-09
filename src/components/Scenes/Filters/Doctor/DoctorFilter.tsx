@@ -94,12 +94,12 @@ const DoctorFilter: React.FC = () => {
       
       </div>
 
-      <div className="flex p-4 lg:flex-row flex-col sm:gap-4 md:gap-8 lg:gap-20 items-center">
+      <div className="flex  lg:flex-row flex-col sm:gap-4 md:gap-8 lg:gap-20 items-center">
         {/* Bookings */}
        
 
-        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 mb-4">
-          <label className="font-medium mb-1">Department:</label>
+        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 lg:pb-4  pb-4">
+          <label className="font-medium ">Department:</label>
           <SelectDropDown
              value={dropdownValues.dept}
 
@@ -113,8 +113,8 @@ const DoctorFilter: React.FC = () => {
           />
         </div>
         {/* Gender */}
-        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 mb-4">
-          <label className="font-medium mb-1">Gender:</label>
+        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 lg:pb-0  pb-4">
+          <label className="font-medium ">Gender:</label>
           <SelectDropDown
               value={dropdownValues.gender}
               onChange={(value) => handleSelectChange('gender', value)}            
@@ -130,10 +130,10 @@ const DoctorFilter: React.FC = () => {
         
       </div>
 
-      <div className="flex w-full transform lg:-translate-y-0 -translate-y-8 p-4 flex-wrap gap-4 md:gap-8 lg:gap-10 items-center">
+      <div className="flex w-full lg:pb-4   flex-wrap gap-4 md:gap-8 lg:gap-10 items-center">
         {/* Doctor */}
-        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-4 mb-4 lg:mb-0">
-          <label className="font-medium mb-1">Doctor:</label>
+        <div className="flex w-full  lg:flex-row flex-col lg:items-center lg:gap-4 lg:pb-0  pb-4  lg:mb-0 ">
+          <label className="font-medium ">Doctor:</label>
           <SelectDropDown
   value={dropdownValues.doctor}
   onChange={(value) => handleSelectChange('doctor', value)}
@@ -153,7 +153,7 @@ const DoctorFilter: React.FC = () => {
       </div>
 
       {/* Region */}
-      <div className="flex lg:flex-row flex-col lg:items-center   lg:gap-4 ">
+      <div className="flex lg:flex-row flex-col lg:items-center lg:pb-0  pb-4   lg:gap-4 ">
 
 <label htmlFor="" className="mb-1 whitespace-nowrap">Regions</label>
 <input
