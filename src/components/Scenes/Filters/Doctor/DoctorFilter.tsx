@@ -11,14 +11,32 @@ import SelectDropDown from "../../Select/Select";
 import { PiMicrosoftExcelLogo } from "react-icons/pi";
 
 
-// Define the regions
-const Regions = [
+export const Regions = [
   { name: "Bangalore", icon: Region, doctorCount: 24 },
   { name: "Whitefield", icon: Region, doctorCount: 18 },
   { name: "Koramangala", icon: Region, doctorCount: 30 },
   { name: "Malleswaram", icon: Region, doctorCount: 12 },
   { name: "Indiranagar", icon: Region, doctorCount: 20 },
   { name: "Jayanagar", icon: Region, doctorCount: 15 },
+  { name: "Hebbal", icon: Region, doctorCount: 10 },
+  { name: "Electronic City", icon: Region, doctorCount: 22 },
+  { name: "Yelahanka", icon: Region, doctorCount: 17 },
+  { name: "RT Nagar", icon: Region, doctorCount: 14 },
+  { name: "Basavanagudi", icon: Region, doctorCount: 8 },
+  { name: "JP Nagar", icon: Region, doctorCount: 16 },
+  { name: "Banashankari", icon: Region, doctorCount: 9 },
+  { name: "Sarjapur Road", icon: Region, doctorCount: 25 },
+  { name: "Marathahalli", icon: Region, doctorCount: 20 },
+  { name: "Hosur Road", icon: Region, doctorCount: 13 },
+  { name: "Bellandur", icon: Region, doctorCount: 19 },
+  { name: "HSR Layout", icon: Region, doctorCount: 21 },
+  { name: "Domlur", icon: Region, doctorCount: 11 },
+  { name: "Ulsoor", icon: Region, doctorCount: 7 },
+  { name: "Vijayanagar", icon: Region, doctorCount: 15 },
+  { name: "Kumaraswamy Layout", icon: Region, doctorCount: 9 },
+  { name: "Magadi Road", icon: Region, doctorCount: 6 },
+  { name: "Rajajinagar", icon: Region, doctorCount: 18 },
+  { name: "Peenya", icon: Region, doctorCount: 12 },
 ];
 
 const DoctorFilter: React.FC = () => {
@@ -28,6 +46,17 @@ const DoctorFilter: React.FC = () => {
     doctor: '',
     dept: '',
   });
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showAll, setShowAll] = useState<boolean>(false);
+
+  const filteredregions = Regions.filter(region =>
+    region.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+
+  const displayedRegions = showAll ? filteredregions : filteredregions.slice(0, 6);
+  const hasMoreThan12Regions = filteredregions.length > 6;
+
   
   const handleSelectChange = (key: string, value: string) => {
     setDropdownValues((prevValues) => ({
@@ -49,16 +78,20 @@ const DoctorFilter: React.FC = () => {
   };
 
   // Get the doctor count for the selected region
-  const selectedRegionData = Regions.find(region => region.name === selectedRegion);
-  const doctorCount = selectedRegionData?.doctorCount || 0;
 
   return (
     <div className="p-8 mb-8  text-white rounded-tl-lg rounded-tr-lg space-y-4 bg-[#1A91FF]">
       <div className="flex lg:flex-row gap-4 flex-col lg:items-center lg:justify-between">
         <h1 className="text-lg font-bold border-b-2 border-white">Filters</h1>
-        <button onClick={exportToExcel} className="p-3  justify-center whitespace-nowrap bg-[#1A91FF] shadow-md border rounded-full flex items-center gap-2">
+        <div className="flex justify-between items-center lg:flex-nowrap flex-wrap gap-4">
+        <button onClick={exportToExcel} className="p-3 whitespace-nowrap w-full bg-[#1A91FF] shadow-md border rounded-full text-center flex justify-center gap-2">
           Export as Excel <PiMicrosoftExcelLogo size={20} />
         </button>
+        <button onClick={exportToExcel} className="p-3 whitespace-nowrap w-full text-center bg-[#1A91FF] shadow-md border rounded-full  gap-2">
+        Apply Filter
+        </button>
+        </div>
+      
       </div>
 
       <div className="flex p-4 lg:flex-row flex-col sm:gap-4 md:gap-8 lg:gap-20 items-center">
@@ -120,41 +153,70 @@ const DoctorFilter: React.FC = () => {
       </div>
 
       {/* Region */}
-      <div className="flex lg:flex-row transform lg:-translate-y-0 -translate-y-8  items-start flex-col overflow-hidden lg:items-center p-4 gap-6">
-        <label className="font-medium mb-1">Region:</label>
-        <div className="flex gap-12">
-          {Regions.map((region, index) => (
-            <div
-              key={index}
-              onClick={() => handleRegionSelect(region.name)}
-              className="flex justify-center items-center flex-col"
-            >
-              <div
-                className={`relative mb-4 rounded-full w-36 h-36 justify-center transition-all duration-300 ease-in-out cursor-pointer flex flex-col items-center ${selectedRegion === region.name ? "bg-gradient-to-r from-[#FFFFFF00]  shadow-lg to-[#FFFFFFFF]" : "bg-transparent"}`}
-              >
-                <div className="flex items-center flex-col w-full justify-center">
-                  <Image
-                    src={region.icon}
-                    alt={region.name}
-                    title={region.name}
-                    className="max-w-[60px] mb-1"
-                  />
-                  <p className={`text-center text-sm font-medium ${selectedRegion === region.name ? "text-[#000000]" : "text-white"}`}>
-                    {region.name}
-                  </p>
-                </div>
-              </div>
-              {selectedRegion === region.name && (
-                <div className="bg-[#D9D9D9] p-2 rounded-full">
-                  <p className="text-[#000000] text-center text-sm">
-                    {doctorCount} Doctors
-                  </p>
-                </div>
-              )}
-            </div>
-          ))}
+      <div className="flex lg:flex-row flex-col lg:items-center   lg:gap-4 ">
+
+<label htmlFor="" className="mb-1 whitespace-nowrap">Regions</label>
+<input
+  placeholder="Search Regions"
+  type="text"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  className="w-full text-gray-700 shadow-md px-8 p-3 rounded-full outline-none"
+/>
+      </div>
+
+      {/* Region */}
+      <div className="grid  grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6  transform lg:-translate-y-0 items-start lg:items-center">
+  {displayedRegions.map((region, index) => (
+    <div
+      key={index}
+      onClick={() => handleRegionSelect(region.name)}
+      className="flex justify-center items-center flex-col"
+    >
+      <div
+        className={`relative mb-4 rounded-full w-36 h-36 justify-center transition-all duration-300 ease-in-out cursor-pointer flex flex-col items-center ${
+          selectedRegion === region.name
+            ? "bg-gradient-to-r from-[#FFFFFF00] shadow-lg to-[#FFFFFFFF]"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="flex items-center flex-col w-full justify-center">
+          <Image
+            src={region.icon}
+            alt={region.name}
+            title={region.name}
+            className="max-w-[60px] mb-1"
+          />
+          <p
+            className={`text-center text-sm font-medium ${
+              selectedRegion === region.name ? "text-[#000000]" : "text-white"
+            }`}
+          >
+            {region.name}
+          </p>
         </div>
       </div>
+      {selectedRegion === region.name && (
+        <div className="bg-[#D9D9D9] p-2 rounded-full">
+          <p className="text-[#000000] text-center text-sm">
+            {region.doctorCount} Doctors
+          </p>
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
+{hasMoreThan12Regions && (
+<div className="flex justify-center">
+<button
+          onClick={() => setShowAll((prev) => !prev)}
+          className="text-white border  px-4 py-2 rounded-full"
+        >
+          {showAll ? "View Less" : "View More"}
+        </button>
+</div>
+)}
 
      
     </div>

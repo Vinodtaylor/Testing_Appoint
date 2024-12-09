@@ -4,28 +4,54 @@ import React, { useState } from "react";
 import Modal from "../../Modal/Modal";
 import { useModal } from "@/hooks/useModal";
 import SelectDropDown from "../../Select/Select";
-import { Plus, UploadCloudIcon } from "lucide-react";
+import {  UploadCloudIcon } from "lucide-react";
 import { FaSearch } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
-
+import { useForm,   FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import DoctorSchema,{DoctorFormValues} from "@/schema/Doctor";
+import ArrayField from "../../Fields/Array/Array";
 
 
 
 const DoctorDetails = () => {
-  const { isOpen, openModal, closeModal } = useModal();
-  
+  const { isOpen, openModal, closeModal } = useModal(); 
   const [dropdownValues, setDropdownValues] = useState({
     department:''
   });
 
 
+  const methods = useForm<DoctorFormValues>({
+    resolver: zodResolver(DoctorSchema),
+    defaultValues: {
+      speciality: [],
+      meta_tag: [],
+      doctor_expert: [],
+      top_treatments: [],
+      doctor_best_known: [],
+      doctor_video: [],
+      qualification: [{ degree: "", year: new Date().getFullYear() }],
+    },
+  });
+
+  // const { fields: qualificationFields, append, remove } = useFieldArray({
+  //   control: methods.control, 
+  //   name: "qualification",
+  // });
+
+
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isWalkinVisitTrue, setIsWalkinVisitTrue] = useState<boolean>(false);
+  const [isdoctorVisitTrue, setIsdoctorVisitTrue] = useState<boolean>(false);
 
-  const [isTrue, setIsTrue] = useState<boolean>(false);
-
-  const handleToggle = () => {
-    setIsTrue((prevState) => !prevState);
+  const handleWalkinToggle = () => {
+    setIsWalkinVisitTrue((prevState) => !prevState);
   };
+
+  const handleDoctorVisitToggle = () => {
+    setIsdoctorVisitTrue((prevState) => !prevState);
+  };
+
 
 
   const Depts = [
@@ -77,10 +103,16 @@ const DoctorDetails = () => {
       </button>
 
       <Modal isOpen={isOpen} onClose={closeModal} title="Add Doctor Details">
-      <form className="space-y-6 max-h-full overflow-scroll ">
+        <FormProvider {...methods}>
+
+        <form className="space-y-6 max-h-full overflow-scroll ">
           {/* Personal Details */}
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px] max-w-sm">
+
+
+
+
               <label htmlFor="name" className="block text-left mb-2 text-sm font-medium">
                 Name
               </label>
@@ -88,7 +120,7 @@ const DoctorDetails = () => {
                 type="text"
                 id="name"
                 placeholder="Doctor's Name"
-                className="w-full p-2 shadow-md border border-gray-300  outline-none rounded-lg"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300  outline-none rounded-lg"
               />
             </div>
 
@@ -115,7 +147,7 @@ const DoctorDetails = () => {
                 type="number"
                 id="age"
                 placeholder="Age"
-                className="w-20 p-2 shadow-md border  border-gray-300 rounded-md outline-none"
+                className="w-20 p-2 placeholder:text-sm placeholder:px-4 shadow-md border  border-gray-300 rounded-md outline-none"
               />
             </div>
           </div>
@@ -130,7 +162,7 @@ const DoctorDetails = () => {
                 type="text"
                 id="region"
                 placeholder="Region"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
 
@@ -142,7 +174,7 @@ const DoctorDetails = () => {
                 type="email"
                 id="email"
                 placeholder="Email"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
 
@@ -153,7 +185,7 @@ const DoctorDetails = () => {
 
 
           {/* Professional Details */}
-          <div className="flex lg:flex-row sm:flex-row  flex-col  lg:flex-wrap gap-4">
+          <div className="flex lg:flex-row sm:flex-row  lg:items-center  flex-col  lg:flex-wrap gap-4">
 
 
           <div className="flex-1  ">
@@ -164,7 +196,7 @@ const DoctorDetails = () => {
                 type="tel"
                 id="doctor-phone"
                 placeholder="Phone Number"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
             <div className="flex-1 ">
@@ -175,35 +207,63 @@ const DoctorDetails = () => {
                 type="number"
                 id="experience"
                 placeholder="Experience"
-                className="  w-full  p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="  w-full placeholder:text-sm placeholder:px-4  p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
+              
             </div>
 
-            <div className="flex-1">
-            <div className=" gap-4">
 
-<label htmlFor="doctor-type" className="block mb-2 text-left text-sm font-medium">Doctor  Type</label>
-<div className="flex gap-4">
+<div className="flex-1 ">
+<div className="flex gap-8 w-full ">
+            <div className="">
+
+<label htmlFor="doctor-type" className="block mb-2 text-left text-sm font-medium">Doctor Visit</label>
+<div className="flex flle gap-4">
 <div
       className={`w-16 h-8 flex items-center rounded-full cursor-pointer transition-colors duration-300 ${
-        isTrue ? "bg-blue-500" : "bg-gray-300"
+        isdoctorVisitTrue ? "bg-blue-500" : "bg-gray-300"
       }`}
-      onClick={handleToggle}
+      onClick={handleDoctorVisitToggle}
     >
       <div
         className={`w-7 h-7 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-          isTrue ? "translate-x-8" : "translate-x-1"
+          isdoctorVisitTrue ? "translate-x-8" : "translate-x-1"
         }`}
       />
 
       
     </div>
-    <span className="text-base font-normal">{isTrue ? "Walkin" : "Doctor Visit"}</span>
+
+</div>
+
+  </div>
+  <div>
+
+<label htmlFor="doctor-type" className="block mb-2 text-left text-sm font-medium">Walkin Visit</label>
+<div className="flex gap-4">
+<div
+      className={`w-16 h-8 flex items-center rounded-full cursor-pointer transition-colors duration-300 ${
+        isWalkinVisitTrue ? "bg-blue-500" : "bg-gray-300"
+      }`}
+      onClick={handleWalkinToggle}
+    >
+      <div
+        className={`w-7 h-7 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+          isWalkinVisitTrue ? "translate-x-8" : "translate-x-1"
+        }`}
+      />
+
+      
+    </div>
 
 </div>
 
   </div>
             </div>
+
+</div>
+          
+            
 
            
           </div>
@@ -217,7 +277,7 @@ const DoctorDetails = () => {
                 type="number"
                 id="fees"
                 placeholder="Fees"
-                className="w-full   p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4   p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
 
@@ -230,7 +290,7 @@ const DoctorDetails = () => {
                 type="number"
                 id="doctor-fees"
                 placeholder="Fees"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full p-2 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
           </div>
@@ -276,7 +336,7 @@ const DoctorDetails = () => {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search by Name"
-        className="pl-4 pr-4 py-2 w-full text-b rounded-md focus:outline-none outline-none"
+        className="pl-4 placeholder:text-sm placeholder:px-4 pr-4 py-2 w-full text-b rounded-md focus:outline-none outline-none"
       />
     </div>
 </div>
@@ -314,7 +374,7 @@ const DoctorDetails = () => {
                 type="text"
                 id="degree"
                 placeholder="Degree"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
 
@@ -327,34 +387,23 @@ const DoctorDetails = () => {
                 type="number"
                 id="year"
                 placeholder="Year"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
           </div>
 
 
           <div className="">
-          <div className="flex mb-2 justify-between items-center ">
-                <label htmlFor="speciality" className="block mb-2 text-sm font-medium">
-               Speciality
-              </label>
+          <div className="">
+          <ArrayField name="speciality" label="Speciality" placeholder="Add Speciality"/>
+            </div>
 
-              <button  type="button"  className="bg-blue-500  text-white rounded-md px-1 py-1 shadow-xl hover:shadow-2xl active:shadow-none active:scale-95 transition-all duration-200">
-  <Plus/>
-</button>
-                </div>
 
 <div className="">
 
 
 </div>
-                <input
-                type="text"
-                id="Speciality"
-                placeholder="Speciality"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
-
+               
               
           </div>
 
@@ -416,79 +465,26 @@ const DoctorDetails = () => {
 
 
 <div className="flex flex-col gap-4">
-            <div className="">
-            <div className="flex mb-1 justify-between items-center ">
-                <label htmlFor="doctor-email" className="block mb-2 text-sm font-medium">
-               Top Treatments
-              </label>
-
-              <button  type="button"  className="bg-blue-500  text-white rounded-md px-1 py-1 shadow-xl hover:shadow-2xl active:shadow-none active:scale-95 transition-all duration-200">
-  <Plus/>
-</button>
-                </div>
-              <input
-                type="text"
-                id="top-treatments"
-                placeholder="Top Treatments"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
-            </div>
-
-            <div className="">
-            <div className="flex mb-2 justify-between items-center ">
-                <label htmlFor="best-known" className="block mb-2 text-sm font-medium">
-               Best Known For
-              </label>
-
-              <button  type="button"  className="bg-blue-500  text-white rounded-md px-1 py-1 shadow-xl hover:shadow-2xl active:shadow-none active:scale-95 transition-all duration-200">
-  <Plus/>
-</button>
-                </div>
-              <input
-                type="text"
-                id="best-known"
-                placeholder="Best Known for "
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
-            </div>
-
+         
 
 
             <div className="">
-            <div className="flex mb-2 justify-between items-center ">
-                <label htmlFor="expertise" className="block mb-2 text-sm font-medium">
-               Expertise
-              </label>
-
-              <button  type="button"  className="bg-blue-500  text-white rounded-md px-1 py-1 shadow-xl hover:shadow-2xl active:shadow-none active:scale-95 transition-all duration-200">
-  <Plus/>
-</button>
-                </div>
-              <input
-                type="text"
-                id="expertise"
-                placeholder="Expertise"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
+          <ArrayField name="top_treatments" label="Top Treatments" placeholder="Add Top Treatments"/>
             </div>
 
 
             <div className="">
-            <div className="flex mb-2 justify-between items-center ">
-                <label htmlFor="video-link" className="block mb-2 text-sm font-medium">
-              Video Link
-              </label>
+          <ArrayField name="doctor_best_known" label="Best Known For" placeholder="Best Known For"/>
+            </div>
 
-              <button  type="button"  className="bg-blue-500  text-white rounded-md px-1 py-1 shadow-xl hover:shadow-2xl active:shadow-none active:scale-95 transition-all duration-200">
-  <Plus/>
-</button>
-                </div>
-              <input
-                type="text"
-                id="video-link"
-                placeholder="Video Link"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
+
+            <div className="">
+          <ArrayField name="doctor_expert" label="Expertise" placeholder="Add Expertise"/>
+            </div>
+
+
+            <div className="">
+          <ArrayField name="doctor_video" label="Add Video Links" placeholder="Add Video Links"/>
             </div>
            
           </div>
@@ -506,7 +502,7 @@ const DoctorDetails = () => {
                 type="text"
                 id="meta name"
                 placeholder="Meta Name"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
             </div>
 
@@ -518,7 +514,7 @@ const DoctorDetails = () => {
                 type="text"
                 id="meta-description"
                 placeholder="Meta Description"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
 
 
@@ -527,22 +523,7 @@ const DoctorDetails = () => {
 
             <div className="mb-4">
 
-                <div className="flex mb-2 justify-between items-center ">
-                <label htmlFor="meta-tags" className="block mb-2 text-sm  font-medium">
-               Meta Tag
-              </label>
-
-              <button  type="button" className="bg-blue-500 flex items-center gap-2 text-white rounded-md px-1 py-1 shadow-xl hover:shadow-2xl active:shadow-none active:scale-95 transition-all duration-200">
-<Plus/>
-</button>
-                </div>
-          
-              <input
-                type="text"
-                id="meta-tags"
-                placeholder="Meta Tag"
-                className="w-full  p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
+            <ArrayField name="meta_tag" label="Meta Tags"  placeholder="Meta tags"/>
 
 
               
@@ -564,6 +545,8 @@ const DoctorDetails = () => {
             </button>
           </div>
         </form>
+        </FormProvider>
+     
       </Modal>
     </div>
   );
