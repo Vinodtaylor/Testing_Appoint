@@ -27,7 +27,7 @@ const ArrayField: React.FC<ArrayFieldProps> = ({ name, label, placeholder }) => 
 
   return (
     <div>
-      <div className="flex justify-between items-center lg:mb-0 mb-2">
+      <div className="flex justify-between items-center  mb-2">
         <label htmlFor={`${name}_inputField`} className="block text-sm font-medium">
           {label}
         </label>
