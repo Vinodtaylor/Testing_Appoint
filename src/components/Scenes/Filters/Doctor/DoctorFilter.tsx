@@ -98,7 +98,7 @@ const DoctorFilter: React.FC = () => {
         {/* Bookings */}
        
 
-        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 lg:pb-4  pb-4">
+        <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 lg:pb-0  pb-4">
           <label className="font-medium ">Department:</label>
           <SelectDropDown
              value={dropdownValues.dept}

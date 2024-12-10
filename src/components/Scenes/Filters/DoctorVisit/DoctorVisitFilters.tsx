@@ -146,9 +146,9 @@ const DoctorVisitFilters: React.FC = () => {
         </div>
 
         {/* Date Filters */}
-        <div className="flex  w-full lg:flex-row flex-col lg:items-center gap-2  lg:w-96">
+        <div className="flex  w-full lg:flex-row flex-col lg:items-center gap-2 lg:-mt-4  lg:w-96">
           <p className="">Date:</p>
-          <div className="flex  lg:flex-row flex-col items-center gap-4 w-full">
+          <div className="flex  lg:flex-row flex-col items-center  gap-4 w-full">
             {/* Start Date Picker */}
             <Popover >
               <PopoverTrigger asChild className="">

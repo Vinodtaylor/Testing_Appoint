@@ -251,7 +251,7 @@ const WalkinFilters: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex lg:flex-row flex-col lg:items-center   lg:gap-4 ">
+      <div className="flex lg:flex-row flex-col lg:items-center    lg:gap-4 ">
 
 <label htmlFor="" className="mb-1 whitespace-nowrap">Regions</label>
 <input
