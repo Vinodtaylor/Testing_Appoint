@@ -28,15 +28,17 @@ const ArrayField: React.FC<ArrayFieldProps> = ({ name, label, placeholder }) => 
 
   return (
     <div>
-      <div className="flex justify-between items-center lg:mb-0 mb-2">
-        <label className="block text-sm font-medium mb-2">{label}</label>
+      <div className="flex justify-between items-center    lg:mb-2 mb-2">
+        <label className="text-sm font-medium mb-2" >{label}</label>
         <Controller
           name={`${name}_inputField`}
           defaultValue=""
+          
           control={control}
           render={({ field }) => (
             <button
               type="button"
+              
               onClick={() => {
                 if (field.value.trim() !== "") {
                   append({ value: field.value });
