@@ -71,38 +71,38 @@ const Page = () => {
       const filtered = data.filter((appointment) => {
         // Check for department match
         const matchesDept =
-          !filterValues.department ||
-          (appointment.doctor_id.department.department_name &&
-            appointment.doctor_id.department.department_name
+          !filterValues.department || 
+          (appointment?.doctor_id?.department?.department_name &&
+            appointment?.doctor_id?.department?.department_name
               .toLowerCase()
-              .includes(filterValues.department.toLowerCase()));
-
+              .includes(filterValues.department.trim().toLowerCase()));
+    
         // Check for gender match
         const matchesGender =
           !filterValues.gender ||
-          appointment.patient_id.gender.toLowerCase() === filterValues.gender.toLowerCase();
-
+          (appointment?.patient_id?.gender &&
+            appointment.patient_id.gender.toLowerCase() === filterValues.gender.trim().toLowerCase());
+    
         // Check for doctor match
         const matchesDoctor =
           !filterValues.doctor ||
-          (appointment.doctor_id.name &&
-            appointment.doctor_id.name.toLowerCase().includes(filterValues.doctor.toLowerCase()));
-
-
-
-            const matchesHospital =
-            !filterValues.hospital ||
-            (appointment.hospital_id.hospital_name && appointment.hospital_id.hospital_name.toLowerCase().includes(filterValues.hospital.toLowerCase()));
-  
-
+          (appointment?.doctor_id?.name &&
+            appointment.doctor_id.name.toLowerCase().includes(filterValues.doctor.trim().toLowerCase()));
+    
+        // Check for hospital match
+        const matchesHospital =
+          !filterValues.hospital ||
+          (appointment?.hospital_id?.hospital_name &&
+            appointment.hospital_id.hospital_name
+              .toLowerCase()
+              .includes(filterValues.hospital.trim().toLowerCase()));
+    
         // Check for region match
         const matchesRegion =
-        !filterValues.region ||
-        (appointment.region &&
-          appointment.region.region_name.toLowerCase() ===
-            filterValues.region.toLowerCase());
-      
-
+          !filterValues.region ||
+          (appointment?.region?.region_name &&
+            appointment.region.region_name.toLowerCase() === filterValues.region.trim().toLowerCase());
+    
         // Handle date range comparison
         const appointmentDate = moment(appointment.createdAt, 'YYYY-MM-DD');
         const startMoment = filterValues.startdate
@@ -111,12 +111,12 @@ const Page = () => {
         const endMoment = filterValues.enddate
           ? moment(filterValues.enddate).endOf('day')
           : null;
-
+    
         // Check if the appointment's creation date is within the start and end date range
         const isWithinDateRange =
           (!startMoment || appointmentDate.isSameOrAfter(startMoment)) &&
           (!endMoment || appointmentDate.isSameOrBefore(endMoment));
-
+    
         // Return true if all conditions match
         return (
           matchesDept &&
@@ -127,10 +127,10 @@ const Page = () => {
           isWithinDateRange
         );
       });
-
+    
       setFilteredData(filtered);
     };
-
+    
     if (data && data.length > 0) {
       filterAppointments();
     }
