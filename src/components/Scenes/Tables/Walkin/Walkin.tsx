@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -9,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TableHeadertype } from "@/types/types";
+import { Appointment, TableHeadertype } from "@/types/types";
 import { Trash } from "lucide-react";
 import {
   AlertDialog,
@@ -22,14 +23,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { WalkintableData } from "@/constants/data";
 import SelectDropDown from "../../Select/Select";
+import { DeleteWalkinAppointment, getWalkinData } from "@/routes/routes";
+import moment from "moment";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 // Table headers
 const tableHeader: TableHeadertype[] = [
   { name: "SLNO" },
   { name: "Type" },
-  { name: "Booking" },
+  // { name: "Booking" },
   { name: "Name" },
   { name: "P-ID" },
   { name: "V-ID" },
@@ -50,13 +53,71 @@ const tableHeader: TableHeadertype[] = [
 
 
 
-export const Walkin: React.FC = () => {
+
+interface WalkinProps {
+  Appointmentdata: Appointment[];
+  currentPage: number;
+  totalPages: number;
+  setAppointments: React.Dispatch<React.SetStateAction<Appointment[]>>;
+  onPrevPage: () => void;
+  onNextPage: () => void;
+}
+
+export const Walkin: React.FC<WalkinProps> = ({
+Appointmentdata,currentPage,totalPages,setAppointments,onNextPage,onPrevPage
+}) => {
   const [dropdownValues, setDropdownValues] = useState({
     department:'',
     disease:'',
     method:'',
     status:''
   });
+
+ 
+  const [data, setData] = useState<Appointment[]>([]);
+  const [deleteWalkin, setdeleteWalkin] = useState<Appointment | null>(null);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const result = await getWalkinData();
+        const filteredData = result.data.filter(
+          (item: Appointment) => item.booking_type === "Walkin"
+        );
+  
+        // Sort filteredData by createdAt in descending order
+        const sortedFilteredData = filteredData.sort((a:any,b:any) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return dateB.getTime() - dateA.getTime(); 
+        });
+  
+        console.log(sortedFilteredData, "Filtered and Sorted Data");
+        setData(sortedFilteredData);
+      } catch (e) {
+        console.error(e, "Error fetching data");
+      }
+    };
+  
+    getData();
+  },
+   []);
+  
+
+
+
+    const handleDelete = async (id:string) => {
+      if (deleteWalkin) {
+        try {
+          await DeleteWalkinAppointment(id);
+          setAppointments(data.filter((region) => region._id !== deleteWalkin._id));
+
+          setdeleteWalkin(null); 
+        } catch (e) {
+          console.error("Error deleting region:", e);
+        }
+      }
+    };
   
   const handleSelectChange = (key: string, value: string) => {
     setDropdownValues((prevValues) => ({
@@ -64,6 +125,11 @@ export const Walkin: React.FC = () => {
       [key]: value,
     }));
   };
+
+
+
+
+
   return (
     <div className="">
       <div className="overflow-x-auto rounded-lg shadow-md">
@@ -81,153 +147,70 @@ export const Walkin: React.FC = () => {
               ))}
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {WalkintableData.map((row, index) => (
-              <TableRow
-                key={index}
-                className="hover:bg-gray-50 transition-all ease-in-out"
-          >
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.slNo}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.type}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.booking}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.name}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.pId}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.vId}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.phone}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.email}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.date}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.time}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.bookedTime}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.hospital}</TableCell>       
-                      <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.doctorname}</TableCell>
-                <TableCell className="px-3 py-2 text-gray-900  sm:text-sm">{row.status}</TableCell>
-                <TableCell className="px-3 py-2">
-                
-
-
-                <AlertDialog >
-<AlertDialogTrigger   className="text-xs p-2 border-[#1A91FF] border sm:text-sm rounded-full text-[#1A91FF] hover:bg-[#1A91FF] hover:text-white"
-> 
+          
+            <TableBody>
               
-                  Revisit
-                </AlertDialogTrigger>
-                <AlertDialogContent className="w-full max-w-lg sm:max-w-xl lg:max-w-3xl rounded-lg h-full lg:h-3/4 mx-auto overflow-x-scroll">
-<AlertDialogHeader>
-  <AlertDialogTitle className="text-center text-lg font-semibold">
-    Add Revisit Details
-  </AlertDialogTitle>
-</AlertDialogHeader>
+              {
+            Appointmentdata ?.length === 0 ? (
 
-<div className="space-y-6">
-  {/* Search Hospital */}
-  <div className="mb-4">
-    <div className="flex items-center shadow-md h-[50px] border border-gray-200 rounded-full overflow-hidden w-full  lg:max-w-3xl">
-      <input
-        type="text"
-        placeholder="Search Hospital"
-        className="flex-grow px-4 py-2 outline-none"
-      />
-      <button className="bg-blue-500 h-[50px] text-white px-4 py-2 hover:bg-blue-600 transition">
-        Search
-      </button>
-    </div>
+              <>
+                <TableRow>
+                    <TableCell colSpan={8} className="px-3 py-2 lg:translate-x-[400px] text-gray-900 text-sm text-center p-5">
+                        <h3 className="text-base">No Walkin Appointments found</h3> 
+                    </TableCell>
+                  </TableRow>
+              
+              </>
+            ):(<>
+            
+            
+            {Appointmentdata.map((row, index) => (
+                <TableRow
+                  key={index}
+                  className="hover:bg-gray-50 transition-all ease-in-out"
+            >
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{index + 1}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.booking_type}</TableCell>
+                  {/* <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.booking}</TableCell> */}
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.name}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.patient_id}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.visit_id}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.phone_number}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.email_id}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900 text-sm">
+    {moment(row.createdAt).format("YYYY-MM-DD")}
+  </TableCell>
+  <TableCell className="px-3 py-2 text-gray-900 text-sm">
+  {moment.utc(row.createdAt).local().format("h:mm A")}
+</TableCell>
 
-    <div className="border w-full  lg:max-w-3xl cursor-pointer border-gray-200 shadow-md rounded-xl bg-white h-[200px] overflow-y-auto mt-4">
-      <div className="flex flex-col items-center justify-center h-full">
-        <p className="text-center text-gray-500 text-sm font-medium">
-          Hospital information will be displayed here.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  {/* Search Doctor */}
-  <div className="mb-4">
-    <div className="flex items-center shadow-md h-[50px] border border-gray-300 rounded-full overflow-hidden w-full  lg:max-w-3xl">
-      <input
-        type="text"
-        placeholder="Search Doctor"
-        className="flex-grow px-4 py-2 text-sm outline-none"
-      />
-      <button className="bg-blue-500 h-[50px] text-white px-4 py-2 hover:bg-blue-600 transition">
-        Search
-      </button>
-    </div>
-
-    <div className="border w-full  lg:max-w-3xl cursor-pointer border-gray-200 shadow-md rounded-xl bg-white h-[200px] overflow-y-auto mt-4">
-      <div className="flex flex-col items-center justify-center h-full">
-        <p className="text-center text-gray-500 text-sm font-medium">
-          Doctor information will be displayed here.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  {/* Consultancy Fee */}
-  <div className="text-base mb-4 text-gray-700  font-medium">
-    <p className="flex items-center">
-      Consultancy Fee - <span className="ml-1 font-semibold">₹900</span>
-    </p>
-  </div>
-
-  {/* Dropdowns */}
-  <div className="flex flex-col lg:flex-row items-center gap-4  mb-4 lg:gap-8 justify-center">
-    <SelectDropDown
-      value={dropdownValues.method}
-      onChange={(value) => handleSelectChange("method", value)}
-      options={["Cash", "Online/UPI"]}
-      label="Method"
-      placeholder="Select Method"
-      inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
-      containerClassName="w-full"
-      dropdownClassName="text-black bg-white"
-      id="method"
-    />
-
-    <SelectDropDown
-      value={dropdownValues.status}
-      onChange={(value) => handleSelectChange("status", value)}
-      options={["Pending", "Paid"]}
-      placeholder="Select Status"
-      label="Status"
-      inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
-      containerClassName="w-full"
-      dropdownClassName="text-black bg-white"
-      id="status"
-    />
-  </div>
-</div>
-
-<AlertDialogFooter className=" lg:mt-0">
-  <AlertDialogCancel className="rounded-full h-[38px] w-full border-blue-500 text-blue-500 hover:text-white hover:bg-blue-500">
-    Cancel
-  </AlertDialogCancel>
-  <AlertDialogAction className="rounded-full h-[38px] w-full bg-blue-500 text-white hover:bg-blue-600">
-    Submit
-  </AlertDialogAction>
-</AlertDialogFooter>
-</AlertDialogContent>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.time}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.hospital_id.hospital_name}</TableCell>       
+                        <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.doctor_id.name}</TableCell>
+                        <TableCell className="px-3 py-2 text-gray-900 sm:text-sm">
+    {row.payment_status ? "Paid" : "Pending"}
+  </TableCell>
+                  <TableCell className="px-3 py-2">
+                  
 
 
-</AlertDialog>
-              </TableCell>
-              <TableCell className="px-3 py-2">
-              <AlertDialog>
-<AlertDialogTrigger className="text-xs p-2 border-[#1A91FF] border sm:text-sm rounded-full text-[#1A91FF] hover:bg-[#1A91FF] hover:text-white">
-  New Followup
-</AlertDialogTrigger>
-
-<AlertDialogContent className="w-full max-w-lg sm:max-w-xl lg:max-w-3xl rounded-lg h-full lg:h-3/4 mx-auto overflow-x-auto">
+                  <AlertDialog >
+  <AlertDialogTrigger   className="text-xs p-2 border-[#1A91FF] border sm:text-sm rounded-full text-[#1A91FF] hover:bg-[#1A91FF] hover:text-white"
+  > 
+                
+                    Revisit
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="w-full max-w-lg sm:max-w-xl lg:max-w-3xl rounded-lg h-full lg:h-3/4 mx-auto overflow-x-scroll">
   <AlertDialogHeader>
     <AlertDialogTitle className="text-center text-lg font-semibold">
-      Add Followup Details
+      Add Revisit Details
     </AlertDialogTitle>
   </AlertDialogHeader>
 
-  <div className="space-y-6 ">
+  <div className="space-y-6">
     {/* Search Hospital */}
-    <div className="mb-4 ">
-      <div className="flex items-center shadow-md h-[50px] border border-gray-200 rounded-full overflow-hidden w-full  lg:max-w-3xl ">
+    <div className="mb-4">
+      <div className="flex items-center shadow-md h-[50px] border border-gray-200 rounded-full overflow-hidden w-full  lg:max-w-3xl">
         <input
           type="text"
           placeholder="Search Hospital"
@@ -245,53 +228,22 @@ export const Walkin: React.FC = () => {
           </p>
         </div>
       </div>
-
-      <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-8 mt-4">
-        <div className="w-full   lg:max-w-3xl">
-          <SelectDropDown
-            value={dropdownValues.department}
-            onChange={(value) => handleSelectChange("department", value)}
-            options={["ENT", "Cardiology"]}
-            placeholder="Select Department"
-            inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
-            containerClassName="w-full"
-            label="Department"
-            dropdownClassName="text-black bg-white"
-            id="department"
-          />
-        </div>
-
-        <div className="w-full   lg:max-w-3xl">
-          <div className="flex flex-col">
-          <label htmlFor="disease">Disease</label>
-          <input
-            type="text"
-            name="disease"
-
-            id="disease"
-            placeholder="Enter Disease"
-            className="outline-none border bg-white h-[48px] shadow-md px-4 rounded-full"
-          />
-          </div>
-         
-        </div>
-      </div>
     </div>
 
     {/* Search Doctor */}
-    <div>
+    <div className="mb-4">
       <div className="flex items-center shadow-md h-[50px] border border-gray-300 rounded-full overflow-hidden w-full  lg:max-w-3xl">
         <input
           type="text"
           placeholder="Search Doctor"
           className="flex-grow px-4 py-2 text-sm outline-none"
         />
-        <button className="bg-blue-500 h-full text-white px-4 py-2 hover:bg-blue-600 transition">
+        <button className="bg-blue-500 h-[50px] text-white px-4 py-2 hover:bg-blue-600 transition">
           Search
         </button>
       </div>
 
-      <div className="border w-full   lg:max-w-3xl cursor-pointer border-gray-200 shadow-md rounded-xl bg-white h-[200px] overflow-y-auto mt-4">
+      <div className="border w-full  lg:max-w-3xl cursor-pointer border-gray-200 shadow-md rounded-xl bg-white h-[200px] overflow-y-auto mt-4">
         <div className="flex flex-col items-center justify-center h-full">
           <p className="text-center text-gray-500 text-sm font-medium">
             Doctor information will be displayed here.
@@ -301,45 +253,41 @@ export const Walkin: React.FC = () => {
     </div>
 
     {/* Consultancy Fee */}
-    <div className="text-base mb-4 text-gray-700 font-medium">
+    <div className="text-base mb-4 text-gray-700  font-medium">
       <p className="flex items-center">
         Consultancy Fee - <span className="ml-1 font-semibold">₹900</span>
       </p>
     </div>
 
     {/* Dropdowns */}
-    <div className="flex lg:flex-row  flex-col items-center gap-4 lg:gap-8">
-      <div className="w-full   lg:max-w-3xl">
-        <label htmlFor="method">Payment Method</label>
-        <SelectDropDown
-          value={dropdownValues.method}
-          onChange={(value) => handleSelectChange("method", value)}
-          options={["Cash", "Online/UPI"]}
-          placeholder="Select Method"
-          inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
-          containerClassName="w-full"
-          dropdownClassName="text-black bg-white"
-          id="method"
-        />
-      </div>
+    <div className="flex flex-col lg:flex-row items-center gap-4  mb-4 lg:gap-8 justify-center">
+      <SelectDropDown
+        value={dropdownValues.method}
+        onChange={(value) => handleSelectChange("method", value)}
+        options={["Cash", "Online/UPI"]}
+        label="Method"
+        placeholder="Select Method"
+        inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
+        containerClassName="w-full"
+        dropdownClassName="text-black bg-white"
+        id="method"
+      />
 
-      <div className="w-full  lg:max-w-3xl">
-        <label htmlFor="status">Status</label>
-        <SelectDropDown
-          value={dropdownValues.status}
-          onChange={(value) => handleSelectChange("status", value)}
-          options={["Pending", "Paid"]}
-          placeholder="Select Status"
-          inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
-          containerClassName="w-full"
-          dropdownClassName="text-black bg-white"
-          id="status"
-        />
-      </div>
+      <SelectDropDown
+        value={dropdownValues.status}
+        onChange={(value) => handleSelectChange("status", value)}
+        options={["Pending", "Paid"]}
+        placeholder="Select Status"
+        label="Status"
+        inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
+        containerClassName="w-full"
+        dropdownClassName="text-black bg-white"
+        id="status"
+      />
     </div>
   </div>
 
-  <AlertDialogFooter className="lg:mt-0">
+  <AlertDialogFooter className=" lg:mt-0">
     <AlertDialogCancel className="rounded-full h-[38px] w-full border-blue-500 text-blue-500 hover:text-white hover:bg-blue-500">
       Cancel
     </AlertDialogCancel>
@@ -347,35 +295,212 @@ export const Walkin: React.FC = () => {
       Submit
     </AlertDialogAction>
   </AlertDialogFooter>
-</AlertDialogContent>
-</AlertDialog>
+  </AlertDialogContent>
 
-                
+
+  </AlertDialog>
+                </TableCell>
+                <TableCell className="px-3 py-2">
+                <AlertDialog>
+  <AlertDialogTrigger className="text-xs p-2 border-[#1A91FF] border sm:text-sm rounded-full text-[#1A91FF] hover:bg-[#1A91FF] hover:text-white">
+    New Followup
+  </AlertDialogTrigger>
+
+  <AlertDialogContent className="w-full max-w-lg sm:max-w-xl lg:max-w-3xl rounded-lg h-full lg:h-3/4 mx-auto overflow-x-auto">
+    <AlertDialogHeader>
+      <AlertDialogTitle className="text-center text-lg font-semibold">
+        Add Followup Details
+      </AlertDialogTitle>
+    </AlertDialogHeader>
+
+    <div className="space-y-6 ">
+      {/* Search Hospital */}
+      <div className="mb-4 ">
+        <div className="flex items-center shadow-md h-[50px] border border-gray-200 rounded-full overflow-hidden w-full  lg:max-w-3xl ">
+          <input
+            type="text"
+            placeholder="Search Hospital"
+            className="flex-grow px-4 py-2 outline-none"
+          />
+          <button className="bg-blue-500 h-[50px] text-white px-4 py-2 hover:bg-blue-600 transition">
+            Search
+          </button>
+        </div>
+
+        <div className="border w-full  lg:max-w-3xl cursor-pointer border-gray-200 shadow-md rounded-xl bg-white h-[200px] overflow-y-auto mt-4">
+          <div className="flex flex-col items-center justify-center h-full">
+            <p className="text-center text-gray-500 text-sm font-medium">
+              Hospital information will be displayed here.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-8 mt-4">
+          <div className="w-full   lg:max-w-3xl">
+            <SelectDropDown
+              value={dropdownValues.department}
+              onChange={(value) => handleSelectChange("department", value)}
+              options={["ENT", "Cardiology"]}
+              placeholder="Select Department"
+              inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
+              containerClassName="w-full"
+              label="Department"
+              dropdownClassName="text-black bg-white"
+              id="department"
+            />
+          </div>
+
+          <div className="w-full   lg:max-w-3xl">
+            <div className="flex flex-col">
+            <label htmlFor="disease">Disease</label>
+            <input
+              type="text"
+              name="disease"
+
+              id="disease"
+              placeholder="Enter Disease"
+              className="outline-none border bg-white h-[48px] shadow-md px-4 rounded-full"
+            />
+            </div>
+          
+          </div>
+        </div>
+      </div>
+
+      {/* Search Doctor */}
+      <div>
+        <div className="flex items-center shadow-md h-[50px] border border-gray-300 rounded-full overflow-hidden w-full  lg:max-w-3xl">
+          <input
+            type="text"
+            placeholder="Search Doctor"
+            className="flex-grow px-4 py-2 text-sm outline-none"
+          />
+          <button className="bg-blue-500 h-full text-white px-4 py-2 hover:bg-blue-600 transition">
+            Search
+          </button>
+        </div>
+
+        <div className="border w-full   lg:max-w-3xl cursor-pointer border-gray-200 shadow-md rounded-xl bg-white h-[200px] overflow-y-auto mt-4">
+          <div className="flex flex-col items-center justify-center h-full">
+            <p className="text-center text-gray-500 text-sm font-medium">
+              Doctor information will be displayed here.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Consultancy Fee */}
+      <div className="text-base mb-4 text-gray-700 font-medium">
+        <p className="flex items-center">
+          Consultancy Fee - <span className="ml-1 font-semibold">₹900</span>
+        </p>
+      </div>
+
+      {/* Dropdowns */}
+      <div className="flex lg:flex-row  flex-col items-center gap-4 lg:gap-8">
+        <div className="w-full   lg:max-w-3xl">
+          <label htmlFor="method">Payment Method</label>
+          <SelectDropDown
+            value={dropdownValues.method}
+            onChange={(value) => handleSelectChange("method", value)}
+            options={["Cash", "Online/UPI"]}
+            placeholder="Select Method"
+            inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
+            containerClassName="w-full"
+            dropdownClassName="text-black bg-white"
+            id="method"
+          />
+        </div>
+
+        <div className="w-full  lg:max-w-3xl">
+          <label htmlFor="status">Status</label>
+          <SelectDropDown
+            value={dropdownValues.status}
+            onChange={(value) => handleSelectChange("status", value)}
+            options={["Pending", "Paid"]}
+            placeholder="Select Status"
+            inputClassName="outline-none rounded-lg bg-white h-[48px] shadow-md px-4"
+            containerClassName="w-full"
+            dropdownClassName="text-black bg-white"
+            id="status"
+          />
+        </div>
+      </div>
+    </div>
+
+    <AlertDialogFooter className="lg:mt-0">
+      <AlertDialogCancel className="rounded-full h-[38px] w-full border-blue-500 text-blue-500 hover:text-white hover:bg-blue-500">
+        Cancel
+      </AlertDialogCancel>
+      <AlertDialogAction className="rounded-full h-[38px] w-full bg-blue-500 text-white hover:bg-blue-600">
+        Submit
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+  </AlertDialog>
+
+                  
+                </TableCell>
+                <TableCell className="text-center">
+                <AlertDialog>
+                  <AlertDialogTrigger><Trash className="cursor-pointer text-red-500" size={15} 
+                          onClick={() => setdeleteWalkin(row)} 
+
+                  /></AlertDialogTrigger>
+                  <AlertDialogContent className='lg:w-full max-w-sm rounded-lg'>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete this data
+                        and remove your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-full  border-blue-600  text-black hover:text-white hover:bg-blue-600">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+    type="submit"
+    onClick={() => {
+      if (deleteWalkin?._id) {
+        handleDelete(deleteWalkin._id);
+      }
+    }}
+    className="rounded-full bg-blue-500 text-white hover:bg-blue-600"
+  >
+    Delete
+  </AlertDialogAction>
+
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </TableCell>
-              <TableCell className="text-center">
-              <AlertDialog>
-                <AlertDialogTrigger><Trash className="cursor-pointer text-red-500" size={15} /></AlertDialogTrigger>
-                <AlertDialogContent className='lg:w-full max-w-sm rounded-lg'>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete this data
-                      and remove your data from our servers.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-full  border-blue-600  text-black hover:text-white hover:bg-blue-600">Cancel</AlertDialogCancel>
-                    <AlertDialogAction type='submit' onClick={() => { console.log("Deleted data") }} className="rounded-full   bg-blue-500 text-white hover:bg-blue-600">
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+                </TableRow>
+              ))}
+            </>)
+          }
+            </TableBody>
         </Table>
+
+        {Appointmentdata.length > 6 && (
+          <div className="flex mb-8 justify-center gap-4 items-center mt-4">
+            <button
+              onClick={onPrevPage}
+              disabled={currentPage === 1}
+              className={`p-2 text-sm rounded ${currentPage === 1 ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+            >
+              <IoIosArrowBack />
+            </button>
+            <p className="text-sm">
+              Page {currentPage} of {totalPages}
+            </p>
+            <button
+              onClick={onNextPage}
+              disabled={currentPage === totalPages}
+              className={`p-2 text-sm rounded ${currentPage === totalPages ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+            >
+              <IoIosArrowForward />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

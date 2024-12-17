@@ -1,47 +1,60 @@
 import { z } from "zod";
 
-const QualificationSchema = z.object({
-  degree: z.string().nonempty("Degree is required"),
-  year: z.number().min(1900, "Year must be after 1900").max(new Date().getFullYear(), "Year can't be in the future"),
-});
-
 const DoctorSchema = z.object({
-  name: z.string().nonempty("Name is required"),
-  gender: z.string().nonempty("Gender is required"),
-  speciality: z.array(z.string().nonempty("Speciality cannot be empty")),
-  experience: z.number().min(0, "Experience must be non-negative"),
-  email: z.string().email("Invalid email"),
-  phone_number: z.string().nonempty("Phone number is required"),
-  isDoctorVisit: z.boolean(),
-  isWalkin: z.boolean(),
-  age: z.number().min(0, "Age must be non-negative"),
-  region: z.object({
-    id: z.string(),
-    name: z.string(),
-    icon: z.string(),
-    doctorCount: z.number(),
-  }),
-  meta_name: z.string().nonempty("Meta name is required"),
-  meta_tag: z.array(z.string().nonempty("Meta tag cannot be empty")),
-  meta_description: z.string().nonempty("Meta description is required"),
-  doctor_expert: z.array(z.string()),
-  top_treatments: z.array(z.string()),
-  doctor_best_known: z.array(z.string()),
-  doctor_image: z.string(),
-  doctor_cover_image: z.string(),
-  doctor_experience: z.string(),
-  registration: z.string(),
-  price: z.number().min(0, "Price must be non-negative"),
-  about_doctor: z.string(),
-  doctor_video: z.array(z.string()),
-  qualification: z.array(QualificationSchema),
+  email: z.string().email("Enter Valid  email").nonempty("Email is required"),
+  phone_number: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, "Enter Valid Number")
+    .nonempty("Phone number is required"),
+  
+  // All other fields are optional
+  name: z.string().optional(),
+  gender: z.string().optional(),
+  main_speciality: z.array(z.string().nonempty("Speciality cannot be empty")).optional(),
+  speciality: z.array(z.string().nonempty("Speciality cannot be empty")).optional(),
+  department: z.string().optional(),
+  experience: z.preprocess(
+    (value) => parseFloat(value as string), 
+    z.number().min(0, "Experience must be a positive number").default(0)
+  ).optional(),
+  doctor_type: z.array(z.string()).optional(),
+  age: z.preprocess(
+    (value) => {
+      if (value === "") return undefined; 
+      return Number(value);
+    },
+    z.number().min(0, "Age must be non-negative").optional() // Age remains optional
+  ),
+    region: z.string().optional(),
+  meta_name: z.string().optional(),
+  meta_tag: z.array(z.string().optional()).optional(),
+  meta_description: z.string().optional(),
+  doctor_expert: z.array(z.string()).optional(),
+  top_treatments: z.array(z.string()).optional(),
+  doctor_best_known: z.array(z.string()).optional(),
+  membership: z.string().optional(),
+  doctor_image: z.string().url().optional(),
+  hospital: z.string().optional(),
+  doctor_cover_image: z.string().url().optional(),
+  doctor_experience: z.array(z.string()).optional(),
+  registration: z.string().optional(),
+  price: z.preprocess(
+    (value) => {
+      if (typeof value === "string" && value.trim() === "") return 0; // Handle empty string as default
+      return parseFloat(value as string);
+    },
+    z.number().min(0, "Price must be a positive number")
+  ),
+  
+  about_doctor: z.string().optional(),
+  doctor_video: z.array(z.string()).optional(),
+  qualification: z.array(z.string()).optional(),
 });
 
+export default DoctorSchema;
 
+export type CreateDoctorData = z.infer<typeof DoctorSchema>;
 
-
-
-export default DoctorSchema
-
-
-export type DoctorFormValues = z.infer<typeof DoctorSchema>;
+export interface Region {
+  id: string;
+}

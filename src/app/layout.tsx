@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/Scenes/Navbar/Navbar";
+import { Toaster } from 'react-hot-toast';
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -24,6 +26,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+
+
   return (
     <html lang="en">
       <body
@@ -31,6 +37,8 @@ export default function RootLayout({
       >
         <Navbar/>
         {children}
+
+        <Toaster/>
       </body>
     </html>
   );

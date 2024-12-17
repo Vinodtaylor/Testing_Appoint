@@ -1,97 +1,318 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "../../Modal/Modal";
 import { useModal } from "@/hooks/useModal";
 import SelectDropDown from "../../Select/Select";
 import {  UploadCloudIcon } from "lucide-react";
-import { FaSearch } from "react-icons/fa";
-import { FaUserDoctor } from "react-icons/fa6";
-import { useForm,   FormProvider } from "react-hook-form";
+import { FaTrash, FaUserDoctor } from "react-icons/fa6";
+import { useForm,   FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import DoctorSchema,{DoctorFormValues} from "@/schema/Doctor";
+import DoctorSchema,{CreateDoctorData} from "@/schema/Doctor";
 import ArrayField from "../../Fields/Array/Array";
-
-
+import { CreateDoctor, getAllDept, getAllHospital, getAllRegion } from "@/routes/routes";
+import toast from "react-hot-toast";
+import Image from "next/image";
+import { Department, Hospital, RegionsType } from "@/types/types";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 const DoctorDetails = () => {
   const { isOpen, openModal, closeModal } = useModal(); 
-  const [dropdownValues, setDropdownValues] = useState({
-    department:''
-  });
-
-
-  const methods = useForm<DoctorFormValues>({
+  const methods = useForm<CreateDoctorData>({
     resolver: zodResolver(DoctorSchema),
     defaultValues: {
-      speciality: [],
+      main_speciality: [],
       meta_tag: [],
       doctor_expert: [],
       top_treatments: [],
       doctor_best_known: [],
       doctor_video: [],
-      qualification: [{ degree: "", year: new Date().getFullYear() }],
+      qualification: [],
+     doctor_type:[],
+     speciality:[],
+     region:"",
+     department:"",
+  hospital:""
     },
+
   });
 
-  // const { fields: qualificationFields, append, remove } = useFieldArray({
-  //   control: methods.control, 
-  //   name: "qualification",
-  // });
+
+  const formValues = methods.watch(); // Watches the entire form
+
+useEffect(() => {
+  console.log("Form values updated:", formValues);
+}, [formValues]);
 
 
-  const [searchQuery, setSearchQuery] = useState<string>('');
+
+
   const [isWalkinVisitTrue, setIsWalkinVisitTrue] = useState<boolean>(false);
   const [isdoctorVisitTrue, setIsdoctorVisitTrue] = useState<boolean>(false);
+  /* eslint-disable @typescript-eslint/no-unused-vars */
 
-  const handleWalkinToggle = () => {
-    setIsWalkinVisitTrue((prevState) => !prevState);
-  };
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  /* eslint-disable @typescript-eslint/no-unused-vars */
 
-  const handleDoctorVisitToggle = () => {
-    setIsdoctorVisitTrue((prevState) => !prevState);
-  };
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+
+  const [regiondata, setRegionData] = useState<RegionsType[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedDept, setSelectedDept] = useState<string | null>(null);
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [data, setData] = useState<Department[]>([]);
+  const [hospitaldata, sethospitalData] = useState<Hospital[]>([]);
+  const [isDeptDropdownOpen, setIsDeptDropdownOpen] = useState(false);
+  const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
+  const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
+const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
 
 
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        // Using Promise.all to make multiple API calls concurrently
+        const [regionRes, deptRes, hospitalRes] = await Promise.all([
+          getAllRegion(),
+          getAllDept(),
+          getAllHospital(),
+        ]);
 
-  const Depts = [
-    "ENT", 
-    "Cardiology", 
-    "Dermatology", 
-    "Orthopedics", 
-    "Neurology", 
-    "Pediatrics", 
-    "Gastroenterology", 
-    "Oncology", 
-    "Psychiatry", 
-    "Rheumatology", 
-    "Pulmonology", 
-    "Urology", 
-    "Obstetrics & Gynecology", 
-    "Ophthalmology", 
-    "Endocrinology", 
-    "Nephrology", 
-    "General Surgery", 
-    "Hematology", 
-    "Infectious Diseases", 
-    "Radiology", 
-    "Pathology", 
-    "Plastic Surgery", 
-    "Anesthesia", 
-    "Internal Medicine"
-  ];
+        // Updating the state with the responses
+        setRegionData(regionRes.data);
+        setData(deptRes.data);
+        sethospitalData(hospitalRes.data);
+      } catch (e) {
+        console.error("Error fetching data:", e);
+      }
+    };
 
-  const filteredDepts = Depts.filter(dept =>
-    dept.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    getData();
+  }, []); // Empty dependency array ensures it runs only once when the component mounts
+
+  
   
 
-  const handleSelectChange = (key: string, value: string) => {
-    setDropdownValues((prevValues) => ({
-      ...prevValues,
-      [key]: value,
+
+    const DeptOptions = data.map(dept => ({
+      label: dept.department_name, 
+      value: dept._id, 
+      key:dept._id         
     }));
+
+
+    const HospitalOptions = hospitaldata.map(hospital => ({
+      label: hospital.hospital_name,
+      value: hospital._id, 
+      key:hospital._id        
+    }));
+
+
+    const handleHospitalChange = (value:string) => {
+      setSelectedRegion(value); 
+      setIsDropdownOpen(false)
+      console.log("hospital",value)
+      methods.setValue('hospital', value); 
+    };
+
+
+
+    const handleDeptChange = (value:string) => {
+      setSelectedRegion(value); 
+      setIsDropdownOpen(false)
+      console.log("department",value)
+
+      methods.setValue('department', value); 
+    };
+
+  const regionOptions = regiondata.map(region => ({
+    label: region.region_name,
+    value: region._id, 
+    key:region._id        
+  }));
+
+
+  const handleRegionChange = (value:string) => {
+    setSelectedRegion(value); 
+    setIsDropdownOpen(false)
+    methods.setValue('region', value); 
+    console.log("region",value)
+
   };
+ 
+
+  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      setProfileImage(file); 
+      const fileUrl = URL.createObjectURL(file); 
+      setProfileImageUrl(fileUrl); 
+      methods.setValue("doctor_image", fileUrl);
+    } else {
+      console.error("No file selected.");
+    }
+  };
+  
+  const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      setCoverImage(file); 
+      const fileUrl = URL.createObjectURL(file);
+      setCoverImageUrl(fileUrl); 
+      methods.setValue("doctor_cover_image", fileUrl);
+    } else {
+      console.error("No file selected.");
+    }
+  };
+  
+
+  const handleCloseModal = () => {
+    methods.reset(); // Reset the form state when closing the modal
+    closeModal(); 
+  };
+  
+ 
+  
+  
+  const handleRemoveProfileImage = () => {
+    setProfileImage(null); 
+    setProfileImageUrl(null);  
+  };
+  
+  const handleRemoveCoverImage = () => {
+    setCoverImage(null);
+    setCoverImageUrl(null);  
+  };
+  
+
+
+  const renderImagePreview = (imageUrl: string | null, removeImage: () => void) => {
+    if (!imageUrl) return null;
+  
+    return (
+      <div className="relative">
+        <Image
+          src={imageUrl}
+          alt="Image preview"
+          className="border w-full h-[200px] rounded-xl object-cover cursor-pointer"
+          width={100}
+          height={100}
+        />
+        <div
+          onClick={removeImage}
+          className="absolute top-2 right-2 p-1 bg-white rounded-full cursor-pointer hover:bg-gray-200"
+        >
+          <FaTrash size={20} className="text-red-500" />
+        </div>
+      </div>
+    );
+  };
+  
+ 
+  const handleWalkinToggle = () => {
+    const newValue = !isWalkinVisitTrue;
+    setIsWalkinVisitTrue(newValue);
+  
+    const currentDoctorType = methods.getValues("doctor_type") || [];
+  
+    if (newValue) {
+      // Add "Walkin" if it's not already in the array
+      if (!currentDoctorType.includes("Walkin")) {
+        methods.setValue("doctor_type", [...currentDoctorType, "Walkin"]);
+      }
+    } else {
+      // Remove "Walkin" if toggled off
+      methods.setValue("doctor_type", currentDoctorType.filter(type => type !== "Walkin"));
+    }
+  };
+  
+  const handleDoctorVisitToggle = () => {
+    const newValue = !isdoctorVisitTrue;
+    setIsdoctorVisitTrue(newValue);
+  
+    const currentDoctorType = methods.getValues("doctor_type") || [];
+  
+    if (newValue) {
+      // Add "Home" if it's not already in the array
+      if (!currentDoctorType.includes("Home")) {
+        methods.setValue("doctor_type", [...currentDoctorType, "Home"]);
+      }
+    } else {
+      // Remove "Home" if toggled off
+      methods.setValue("doctor_type", currentDoctorType.filter(type => type !== "Home"));
+    }
+  };
+  
+  
+
+
+
+
+
+
+
+
+  const SubmitDoctor = async (data: CreateDoctorData) => {
+    try {
+      const formData = new FormData();
+    
+ 
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            value.forEach(item => {
+              formData.append(key, String(item));  
+            });
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+    
+      // Append images separately (you need to manage images outside this function)
+      if (profileImage) {
+        formData.append("doctor_image", profileImage); 
+      }
+      if (coverImage) {
+        formData.append("doctor_cover_image", coverImage);
+      }
+    
+      // Call the API
+      const res = await CreateDoctor(formData);
+    
+      // Handle response
+      if (res && res.data) {
+    
+        if (res.message === "Success") {
+          toast.success("Doctor Created Successfully", res.data);
+          methods.reset();
+          closeModal();
+          window.location.reload();
+        } else {
+          console.error("API Error:", res.message);
+          toast.error("Failed to create doctor", res.message || "Unknown error");
+        }
+      } else {
+        console.error("Unexpected API response format", res);
+        toast.error("Failed to create doctor. No valid response data.");
+      }
+    } catch (e) {
+      console.error("Error occurred during doctor creation:", e);
+      toast.error("An error occurred while creating the doctor");
+    }
+  };
+  
+  
+  
+  
+  
+  
+
+  console.log(methods.formState.errors);
+
 
   return (
     <div>
@@ -102,10 +323,14 @@ const DoctorDetails = () => {
         Doctor <FaUserDoctor/>
       </button>
 
-      <Modal isOpen={isOpen} onClose={closeModal} title="Add Doctor Details">
-        <FormProvider {...methods}>
+      <Modal isOpen={isOpen}  onClose={closeModal} title="Add Doctor Details">
+        <FormProvider {...methods} >
 
-        <form className="space-y-6 max-h-full overflow-scroll ">
+        <form
+  className="space-y-6 max-h-full overflow-scroll"
+  onSubmit={methods.handleSubmit(SubmitDoctor)} // Corrected form submission
+>
+
           {/* Personal Details */}
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px] max-w-sm">
@@ -119,24 +344,42 @@ const DoctorDetails = () => {
               <input
                 type="text"
                 id="name"
+
+                {...methods.register("name")}
                 placeholder="Doctor's Name"
                 className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300  outline-none rounded-lg"
               />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.name?.message}</p>
+
             </div>
 
-            <div className="flex-1 ">
-             <SelectDropDown
-             value={dropdownValues.department}
-             onChange={(value) => handleSelectChange("gender", value)}
-             options={["Male", "Female"]}
-             placeholder="Select Gender"
-             inputClassName="outline-none rounded-lg bg-white  shadow-md px-4"
-             containerClassName="w-full text-left"
-             dropdownClassName="text-black bg-white"
-             id="gender"
-             label="Gender"
 
-             />
+            <div className="flex-1 ">
+            <Controller
+  name="gender"
+  control={methods.control}
+  render={({ field }) => (
+    <SelectDropDown
+      {...field} 
+      value={field.value!} 
+      onChange={(value) => {
+        field.onChange(value); 
+      }}
+      options={["Male", "Female","Others"]}
+      placeholder="Select Gender"
+      inputClassName="outline-none rounded-lg bg-white shadow-md px-4"
+      containerClassName="w-full text-left"
+      dropdownClassName="text-black bg-white"
+      id="gender"
+      label="Gender"
+    />
+  )}
+/>
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.gender?.message}</p>
+
+
+           
             </div>
 
             <div className="">
@@ -144,44 +387,110 @@ const DoctorDetails = () => {
                 Age
               </label>
               <input
-                type="number"
-                id="age"
-                placeholder="Age"
-                className="w-20 p-2 placeholder:text-sm placeholder:px-4 shadow-md border  border-gray-300 rounded-md outline-none"
-              />
+    type="number"
+    id="age"
+    {...methods.register("age")}
+    placeholder="Age"
+    className="w-20 p-2 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
+  />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.age?.message}</p>
+
             </div>
+
+
+
+         
           </div>
 
           {/* Contact and Location */}
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 ">
-              <label htmlFor="region" className="block text-left mb-2 text-sm font-medium">
-                Region
-              </label>
-              <input
-                type="text"
-                id="region"
-                placeholder="Region"
-                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
-            </div>
+          <div className="flex  flex-wrap gap-4">
+          <div className="flex-1">
+                <Controller
+                  name="region"
+                  control={methods.control}
+                  render={() => (
+                    <div className="relative">
+                                              <label htmlFor="region" className="block mb-2 text-left text-sm font-medium">Region</label>
 
-            <div className="flex-1 ">
+                      <div
+                        className="px-6 flex justify-between items-center  cursor-pointer p-2 h-10 text-gray-800 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
+                        onClick={() => setIsDropdownOpen(prev => !prev)}
+                      >
+                        <span className="text-sm">
+                          {selectedRegion
+                            ? regionOptions.find(option => option.value === selectedRegion)?.label
+                            : "Select Region"}
+                        </span>
+
+                        <IoMdArrowDropdown size={20}/>
+
+                      </div>
+
+                      {isDropdownOpen && (
+                        <div className="absolute h-[150px] overflow-scroll z-10 mt-2 bg-white shadow-lg  rounded-lg w-full mx-auto">
+                          {regionOptions.map(option => (
+                            <div
+                              key={option.key}
+                              className="cursor-pointer text-sm p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
+                              onClick={() => handleRegionChange(option.value!)}
+                            >
+                              {option.label}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                />
+                <p className="text-red-500 text-sm">{methods.formState.errors.region?.message}</p>
+              </div>
+
+              <div className="flex-1 ">
               <label htmlFor="email" className="block text-left mb-2 text-sm font-medium">
-                Email
+                Email*
               </label>
               <input
                 type="email"
                 id="email"
+                {...methods.register("email")}
+
                 placeholder="Email"
                 className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
+
+<p className="text-red-500 text-left text-sm mt-2">{methods.formState.errors.email?.message}</p>
+
             </div>
 
+
+            </div>
+         
+
            
-          </div>
 
+   
+          <div className="">
+              <label htmlFor="experience" className="block mb-2 text-left text-sm font-medium">
+                Experience  in Years
+              </label>
+              <input
+    type="number"
+    id="experience"
+    {...methods.register("experience", {
+      setValueAs: (value) => (value === "" ? "" : Number(value)),
+    })}
+    placeholder="Experience  in years"
+    className="w-full p-2 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
+  />
+            </div>
 
+            <div className="">
+          <ArrayField  name="doctor_experience" label="Experience" placeholder="Add Experience"/>
+
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_experience?.message}</p>
+
+            </div>
 
 
           {/* Professional Details */}
@@ -190,34 +499,25 @@ const DoctorDetails = () => {
 
           <div className="flex-1  ">
               <label htmlFor="phone" className="block text-left mb-2 text-sm font-medium">
-                Phone
+                Phone*
               </label>
               <input
                 type="tel"
                 id="doctor-phone"
+                {...methods.register("phone_number")}
                 placeholder="Phone Number"
                 className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
-            </div>
-            <div className="flex-1 ">
-              <label htmlFor="experience" className="block text-left mb-2 text-sm font-medium">
-                Experience (Years)
-              </label>
-              <input
-                type="number"
-                id="experience"
-                placeholder="Experience"
-                className="  w-full placeholder:text-sm placeholder:px-4  p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
-              
-            </div>
 
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.phone_number?.message}</p>
 
+            </div>
+    
 <div className="flex-1 ">
 <div className="flex gap-8 w-full ">
             <div className="">
 
-<label htmlFor="doctor-type" className="block mb-2 text-left text-sm font-medium">Doctor Visit</label>
+<label htmlFor="doctor-type" className="block mb-2 text-left text-sm font-medium">Home Visit</label>
 <div className="flex flle gap-4">
 <div
       className={`w-16 h-8 flex items-center rounded-full cursor-pointer transition-colors duration-300 ${
@@ -261,11 +561,10 @@ const DoctorDetails = () => {
   </div>
             </div>
 
-</div>
-          
-            
 
-           
+            <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_type?.message}</p>
+
+</div>          
           </div>
 
           <div className="flex  flex-nowrap gap-4">
@@ -275,10 +574,14 @@ const DoctorDetails = () => {
               </label>
               <input
                 type="number"
-                id="fees"
+                id="registration"
+                {...methods.register("registration")}
                 placeholder="Fees"
                 className="w-full placeholder:text-sm placeholder:px-4   p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.registration?.message}</p>
+
             </div>
 
 
@@ -288,10 +591,16 @@ const DoctorDetails = () => {
               </label>
               <input
                 type="number"
-                id="doctor-fees"
+                id="price"
+                {...methods.register("price", {
+                  setValueAs: (value) => (value === "" ? "" : Number(value)),
+                })}
                 placeholder="Fees"
                 className="w-full p-2 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
               />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.price?.message}</p>
+
             </div>
           </div>
 
@@ -315,48 +624,139 @@ const DoctorDetails = () => {
               </label>
               <textarea
               rows={5}
-                id="about"
+                id="about_doctor"
+                {...methods.register("about_doctor")}
                 placeholder="About"
-                className="w-full p-2 shadow-md border border-gray-300 rounded-md outline-none"
+                className="w-full placeholder:px-4 placeholder:text-sm p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
+              <p className="text-red-500 text-left text-sm">{methods.formState.errors.about_doctor?.message}</p>
+
+            </div>
+
+
+            
+          <div className="flex-1 min-w-[200px]">
+              <label htmlFor="membership" className="block mb-2 text-left text-sm font-medium">
+             Membership
+              </label>
+              <textarea
+              rows={5}
+                id="membership"
+                {...methods.register("membership")}
+                placeholder="Membership"
+                className="w-full placeholder:px-4 placeholder:text-sm p-2 shadow-md border border-gray-300 rounded-md outline-none"
+              />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.membership?.message}</p>
+
             </div>
 
 
 
 {/* Department searcbar */}
             <div className="">
-            <div className="relaltive  text-left  mb-4">
-  <label htmlFor="Departments" className=" mb-2">Departments</label>
+            <div className="">
+  <div className="relative text-left mb-4">
 
-    <div className="flex items-center p-1 mt-2 border  rounded-md">
-      <FaSearch size={20} className=" left-3  text-black" />
-      <input
-        type="text"
-        id="Departments"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search by Name"
-        className="pl-4 placeholder:text-sm placeholder:px-4 pr-4 py-2 w-full text-b rounded-md focus:outline-none outline-none"
-      />
-    </div>
+    {/* Department Dropdown */}
+  
+  <Controller
+    name="department"
+    control={methods.control}
+    render={({ field }) => (
+      <div className="relative mb-4">
+        <label htmlFor="department" className="block mb-2 text-left text-sm font-medium">
+          Department
+        </label>
+        <div
+          className="px-6 flex justify-between items-center cursor-pointer p-2 h-10 text-gray-800 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
+          onClick={() => setIsDeptDropdownOpen(prev => !prev)}
+        >
+          <span className="text-sm">
+            {selectedDept
+              ? DeptOptions.find(option => option.value === selectedDept)?.label
+              : "Select Department"}
+          </span>
+          <IoMdArrowDropdown size={20} />
+        </div>
+  
+        {isDeptDropdownOpen && (
+          <div className="absolute text-sm h-[150px] overflow-scroll text-left capitalize z-10 mt-2 bg-white shadow-lg rounded-lg w-full mx-auto">
+            {DeptOptions.map(option => (
+              <div
+                key={option.key}
+                className="cursor-pointer p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
+                onClick={() => {
+                  setSelectedDept(option.value);
+                  field.onChange(option.value); // Correctly update react-hook-form value
+                  setIsDeptDropdownOpen(false);
+                }}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+  />
+  
+  <p className="text-red-500 text-left text-sm">{methods.formState.errors.department?.message}</p>
+
+  
+  
+  
+  <Controller
+    name="hospital"
+    control={methods.control}
+    render={({ field }) => (
+      <div className="relative">
+        <label htmlFor="hospital" className="block mb-2 text-left text-sm font-medium">
+          Hospital
+        </label>
+        <div
+          className="px-6 flex   justify-between items-center cursor-pointer p-2 h-10 text-gray-800 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
+          onClick={() => setIsHospitalDropdownOpen((prev) => !prev)}
+        >
+          <span className="text-sm">
+            {selectedHospital
+              ? HospitalOptions.find((option) => option.value === selectedHospital)?.label
+              : "Select Hospital"}
+          </span>
+          <IoMdArrowDropdown size={20} />
+        </div>
+  
+        {isHospitalDropdownOpen && (
+          <div className="absolute h-[150px] overflow-scroll text-left capitalize z-10 mt-2 bg-white shadow-lg rounded-lg w-full mx-auto">
+            {HospitalOptions.map((option) => (
+              <div
+                key={option.key}
+                className="cursor-pointer text-sm p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
+                onClick={() => {
+                  setSelectedHospital(option.value);
+                  field.onChange(option.value); // Correctly update react-hook-form value
+                  setIsHospitalDropdownOpen(false);
+                }}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+  />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.hospital?.message}</p>
+
+
+
+
+  </div>
 </div>
 
 
-<div className="max-h-48 p-4 overflow-scroll flex gap-4 flex-wrap">
-        {filteredDepts.length > 0 ? (
-          filteredDepts.map((d, index) => (
-            <div key={index}>
-              <button
-                className="rounded-full px-6 py-2 text-sm font-normal hover:bg-blue-500 hover:text-white border border-blue-500 transition-all duration-300 ease-in-out"
-              >
-                {d}
-              </button>
-            </div>
-          ))
-        ) : (
-          <p>No departments found</p> 
-        )}
-      </div>
+
 
 
 
@@ -366,39 +766,30 @@ const DoctorDetails = () => {
 
            
             <div className="flex flex-wrap gap-4">
-          <div className="flex-1 ">
-              <label htmlFor="degree" className="block mb-2 text-sm font-medium text-left">
-            Degree
-              </label>
-              <input
-                type="text"
-                id="degree"
-                placeholder="Degree"
-                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
+        
+            <div className="w-full">
+          <ArrayField name="qualification" label="Qualification" placeholder="Add Qualification"/>
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.qualification?.message}</p>
+
+            </div>  
+            
             </div>
 
 
-            <div className="flex-1">
-              <label htmlFor="year" className="block mb-2 text-sm font-medium text-left">
-              Year
-              </label>
-              <input
-                type="number"
-                id="year"
-                placeholder="Year"
-                className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
+          <div className="">
+          <div className="mb-4">
+          <ArrayField name="main_speciality" label="Main Speciality" placeholder="Add Speciality"/>
+
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.main_speciality?.message}</p>
+
             </div>
-          </div>
 
-
-          <div className="">
-          <div className="">
+            <div className="">
           <ArrayField name="speciality" label="Speciality" placeholder="Add Speciality"/>
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.speciality
+          ?.message}</p>
+
             </div>
-
-
 <div className="">
 
 
@@ -433,6 +824,8 @@ const DoctorDetails = () => {
       type="file"
       id="profile-image"
       className="hidden"
+      onChange={handleProfileImageChange}
+
     />
   </div>
 
@@ -451,48 +844,40 @@ const DoctorDetails = () => {
 
 <UploadCloudIcon size={30}/>
       </div>
-        </div>
-
-     
+        </div>   
     </label>
     <input
       type="file"
       id="cover-image"
       className="hidden"
+      onChange={handleCoverImageChange}
     />
   </div>
 </div>
 
 
 <div className="flex flex-col gap-4">
-         
-
-
             <div className="">
           <ArrayField name="top_treatments" label="Top Treatments" placeholder="Add Top Treatments"/>
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.top_treatments?.message}</p>
+
             </div>
-
-
             <div className="">
           <ArrayField name="doctor_best_known" label="Best Known For" placeholder="Best Known For"/>
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_best_known?.message}</p>
+
             </div>
-
-
             <div className="">
           <ArrayField name="doctor_expert" label="Expertise" placeholder="Add Expertise"/>
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_expert?.message}</p>
+
             </div>
-
-
             <div className="">
           <ArrayField name="doctor_video" label="Add Video Links" placeholder="Add Video Links"/>
-            </div>
-           
+          <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_video?.message}</p>
+
+            </div>           
           </div>
-
-
-
-
-
 <div className="">
 <div className="mb-4">
               <label htmlFor="doctor-email" className="block mb-1 text-sm text-left font-medium">
@@ -500,43 +885,49 @@ const DoctorDetails = () => {
               </label>
               <input
                 type="text"
-                id="meta name"
+                id="meta_name"
+                {...methods.register("meta_name")}
                 placeholder="Meta Name"
                 className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
+                          <p className="text-red-500 text-left text-sm">{methods.formState.errors.meta_name?.message}</p>
+
             </div>
 
             <div className="mb-4">
               <label htmlFor="doctor-email" className="block mb-1 text-sm  text-left font-medium">
                Meta Description
               </label>
-              <input
-                type="text"
-                id="meta-description"
+              <textarea
+              rows={5}
+                id="meta_description"
+                {...methods.register("meta_description")}
                 placeholder="Meta Description"
                 className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
-              />
+              /> 
+                          <p className="text-red-500 text-left text-sm">{methods.formState.errors.meta_description?.message}</p>
 
-
-              
             </div>
 
             <div className="mb-4">
-
-            <ArrayField name="meta_tag" label="Meta Tags"  placeholder="Meta tags"/>
-
-
-              
+            <ArrayField name="meta_tag" label="Meta Tags"  placeholder="Meta tags"/>  
+            <p className="text-red-500 text-left text-sm">{methods.formState.errors.meta_tag?.message}</p>
+            
             </div>
 </div>
 
 
+<div className="grid grid-cols-2 gap-4">
+
+{profileImageUrl && renderImagePreview(profileImageUrl,handleRemoveProfileImage)}
+{coverImageUrl && renderImagePreview(coverImageUrl,handleRemoveCoverImage)}
+</div>
 
 
 
           {/* Submit Button */}
           <div className="flex gap-4 ">
-            <button type="submit" className="px-4 rounded-full py-2 w-full border-blue-500 border  text-blue-500 " onClick={closeModal}>
+            <button type="button" className="px-4 rounded-full py-2 w-full border-blue-500 border  text-blue-500 " onClick={handleCloseModal}>
               Cancel
             </button>
 

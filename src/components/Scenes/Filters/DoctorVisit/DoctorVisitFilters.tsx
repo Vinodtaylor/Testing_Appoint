@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar1Icon } from "lucide-react";
 import {
   Popover,
@@ -10,7 +10,6 @@ import {
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { VscTriangleDown, VscTriangleUp } from "react-icons/vsc";
-import Region from '../../../../../public/region.png';
 import { Calendar } from "@/components/ui/calendar";
 import * as XLSX from 'xlsx';
 import { DoctorVisittableData } from "@/constants/data";
@@ -18,38 +17,14 @@ import SelectDropDown from "../../Select/Select";
 import { PiMicrosoftExcelLogo } from "react-icons/pi";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { getAllDept, GetAllDoctorNames, getAllHospital, getAllRegion } from "@/routes/routes";
+import { RegionsType } from "@/types/types";
 
 
 
 
 
-export const Regions = [
-  { name: "Bangalore", icon: Region, doctorCount: 24 },
-  { name: "Whitefield", icon: Region, doctorCount: 18 },
-  { name: "Koramangala", icon: Region, doctorCount: 30 },
-  { name: "Malleswaram", icon: Region, doctorCount: 12 },
-  { name: "Indiranagar", icon: Region, doctorCount: 20 },
-  { name: "Jayanagar", icon: Region, doctorCount: 15 },
-  { name: "Hebbal", icon: Region, doctorCount: 10 },
-  { name: "Electronic City", icon: Region, doctorCount: 22 },
-  { name: "Yelahanka", icon: Region, doctorCount: 17 },
-  { name: "RT Nagar", icon: Region, doctorCount: 14 },
-  { name: "Basavanagudi", icon: Region, doctorCount: 8 },
-  { name: "JP Nagar", icon: Region, doctorCount: 16 },
-  { name: "Banashankari", icon: Region, doctorCount: 9 },
-  { name: "Sarjapur Road", icon: Region, doctorCount: 25 },
-  { name: "Marathahalli", icon: Region, doctorCount: 20 },
-  { name: "Hosur Road", icon: Region, doctorCount: 13 },
-  { name: "Bellandur", icon: Region, doctorCount: 19 },
-  { name: "HSR Layout", icon: Region, doctorCount: 21 },
-  { name: "Domlur", icon: Region, doctorCount: 11 },
-  { name: "Ulsoor", icon: Region, doctorCount: 7 },
-  { name: "Vijayanagar", icon: Region, doctorCount: 15 },
-  { name: "Kumaraswamy Layout", icon: Region, doctorCount: 9 },
-  { name: "Magadi Road", icon: Region, doctorCount: 6 },
-  { name: "Rajajinagar", icon: Region, doctorCount: 18 },
-  { name: "Peenya", icon: Region, doctorCount: 12 },
-];
+
 
 
 const DoctorVisitFilters: React.FC = () => {
@@ -65,14 +40,66 @@ const DoctorVisitFilters: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showAll, setShowAll] = useState<boolean>(false);
+  const [regiondata, setRegionData] = useState<RegionsType[]>([]);
+  // const [departmentNames, setDepartmentNames] = useState<string[]>([]);
+    const [docNames, setdocNames] = useState<string[]>([]);
+    // const [HospitalNames, setHospitalNames] = useState<string[]>([]);
 
-  const filteredregions = Regions.filter(region =>
-    region.name.toLowerCase().includes(searchQuery.toLowerCase())
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const res = await getAllRegion();
+        setRegionData(res.data);
+      } catch (e) {
+        console.error("Error fetching regions:", e);
+      }
+    };
+
+    getData();
+  }, []);
+
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const [ doctorRes] = await Promise.all([
+            getAllDept(),
+            getAllHospital(),
+            GetAllDoctorNames(),
+          ]);
+    
+          // const departmentNames = deptRes.data.map((dept: { department_name: string }) => dept.department_name);
+          // setDepartmentNames(departmentNames);
+    
+          // const hospitalNames = hospitalRes.data.map((hospital: { hospital_name: string }) => hospital.hospital_name);
+          // setHospitalNames(hospitalNames);
+    
+          const doctorNames = doctorRes.data.map((doctor: { name: string }) => doctor.name);
+          setdocNames(doctorNames);
+       
+          console.log("Doctor Names:", doctorNames);
+    
+        } catch (e) {
+          console.error("Error fetching data:", e);
+        }
+      };
+    
+      fetchData();
+    }, []);
+
+  const filteredregions = regiondata.filter(region =>
+    region.region_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
 
   const displayedRegions = showAll ? filteredregions : filteredregions.slice(0, 6);
   const hasMoreThan12Regions = filteredregions.length > 6;
+
+
+
+
+
 
   
   const handleSelectChange = (key: string, value: string) => {
@@ -94,11 +121,13 @@ const DoctorVisitFilters: React.FC = () => {
     setSelectedRegion(regionName);
   };
 
+
+
   
 
   return (
     <div className="p-8 mb-8  text-white rounded-tl-lg rounded-tr-lg space-y-4 bg-[#1A91FF]">
-      <div className="flex lg:flex-row gap-4 flex-col lg:items-center lg:justify-between">
+      <div className="flex mb-8 lg:flex-row gap-4 flex-col lg:items-center lg:justify-between">
         <h1 className="text-lg font-bold border-b-2 border-white">Filters</h1>
 
         <div className="flex justify-between items-center lg:flex-nowrap flex-wrap gap-4">
@@ -112,9 +141,9 @@ const DoctorVisitFilters: React.FC = () => {
       
       </div>
 
-      <div className="flex  flex-wrap sm:gap-4 md:gap-8 lg:gap-20 items-center">
+      <div className="flex   flex-wrap lg:flex-nowrap   sm:gap-4 md:gap-8 lg:gap-20 items-center">
         {/* Bookings */}
-        <div className="flex lg:max-w-sm w-full lg:flex-row flex-col lg:items-center gap-2 mb-4">
+        {/* <div className="flex lg:max-w-sm w-full lg:flex-row flex-col lg:items-center gap-2 mb-4">
           <label className="font-medium mb-1">Bookings:</label>
           <SelectDropDown
   value={dropdownValues.bookings}
@@ -128,10 +157,10 @@ const DoctorVisitFilters: React.FC = () => {
   dropdownClassName="text-[#000000] bg-transparent"              
 />
 
-        </div>
+        </div> */}
 
         {/* Gender */}
-        <div className="flex lg:w-1/6 w-full  lg:flex-row flex-col lg:items-center gap-2 mb-4">
+        <div className="flex  w-full  lg:flex-row flex-col lg:items-center gap-2 mb-4">
           <label className="font-medium mb-1">Gender:</label>
           <SelectDropDown
               value={dropdownValues.gender}
@@ -146,7 +175,7 @@ const DoctorVisitFilters: React.FC = () => {
         </div>
 
         {/* Date Filters */}
-        <div className="flex  w-full lg:flex-row flex-col lg:items-center gap-2 lg:-mt-4  lg:w-96">
+        <div className="flex  w-full lg:flex-row flex-col lg:items-center gap-2 lg:-mt-4  ">
           <p className="">Date:</p>
           <div className="flex  lg:flex-row flex-col items-center  gap-4 w-full">
             {/* Start Date Picker */}
@@ -204,24 +233,25 @@ const DoctorVisitFilters: React.FC = () => {
 
       <div className="flex pb-4  w-full transform lg:-translate-y-0 -translate-y-1  flex-wrap gap-4 md:gap-8 lg:gap-10 items-center">
         {/* Doctor */}
-        <div className="flex w-full lg:w-1/3 lg:flex-row flex-col lg:items-center lg:gap-4 mb-1 lg:mb-0">
+        <div className="flex w-full lg:w-full lg:flex-row flex-col lg:items-center lg:gap-4 mb-1 lg:mb-0">
           <label className="font-medium mb-1">Doctor:</label>
           <SelectDropDown
-  value={dropdownValues.doctor}
-  onChange={(value) => handleSelectChange('doctor', value)}
-  options={['Jane', 'Smith']}
-  placeholder="Enter Doctor Name"
-  icon={[<VscTriangleDown size={20} key="down" />, <VscTriangleUp key="up" size={20}/>]}
-  id="doctor-name"
-  inputClassName="outline-none rounded-full bg-white text-[#000000] h-[48px] shadow-md"  
-  containerClassName="w-full"    
-  dropdownClassName="text-[#000000] bg-transparent"    
-/>
+           id="doctor"
+           options={docNames}
+           value={dropdownValues.doctor}
+           icon={[<VscTriangleDown size={20} key="down" />, <VscTriangleUp key="up" size={20}/>]}
+             onChange={(value) => handleSelectChange("doctor", value)}
+             placeholder="Select Doctor Name"
+             inputClassName="outline-none rounded-full bg-white text-black h-[48px] shadow-md bg-transparent"
+             containerClassName="w-full"
+             dropdownClassName="bg-white text-black"
+ 
+          />
 
         </div>
 
         {/* City */}
-        <div className="flex lg:flex-row flex-col lg:w-1/6 w-full lg:items-center mb-2 lg:gap-4 lg:mb-0 ">
+        {/* <div className="flex lg:flex-row flex-col lg:w-1/6 w-full lg:items-center mb-2 lg:gap-4 lg:mb-0 ">
           <label className="font-medium mb-1">City:</label>
           <SelectDropDown
              value={dropdownValues.city}
@@ -234,11 +264,15 @@ const DoctorVisitFilters: React.FC = () => {
             dropdownClassName="text-[#000000] bg-transparent"
             
           />
-        </div>
+        </div> */}
       </div>
 
 
-      <div className="  flex lg:flex-row flex-col lg:items-center   lg:gap-4 ">
+   
+
+      {/* Region */}
+ 
+      <div className="flex lg:flex-row flex-col lg:items-center lg:pb-0  pb-4   lg:gap-4 ">
 
 <label htmlFor="" className="mb-1 whitespace-nowrap">Regions</label>
 <input
@@ -251,43 +285,45 @@ const DoctorVisitFilters: React.FC = () => {
       </div>
 
       {/* Region */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6  transform lg:-translate-y-0 items-start lg:items-center">
+      <div className="grid  grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6  transform lg:-translate-y-0 items-start lg:items-center">
   {displayedRegions.map((region, index) => (
     <div
       key={index}
-      onClick={() => handleRegionSelect(region.name)}
+      onClick={() => handleRegionSelect(region.region_name)}
       className="flex justify-center items-center flex-col"
     >
       <div
         className={`relative mb-4 rounded-full w-36 h-36 justify-center transition-all duration-300 ease-in-out cursor-pointer flex flex-col items-center ${
-          selectedRegion === region.name
+          selectedRegion === region.region_name
             ? "bg-gradient-to-r from-[#FFFFFF00] shadow-lg to-[#FFFFFFFF]"
             : "bg-transparent"
         }`}
       >
         <div className="flex items-center flex-col w-full justify-center">
           <Image
-            src={region.icon}
-            alt={region.name}
-            title={region.name}
+            src={region.region_image}
+            width={50}
+            height={100}
+            alt={region.region_name}
+            title={region.region_name}
             className="max-w-[60px] mb-1"
           />
           <p
             className={`text-center text-sm font-medium ${
-              selectedRegion === region.name ? "text-[#000000]" : "text-white"
+              selectedRegion === region.region_name ? "text-[#000000]" : "text-white"
             }`}
           >
-            {region.name}
+            {region.region_name}
           </p>
         </div>
       </div>
-      {selectedRegion === region.name && (
+      {/* {selectedRegion === region.name && (
         <div className="bg-[#D9D9D9] p-2 rounded-full">
           <p className="text-[#000000] text-center text-sm">
             {region.doctorCount} Doctors
           </p>
         </div>
-      )}
+      )} */}
     </div>
   ))}
 </div>
@@ -304,7 +340,6 @@ const DoctorVisitFilters: React.FC = () => {
 )}
 
 
-      {/* Custom Select for an Option */}
      
     </div>
   );

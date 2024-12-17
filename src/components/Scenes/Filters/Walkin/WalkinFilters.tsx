@@ -1,64 +1,109 @@
 "use client";
 
-import React, { useState } from "react";
-import { Calendar1Icon } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { VscTriangleDown, VscTriangleUp } from "react-icons/vsc";
-import Region from "../../../../../public/region.png";
 import { Calendar } from "@/components/ui/calendar";
-import {  WalkintableData } from "@/constants/data";
 import * as XLSX from "xlsx";
 import SelectDropdown from "@/components/Scenes/Select/Select"; 
 import { PiMicrosoftExcelLogo } from "react-icons/pi";
+import { getAllRegion,getAllHospital,getAllDept,GetAllDoctorNames } from "@/routes/routes";
+import { Appointment, RegionsType } from "@/types/types";
+import moment from "moment";
 
 
-export const Regions = [
-  { name: "Bangalore", icon: Region, doctorCount: 24 },
-  { name: "Whitefield", icon: Region, doctorCount: 18 },
-  { name: "Koramangala", icon: Region, doctorCount: 30 },
-  { name: "Malleswaram", icon: Region, doctorCount: 12 },
-  { name: "Indiranagar", icon: Region, doctorCount: 20 },
-  { name: "Jayanagar", icon: Region, doctorCount: 15 },
-  { name: "Hebbal", icon: Region, doctorCount: 10 },
-  { name: "Electronic City", icon: Region, doctorCount: 22 },
-  { name: "Yelahanka", icon: Region, doctorCount: 17 },
-  { name: "RT Nagar", icon: Region, doctorCount: 14 },
-  { name: "Basavanagudi", icon: Region, doctorCount: 8 },
-  { name: "JP Nagar", icon: Region, doctorCount: 16 },
-  { name: "Banashankari", icon: Region, doctorCount: 9 },
-  { name: "Sarjapur Road", icon: Region, doctorCount: 25 },
-  { name: "Marathahalli", icon: Region, doctorCount: 20 },
-  { name: "Hosur Road", icon: Region, doctorCount: 13 },
-  { name: "Bellandur", icon: Region, doctorCount: 19 },
-  { name: "HSR Layout", icon: Region, doctorCount: 21 },
-  { name: "Domlur", icon: Region, doctorCount: 11 },
-  { name: "Ulsoor", icon: Region, doctorCount: 7 },
-  { name: "Vijayanagar", icon: Region, doctorCount: 15 },
-  { name: "Kumaraswamy Layout", icon: Region, doctorCount: 9 },
-  { name: "Magadi Road", icon: Region, doctorCount: 6 },
-  { name: "Rajajinagar", icon: Region, doctorCount: 18 },
-  { name: "Peenya", icon: Region, doctorCount: 12 },
-];
 
-const WalkinFilters: React.FC = () => {
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
-  const [selectedRegion, setSelectedRegion] = useState<string>("Bangalore"); // Default to Bangalore
-  const [dropdownValues, setDropdownValues] = useState({
-    booking: "",
-    gender: "",
-    speciality: "",
-    doctor: "",
-    hospital: "",
-    city: "",
-  });
+
+interface FilterValues {
+  department: string;
+  gender: string;
+  doctor: string;
+  hospital:string;
+  region: string;
+  startdate: string | null;  // Add this line
+  enddate: string | null;    
+}
+
+
+
+interface WalkinFilterProps {
+  onFilterChange: (newFilters: FilterValues) => void; // Accept FilterValues
+  AppointmentData:Appointment[];
+  filteredData: Appointment[];
+  filterValues: FilterValues; // Pass down the current filters
+}
+
+const WalkinFilters:  React.FC<WalkinFilterProps>= ({onFilterChange,AppointmentData,filteredData}) => {
+ 
+  const [selectedRegion, setSelectedRegion] = useState<string>(""); 
+   const [dropdownValues, setDropdownValues] = useState({
+      gender: '',
+      doctor: '',
+      department: '',
+      region:'',
+      startdate:'',
+      hospital:'',
+      enddate:''
+    });
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showAll, setShowAll] = useState<boolean>(false);
+    const [startDate, setStartDate] = useState<moment.Moment | null>(null);
+    const [endDate, setEndDate] = useState<moment.Moment | null>(null);
+  
 
-  const filteredregions = Regions.filter(region =>
-    region.name.toLowerCase().includes(searchQuery.toLowerCase())
+ 
+  const [regiondata, setRegionData] = useState<RegionsType[]>([]);
+const [departmentNames, setDepartmentNames] = useState<string[]>([]);
+  const [docNames, setdocNames] = useState<string[]>([]);
+  const [HospitalNames, setHospitalNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const res = await getAllRegion();
+        setRegionData(res.data);
+      } catch (e) {
+        console.error("Error fetching regions:", e);
+      }
+    };
+
+    getData();
+  }, []);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [deptRes, hospitalRes, doctorRes] = await Promise.all([
+          getAllDept(),
+          getAllHospital(),
+          GetAllDoctorNames(),
+        ]);
+  
+        const departmentNames = deptRes.data.map((dept: { department_name: string }) => dept.department_name);
+        setDepartmentNames(departmentNames);
+  
+        const hospitalNames = hospitalRes.data.map((hospital: { hospital_name: string }) => hospital.hospital_name);
+        setHospitalNames(hospitalNames);
+  
+        const doctorNames = doctorRes.data.map((doctor: { name: string }) => doctor.name);
+        setdocNames(doctorNames);
+          console.log("Department Names:", departmentNames);
+        console.log("Hospital Names:", hospitalNames);
+        console.log("Doctor Names:", doctorNames);
+  
+      } catch (e) {
+        console.error("Error fetching data:", e);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+
+  const filteredregions = regiondata.filter(region =>
+    region.region_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
 
@@ -79,30 +124,175 @@ const WalkinFilters: React.FC = () => {
 
 
 
+  const handleStartDateChange = (date: Date | undefined) => {
+    const newStartDate = date ? moment(date).format("YYYY-MM-DD") : '';
+    setDropdownValues((prevValues) => ({
+      ...prevValues,
+      startdate: newStartDate,
+    }));
+  };
+  
+  const handleEndDateChange = (date: Date | undefined) => {
+    const newEndDate = date ? moment(date).format("YYYY-MM-DD") : '';
+    setDropdownValues((prevValues) => ({
+      ...prevValues,
+      enddate: newEndDate,
+    }));
+  };
+
+  
+    const filterData = () => {
+      const filteredData = AppointmentData.filter((item) => {
+        // Gender filter
+        const matchesGender =
+          !dropdownValues.gender ||
+          (item.patient_id && item.patient_id.gender.toLowerCase() === dropdownValues.gender.toLowerCase());
+    
+        // Doctor filter (name)
+        const matchesDoctor =
+          !dropdownValues.doctor ||
+          (item.doctor_id && item.doctor_id.name.toLowerCase().includes(dropdownValues.doctor.toLowerCase()));
+
+
+          const matchesHospital = 
+          !dropdownValues.hospital || 
+          (item.hospital_id?.hospital_name && 
+           item.hospital_id.hospital_name.toLowerCase().includes(dropdownValues.hospital.toLowerCase()));
+        
+        
+    
+        // Department filter
+        // const matchesDept =
+        //   !dropdownValues.department ||
+        //   (item.doctor_id.department.department_name && item.doctor_id.department.department_name.toLowerCase().includes(dropdownValues.department.toLowerCase()));
+    
+          console.log("Filtering by hospital:", dropdownValues.hospital);
+          console.log("Hospital name:", item.hospital_id?.hospital_name);
+          
+
+        // Region filter
+            const matchesRegion =
+  !selectedRegion ||
+  (item.region &&
+    item.region.region_name.toLowerCase() ===
+      selectedRegion.toLowerCase());
+
+    
+        // Date range filter
+        const AppointmentCreatedDate = moment(item.createdAt, "YYYY-MM-DD");
+    
+        // Check if start and end dates are valid moments
+        const startMoment = dropdownValues.startdate ? moment(dropdownValues.startdate).startOf('day') : null;
+        const endMoment = dropdownValues.enddate ? moment(dropdownValues.enddate).endOf('day') : null;
+    
+        // Check if doctor's creation date is within the date range
+        const isWithinDateRange =
+          (!startMoment || AppointmentCreatedDate.isSameOrAfter(startMoment)) &&
+          (!endMoment || AppointmentCreatedDate.isSameOrBefore(endMoment));
+    
+        // Combine all conditions
+        return matchesGender && matchesDoctor &&   matchesHospital
+        
+        // &&  matchesDept 
+        
+        && matchesRegion && isWithinDateRange;
+      });
+    
+      // After filtering, pass the updated filter values to onFilterChange
+      onFilterChange({
+        gender: dropdownValues.gender,
+        doctor: dropdownValues.doctor,
+        department: dropdownValues.department,
+        region: selectedRegion,
+        startdate: dropdownValues.startdate,
+        hospital:dropdownValues.hospital,
+        enddate: dropdownValues.enddate,
+      });
+    
+      console.log(filteredData, "after filter");
+    };
+
+
+
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(WalkintableData);
+    const ws = XLSX.utils.json_to_sheet(filteredData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "WalkinVisit");
     XLSX.writeFile(wb, "WalkinVisit.xlsx");
   };
+
+
+  const resetFilters = () => {
+    setDropdownValues({
+      gender: '',
+      doctor: '',
+      department: '',
+      hospital:'',
+      region: '',
+      startdate:'',
+      enddate:'',
+    });
+    setStartDate(null)
+    setEndDate(null)
+    setSelectedRegion('');
+    setSearchQuery('');
+  };
+
+
+  
+    useEffect(() => {
+  
+      console.log("Applying filters... on Walkin");
+  
+      filterData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dropdownValues, selectedRegion, searchQuery]);
+    
+    
+  
+    useEffect(() => {
+      console.log("Selected Region  on Walkin:", selectedRegion);
+      console.log("Selected Gender  on Walkin:", dropdownValues.gender);
+      console.log("Selected Doctor  on Walkin:", dropdownValues.doctor);
+      console.log("Selected Start Date  on Walkin:", dropdownValues.startdate);
+      console.log("Selected End Date  on Walkin:", dropdownValues.enddate);
+      console.log("Selected End Date  on Walkin:", dropdownValues.hospital);
+
+      console.log("Selected Department:", dropdownValues.department);
+      console.log("Search Query:", searchQuery);
+    }, [selectedRegion, dropdownValues, searchQuery]);
 
   return (
     <div className="p-8 mb-8 text-white flex flex-col gap-8 rounded-tl-lg rounded-tr-lg space-y-4 bg-[#1A91FF]">
       <div className="flex  mb-0 lg:flex-row gap-4 flex-col lg:items-center lg:justify-between">
         <h1 className="text-lg font-bold border-b-2 border-white">Filters</h1>
         <div className="flex justify-between items-center lg:flex-nowrap flex-wrap gap-4">
-        <button onClick={exportToExcel} className="p-3 whitespace-nowrap w-full bg-[#1A91FF] shadow-md border rounded-full text-center flex justify-center gap-2">
-          Export as Excel <PiMicrosoftExcelLogo size={20} />
-        </button>
-        <button onClick={exportToExcel} className="p-3 whitespace-nowrap w-full text-center bg-[#1A91FF] shadow-md border rounded-full  gap-2">
-        Apply Filter
-        </button>
-        </div>
-      
+  <button
+    onClick={exportToExcel}
+    className="p-3 whitespace-nowrap w-full bg-gradient-to-r from-[#1A91FF] to-[#3498db] text-white shadow-lg border border-transparent rounded-full text-center flex justify-center gap-2 hover:from-[#3498db] hover:to-[#1A91FF] transform transition-all duration-300 ease-in-out hover:scale-105 focus:outline-none"
+  >
+    Export as Excel <PiMicrosoftExcelLogo size={20} />
+  </button>
+  
+  <button
+    onClick={filterData}
+    className="p-3 whitespace-nowrap w-full text-white bg-gradient-to-r from-[#1A91FF] to-[#3498db] shadow-lg border border-transparent rounded-full text-center gap-2 hover:from-[#3498db] hover:to-[#1A91FF] transform transition-all duration-300 ease-in-out hover:scale-105 focus:outline-none"
+  >
+    Apply Filter
+  </button>
+  
+  <button
+    onClick={resetFilters}
+    className="p-3 whitespace-nowrap w-full text-white bg-gradient-to-r from-[#1A91FF] to-[#3498db] shadow-lg border border-transparent rounded-full text-center gap-2 hover:from-[#3498db] hover:to-[#1A91FF] transform transition-all duration-300 ease-in-out hover:scale-105 focus:outline-none"
+  >
+    Reset
+  </button>
+</div>
+
       </div>
 
-      <div className="flex  flex-wrap lg:flex-wrap gap-4 sm:gap-4 md:gap-8  lg:gap-10 items-center">
-        <div className="flex  w-full lg:max-w-xs  lg:mb-0 mb-4 lg:flex-row flex-col lg:items-center gap-2"> 
+      <div className="flex  lg:flex-nowrap flex-wrap  gap-4 sm:gap-4 md:gap-8  lg:gap-10 items-center">
+        {/* <div className="flex  w-full lg:max-w-xs  lg:mb-0 mb-4 lg:flex-row flex-col lg:items-center gap-2"> 
           <label className="font-medium mb-1">Bookings:</label>
           <SelectDropdown
           id="booking"
@@ -114,9 +304,9 @@ const WalkinFilters: React.FC = () => {
             containerClassName="w-full"
             dropdownClassName="bg-white text-black"
           />
-        </div>
+        </div> */}
 
-        <div className="flex  w-full lg:max-w-xs mb-4  lg:mb-0   lg:flex-row flex-col lg:items-center gap-2">
+        <div className="flex  w-full  mb-4  lg:mb-0  lg:flex-row flex-col lg:items-center gap-2">
           <label className="font-medium mb-1">Gender:</label>
           <SelectDropdown
           id="gender"
@@ -131,69 +321,72 @@ const WalkinFilters: React.FC = () => {
         </div>
 
 
+        <div className="flex w-full lg:flex-row flex-col lg:items-center  lg:mb-0 mb-4 gap-2 ">
+             <p>Date:</p>
+             <div className="flex lg:flex-row flex-col items-center gap-4 w-full">
+               {/* Start Date Picker */}
+               <Popover>
+         <PopoverTrigger asChild>
+           <div className="relative w-full">
+             <input
+               placeholder="Start Date"
+               value={dropdownValues.startdate}
+               className="pr-10 text-center pl-4 w-full text-sm shadow-md rounded-lg cursor-pointer h-[48px] placeholder:text-white outline-none border bg-transparent"
+               readOnly
+             />
+           </div>
+         </PopoverTrigger>
+         <PopoverContent className="w-auto p-0" align="start">
+           <Calendar
+             mode="single"
+             selected={startDate?.toDate()}
+             onSelect={handleStartDateChange}
+             disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+             initialFocus
+           />
+         </PopoverContent>
+       </Popover>
+       
+       {/* End Date Picker */}
+       
+       
+       
+               <span className="text-white">to</span>
+       
+               {/* End Date Picker */}
+           <Popover>
+         <PopoverTrigger asChild>
+           <div className="relative w-full">
+             <input
+               placeholder="End Date"
+               value={dropdownValues.enddate}
+               className="pr-10 text-center pl-4 w-full text-sm cursor-pointer h-[48px] placeholder:text-white rounded-lg outline-none shadow-md border bg-transparent"
+               readOnly
+             />
+           </div>
+         </PopoverTrigger>
+         <PopoverContent className="w-auto p-0" align="start">
+           <Calendar
+             mode="single"
+             selected={endDate?.toDate()}
+             onSelect={handleEndDateChange}
+             disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+             initialFocus
+           />
+         </PopoverContent>
+       </Popover>
+             </div>
+           </div>
        {/* Date Filters */}
-       <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-4 space-y-2 lg:max-w-sm mb-4">
-          <p className=" font-medium lg:-mb-0 sm:-mb-0 -mb-2">Date:</p>
-          <div className="flex  lg:flex-row flex-col items-center gap-2 w-full">
-            {/* Start Date Picker */}
-            <Popover >
-              <PopoverTrigger asChild className="">
-                <div className="relative w-full">
-                  <Input
-                    placeholder="Start Date"
-                    value={startDate ? startDate.toLocaleDateString() : ""}
-                    className="pr-10 text-sm shadow-md cursor-pointer h-[48px] placeholder:text-white outline-none"
-                    readOnly
-                  />
-                  <Calendar1Icon className="absolute right-3 text-white top-1/2 transform -translate-y-1/2" />
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+     
 
-            <span className="text-white">to</span>
-
-            {/* End Date Picker */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <div className="relative  w-full">
-                  <Input
-                    placeholder="End Date"
-                    value={endDate ? endDate.toLocaleDateString() : ""}
-                    className="pr-10 text-sm cursor-pointer h-[48px] placeholder:text-white outline-none shadow-md"
-                    readOnly
-                  />
-                  <Calendar1Icon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white" />
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        <div className="flex  lg:max-w-full  w-full lg:flex-row flex-col lg:items-center gap-2">
-          <label className="font-medium ">Speciality:</label>
+        <div className="flex  b lg:max-w-full   w-full lg:flex-row flex-col lg:items-center gap-2">
+          <label className="font-medium ">Department:</label>
           <SelectDropdown
           id="speciality"
-           options={["ENT","Cardiology"]}
-           value={dropdownValues.speciality}
-            onChange={(value) => handleSelectChange("speciality", value)}
+           options={departmentNames}
+           value={dropdownValues.department}
+            onChange={(value) => handleSelectChange("department", value)}
             placeholder="Select Speciality"
             inputClassName="outline-none rounded-lg h-[48px] shadow-md bg-transparent"
             containerClassName="w-full"
@@ -202,12 +395,12 @@ const WalkinFilters: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex w-full  flex-wrap gap-4 md:gap-8 lg:gap-10 items-center">
-        <div className="flex lg:mb-0 mb-4 lg:w-1/3 w-full lg:flex-row flex-col lg:items-center gap-2">
+      <div className="flex w-full flex-wrap lg:flex-nowrap gap-4 md:gap-8 lg:gap-10 items-center">
+        <div className="flex lg:mb-0 mb-4 lg:w-full w-full lg:flex-row flex-col lg:items-center gap-2">
           <label className="font-medium ">Doctor:</label>
           <SelectDropdown
            id="doctor"
-           options={["Doctor 1","Doctor 2"]}
+           options={docNames}
            value={dropdownValues.doctor}
            icon={[<VscTriangleDown size={20} key="down" />, <VscTriangleUp key="up" size={20}/>]}
              onChange={(value) => handleSelectChange("doctor", value)}
@@ -219,11 +412,11 @@ const WalkinFilters: React.FC = () => {
           />
         </div>
 
-        <div className="flex  lg:mb-0 mb-4 lg:w-1/3 w-full lg:flex-row flex-col lg:items-center gap-2">
+        <div className="flex  lg:mb-0 mb-4 lg:w-full w-full lg:flex-row flex-col lg:items-center gap-2">
           <label className="font-medium">Hospital:</label>
           <SelectDropdown
           id="hospital"
-          options={["Apollo","Medidocs"]}
+          options={HospitalNames}
           value={dropdownValues.hospital}
           icon={[<VscTriangleDown size={20} key="down" />, <VscTriangleUp key="up" size={20}/>]}
 
@@ -236,7 +429,7 @@ const WalkinFilters: React.FC = () => {
           />
         </div>
 
-        <div className="flex lg:w-1/6 w-full lg:flex-row flex-col lg:items-center gap-2">
+        {/* <div className="flex lg:w-1/6 w-full lg:flex-row flex-col lg:items-center gap-2">
           <label className="font-medium ">City:</label>
           <SelectDropdown
           id="city"
@@ -248,7 +441,7 @@ const WalkinFilters: React.FC = () => {
             containerClassName="w-full"
             dropdownClassName="bg-white text-black"
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="flex lg:flex-row flex-col lg:items-center    lg:gap-4 ">
@@ -268,39 +461,40 @@ const WalkinFilters: React.FC = () => {
   {displayedRegions.map((region, index) => (
     <div
       key={index}
-      onClick={() => handleRegionSelect(region.name)}
+      onClick={() => handleRegionSelect(region.region_name)}
       className="flex justify-center items-center flex-col"
     >
       <div
         className={`relative mb-4 rounded-full w-36 h-36 justify-center transition-all duration-300 ease-in-out cursor-pointer flex flex-col items-center ${
-          selectedRegion === region.name
+          selectedRegion === region.region_name
             ? "bg-gradient-to-r from-[#FFFFFF00] shadow-lg to-[#FFFFFFFF]"
             : "bg-transparent"
         }`}
       >
         <div className="flex items-center flex-col w-full justify-center">
           <Image
-            src={region.icon}
-            alt={region.name}
-            title={region.name}
+            src={region.region_image}
+            alt={region.region_name}
+            title={region.region_name}
+            width={50} height={100}
             className="max-w-[60px] mb-1"
           />
           <p
             className={`text-center text-sm font-medium ${
-              selectedRegion === region.name ? "text-[#000000]" : "text-white"
+              selectedRegion === region.region_name ? "text-[#000000]" : "text-white"
             }`}
           >
-            {region.name}
+            {region.region_name}
           </p>
         </div>
       </div>
-      {selectedRegion === region.name && (
+      {/* {selectedRegion === region.name && (
         <div className="bg-[#D9D9D9] p-2 rounded-full">
           <p className="text-[#000000] text-center text-sm">
             {region.doctorCount} Doctors
           </p>
         </div>
-      )}
+      )} */}
     </div>
   ))}
 </div>
