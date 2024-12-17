@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -24,7 +25,7 @@ interface Region{
 }
 
 interface Doctor {
-  _id:string
+  _id?:string
   name: string;
   gender: string;
   age: number;
@@ -37,8 +38,8 @@ interface Doctor {
   registration: string;
   price: number;
   about_doctor: string;
-  department: Department;
-  hospital: Hospital;
+  department: string;
+  hospital:string;
  speciality: string[];
   main_speciality: string[];
   qualification: string[];
@@ -50,8 +51,8 @@ interface Doctor {
   meta_name: string;
   meta_description: string;
   meta_tag: string[];
-  doctor_image:  string; // Supports either File object or URL string
-  doctor_cover_image:string; // Supports either File object or URL string
+  doctor_image:  string; 
+  doctor_cover_image:string; 
 }
 
 
@@ -69,7 +70,8 @@ const EditDoctor:React.FC<EditDoctorProps> = ({doctor}) => {
     const [isDeptDropdownOpen, setIsDeptDropdownOpen] = useState(false);
 const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
 
-  const doctorId = doctor?._id;
+  
+
   const methods = useForm<getDoctor>({
     resolver: zodResolver(DoctorSchema),
     defaultValues: {
@@ -83,7 +85,8 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
       doctor_video: [],
       qualification: [],
       doctor_type:[],
-      hospital:""
+      hospital:"",
+      department:""
     },
 
   });
@@ -191,7 +194,7 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     setSelectedRegion(value._id); 
 
     setIsDropdownOpen(false);
-    methods.setValue('region', value._id);
+    methods.setValue('region', value._id as any);
 
   };
   
@@ -204,6 +207,7 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     console.log(doctor.region, "Doctor object"); 
 
     methods.reset({
+      _id:doctor._id,
       name: doctor.name,
       gender: doctor.gender,
       age: doctor.age,
@@ -212,6 +216,7 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
       membership:doctor.membership,
       phone_number: doctor.phone_number,
       registration: doctor.registration,
+      region:doctor.region?._id,
       price: doctor.price,
       about_doctor: doctor.about_doctor,
       department: doctor.department?._id || '', // Safe access
@@ -369,25 +374,48 @@ const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 const SubmitDoctor = async (data: Doctor) => {
   console.log("Form data before submission:", data);
 
+  // Ensure the doctor ID and region ID are included if not already set
+  if (!data._id) {
+    data._id = doctor._id;  // Set doctor ID from the prop if it's missing
+  }
+  
+  // Ensure data.region is an object (it could be a string, i.e., just the region ID)
+  if (typeof data.region === 'string') {
+    data.region = { _id: data.region };  // Create the region object if it's a string
+  }
+
+  if (!data.region?._id) {
+    data.region._id = doctor.region._id;  // Set region ID from the prop if it's missing
+  }
+
+  // Check if data has the necessary values now
+  if (!data._id || !data.region?._id) {
+    console.error("Doctor ID or Region ID is missing:", data);
+    return;
+  }
+
   try {
+    console.log("Doctor data before processing:", data);
+
     // Prepare the doctor data (excluding images)
     const doctorData = {
       ...data,
       region: data.region._id,
     };
+    console.log("Prepared doctor data:", doctorData);
 
     // First, update the doctor details (excluding images)
-    const resDoctor = await UpdateDoctor(doctorId, doctorData);
+    const resDoctor = await UpdateDoctor(data._id, doctorData);
     console.log("Doctor update response:", resDoctor);
 
     // Upload images in parallel (if they exist)
     const updateCoverImagePromise = coverImage
-      ? UpdateCoverImage(doctorId, coverImage)  // Pass the File object directly
-      : Promise.resolve({ status: 200, data: { doctor_cover_image: '' } });  // If no cover image, resolve immediately
+      ? UpdateCoverImage(data._id, coverImage)
+      : Promise.resolve({ status: 200, data: { doctor_cover_image: '' } });
 
     const updateProfileImagePromise = profileImage
-      ? UpdateProfileImage(doctorId, profileImage)  // Pass the File object directly
-      : Promise.resolve({ status: 200, data: { doctor_image: '' } });  // If no profile image, resolve immediately
+      ? UpdateProfileImage(data._id, profileImage)
+      : Promise.resolve({ status: 200, data: { doctor_image: '' } });
 
     // Wait for both image uploads to complete
     const [resCoverImage, resProfileImage] = await Promise.all([updateCoverImagePromise, updateProfileImagePromise]);
@@ -397,49 +425,44 @@ const SubmitDoctor = async (data: Doctor) => {
 
     // If images were uploaded, update the URLs in doctor data
     if (resCoverImage.status === 200 && resCoverImage.data?.doctor_cover_image) {
-      doctorData.cover_image_url = resCoverImage.data.doctor_cover_image;
+      doctorData.doctor_cover_image = resCoverImage.data.doctor_cover_image;
     }
 
     if (resProfileImage.status === 200 && resProfileImage.data?.doctor_image) {
-      doctorData.profile_image_url = resProfileImage.data.doctor_image;
+      doctorData.doctor_image = resProfileImage.data.doctor_image;
     }
 
     // Now, update the doctor details with the image URLs
-    const resDoctorWithImages = await UpdateDoctor(doctorId, doctorData);
+    const resDoctorWithImages = await UpdateDoctor(data._id, doctorData);
     console.log("Doctor details with image URLs response:", resDoctorWithImages);
 
-    // Check if all responses are successful
-
-
-
-    methods.reset()
-    closeModal()
+    methods.reset();
+    closeModal();
     toast.success("Doctor updated successfully!");
-window.location.reload()
-   
+    window.location.reload();
+
   } catch (e) {
-    console.error("Error occurred while submitting doctor data:", e.message);
+    console.error("Error occurred while submitting doctor data:", e);
     toast.error("An error occurred while updating doctor details");
   }
 };
 
 
-  
 
 
-
-  
-  
-  
-  
-  
   
   
 
   console.log(methods.formState.errors);
 
 
+  console.log(doctor._id, "Passed Doctor Prop");
+
+  console.log("Doctor ID:", doctor?._id);
+console.log("Doctor Object at Execution:", doctor);
+
   return (
+
     <div>
 
       <div className="flex  justify-center">
@@ -567,7 +590,7 @@ window.location.reload()
               className="cursor-pointer text-sm text-left p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
               onClick={() => {
                 // Set the selected region ID when a region is clicked
-                setSelectedRegion(option.value._id);
+                setSelectedRegion(option.value._id!);
                 field.onChange(option.value._id); // Set the value for react-hook-form
                 setIsDropdownOpen(false);
               }}

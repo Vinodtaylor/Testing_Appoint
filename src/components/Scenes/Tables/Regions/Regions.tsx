@@ -1,11 +1,8 @@
-"use client";
-
-import { getAllRegion, DeleteRegion, UpdateRegion, createRegion } from "@/routes/routes";
-import { RegionsType } from "@/types/types";
+import { getAllRegion, createRegion, DeleteRegion,UpdateRegion } from "@/routes/routes"; // Adjust import paths
+import {  Regions } from "@/types/types";
+import React, { useState, useEffect } from "react";
 import { EditIcon, Plus, Trash, UploadCloudIcon } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,11 +14,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/TableAlert";
 import { AlertDialogDescription } from "@radix-ui/react-alert-dialog";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-const Regions = () => {
-  const [data, setData] = useState<RegionsType[]>([]);
+const RegionsTable = () => {
+  const [data, setData] = useState<Regions[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentRegion, setCurrentRegion] = useState<RegionsType | null>(null);
+  const [currentRegion, setCurrentRegion] = useState<Regions | null>(null);
   const [formValues, setFormValues] = useState({
     region_name: "",
     region_image: "",
@@ -32,7 +30,7 @@ const Regions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  const [deletingRegion, setDeletingRegion] = useState<RegionsType | null>(null);
+  const [deletingRegion, setDeletingRegion] = useState<Regions | null>(null);
 
   useEffect(() => {
     const getData = async () => {
@@ -50,16 +48,16 @@ const Regions = () => {
   const handleDelete = async () => {
     if (deletingRegion) {
       try {
-        await DeleteRegion(deletingRegion._id!);
+        await DeleteRegion(deletingRegion._id);
         setData(data.filter((region) => region._id !== deletingRegion._id));
-        setDeletingRegion(null); // Clear deletingRegion after deletion
+        setDeletingRegion(null);
       } catch (e) {
         console.error("Error deleting region:", e);
       }
     }
   };
 
-  const handleEdit = (region: RegionsType) => {
+  const handleEdit = (region: Regions) => {
     setCurrentRegion(region);
     setFormValues({
       region_name: region.region_name,
@@ -95,37 +93,44 @@ const Regions = () => {
     try {
       const fileInput = document.getElementById("file-upload") as HTMLInputElement;
       const imageFile = fileInput?.files?.[0] || null;
-
+  
       // Create FormData for API submission
       const formData = new FormData();
       formData.append("region_name", formValues.region_name);
-
+  
+      // If there's an image file, append it to FormData
       if (imageFile) {
         formData.append("region_image", imageFile);
       } else if (formValues.region_image) {
+        // In case there's an existing base64 image, append that too
         formData.append("region_image", formValues.region_image);
       }
-
+  
+      let response;
       if (currentRegion) {
-        // Update existing region
-        await UpdateRegion(currentRegion._id!, formData);
-        setData(data.map(region =>
+        // If updating an existing region
+        // Send FormData for both region name and image
+        response = await UpdateRegion(currentRegion._id, formData);
+  
+        // Update the local state to reflect changes
+        setData(data.map((region) =>
           region._id === currentRegion._id
             ? { ...region, region_name: formValues.region_name, region_image: formValues.region_image }
             : region
         ));
       } else {
-        // Create new region
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const newRegion = await createRegion(formData as any);
-        setData([...data, newRegion.data]);
+        // If creating a new region
+        response = await createRegion(formData);
+        setData([...data, response.data]);
       }
-
+  
       setModalOpen(false); // Close modal after submission
     } catch (error) {
       console.error("Error submitting region:", error);
+      alert("An error occurred while submitting the region details.");
     }
   };
+  
 
   // Pagination logic
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -181,10 +186,8 @@ const Regions = () => {
                   </td>
                   <td className="px-3 py-2 text-gray-900 text-sm">
                     <AlertDialog>
-                      <AlertDialogTrigger>
-                        <button onClick={() => setDeletingRegion(region)} className="bg-red-500 rounded-xl text-white px-2 py-1 hover:bg-red-600">
-                          <Trash />
-                        </button>
+                      <AlertDialogTrigger onClick={() => setDeletingRegion(region)} className="bg-red-500 rounded-xl text-white px-2 py-1 hover:bg-red-600">
+                        <Trash />
                       </AlertDialogTrigger>
                       <AlertDialogContent className="w-full max-w-sm sm:max-w-xl lg:max-w-3xl rounded-lg">
                         <AlertDialogHeader>
@@ -214,25 +217,27 @@ const Regions = () => {
       ) : null}
 
       {/* Pagination Controls */}
-      <div className="flex justify-center gap-4 items-center mt-4">
-        <button
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-          className={`p-2 text-sm rounded ${currentPage === 1 ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} text-white`}
-        >
-          <IoIosArrowBack />
-        </button>
-        <p className="text-sm">
-          Page {currentPage} of {totalPages}
-        </p>
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          className={`p-2 text-sm rounded ${currentPage === totalPages ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} text-white`}
-        >
-          <IoIosArrowForward />
-        </button>
-      </div>
+      {data.length > itemsPerPage && (
+        <div className="flex justify-center gap-4 items-center mt-4">
+          <button
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+            className={`p-2 text-sm rounded ${currentPage === 1 ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+          >
+            <IoIosArrowBack />
+          </button>
+          <p className="text-sm">
+            Page {currentPage} of {totalPages}
+          </p>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className={`p-2 text-sm rounded ${currentPage === totalPages ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+          >
+            <IoIosArrowForward />
+          </button>
+        </div>
+      )}
 
       {/* Modal for Create/Edit */}
       {modalOpen && (
@@ -257,7 +262,7 @@ const Regions = () => {
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Region Image:</label>
                 <div className="flex items-center gap-3">
-                  <label htmlFor="file-upload" className="flex items-center  w-full shadow-md  gap-2 cursor-pointer bg-gray-200 px-3 py-2 rounded hover:bg-gray-300">
+                  <label htmlFor="file-upload" className="flex items-center w-full shadow-md gap-2 cursor-pointer bg-gray-200 px-3 py-2 rounded hover:bg-gray-300">
                     <UploadCloudIcon size={24} />
                     <span className="text-sm"> Upload Image</span>
                   </label>
@@ -270,11 +275,9 @@ const Regions = () => {
                   />
                 </div>
                 {imagePreview && (
-                  <>
-                    <div className="w-full flex justify-center">
-                      <Image src={imagePreview} alt="Region Preview" width={100} height={100} className="mt-4 max-w-full" />
-                    </div>
-                  </>
+                  <div className="w-full flex justify-center">
+                    <Image src={imagePreview} alt="Region Image Preview" width={100} height={100} className="mt-4 max-w-full" />
+                  </div>
                 )}
               </div>
               <div className="flex justify-end gap-2">
@@ -286,7 +289,7 @@ const Regions = () => {
                   Cancel
                 </button>
                 <button type="submit" className="bg-blue-500 w-full text-sm text-white px-4 py-2 rounded-full">
-                  {currentRegion ? "Update Region" : "Create"}
+                  {currentRegion ? "Save Changes" : "Create"}
                 </button>
               </div>
             </form>
@@ -297,4 +300,4 @@ const Regions = () => {
   );
 };
 
-export default Regions;
+export default RegionsTable;

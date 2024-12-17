@@ -17,7 +17,7 @@ export interface City {
 }
 
 export interface Region {
-    _id:string,
+    _id?:string,
     regionIcon: string;
     regionName: string;
 }
@@ -100,12 +100,14 @@ export interface Schedule {
 
   
   export interface getDoctor {
-    _id:string
+    _id?:string
     name: string;
     gender: string;
     doctor_id:string;
     main_speciality: string[];
-    department: Department;
+    speciality:string[];
+    department: string;
+    hospital:string;
     email: string;
     phone_number: string;
     doctor_type: string[];
@@ -132,7 +134,7 @@ export interface Schedule {
   }
 
   export interface RegionsType {
-    _id: string;
+    _id?: string;
     region_name: string;
     region_image: string;
   };
@@ -141,7 +143,7 @@ export interface Schedule {
   // Walkin Appointments
 
   interface Patient {
-    _id: string;
+    _id?: string;
     name: string;
     age: number;
     gender: string;
@@ -153,8 +155,8 @@ export interface Schedule {
     otpforgotPassword: string;
   }
   
-  interface Regions {
-    _id: string;
+  export interface Regions {
+    _id?: string;
     region_image: string;
     region_name: string;
     createdAt: string;
@@ -162,7 +164,7 @@ export interface Schedule {
   }
   
   interface Doctors {
-    _id: string;
+    _id?: string;
     name: string;
     doctor_image: string;
     age: number;
@@ -174,19 +176,20 @@ export interface Schedule {
     phone_number: string;
     price: number;
     rating: number;
+    department:Department;
   }
 
   
   
   export interface Hospital {
-    _id: string;
+    _id?: string;
     hospital_name: string;
     hospital_address: string;
     hospital_icon: string;
   }
   
   export interface Appointment {
-    _id: string;
+    _id?: string;
     patient_id: Patient;
     visit_id: string;
     booking_type: string;
@@ -204,7 +207,7 @@ export interface Schedule {
   }
 
   export interface Department{
-    _id:string
+    _id?:string
     department_name :string
-    description:string
+    department_description:string
   }

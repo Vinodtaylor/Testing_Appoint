@@ -1,6 +1,6 @@
 "use client";
 
-import { Department, Doctor,  HospitalSubmission, Schedule} from "@/types/types";
+import { Department, Doctor,   Schedule} from "@/types/types";
 import { axiosInstance } from "./api";
 
 
@@ -146,7 +146,7 @@ export interface Regiondata{
 
 
 
-export const createRegion =async(data:Regiondata)=>{
+export const createRegion =async(data:FormData)=>{
   try {
     const res = await axiosInstance.post(`/region/create_region`,data,
       {headers: { "Content-Type": "multipart/form-data" }}
@@ -184,7 +184,7 @@ export const DeleteRegion =async(id:string)=>{
 
 export const UpdateRegion =async(id:string,data: FormData | Regiondata)=>{
   try {
-    const res = await axiosInstance.put(`/region/update_region/${id}`,{data},
+    const res = await axiosInstance.put(`/region/update_region/${id}`,data,
       {headers: { "Content-Type": "multipart/form-data" }}
 
     );
@@ -293,7 +293,7 @@ export const DeleteWalkinAppointment =async(id:string)=>{
 
 
 
-export const createHospital=async(data:HospitalSubmission)=>{
+export const createHospital=async(data:FormData)=>{
   try {
     const res = await axiosInstance.post(`/hospital/add_hospital`,data,
       {headers: { "Content-Type": "multipart/form-data" }}
@@ -325,6 +325,13 @@ export const DeleteHospital =async(id:string)=>{
     handleError(e, "Failed to get Regions");
   }
 }
+
+export interface HospitalSubmission {
+  hospital_name: string;
+  hospital_address: string;
+  hospital_icon?: File | string; 
+}
+
 
 
 export const UpdateHospital = async (id: string, data: HospitalSubmission | FormData) => {

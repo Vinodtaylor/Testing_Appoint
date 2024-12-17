@@ -24,7 +24,7 @@ const Departments = () => {
   const [Dept, setCurrentDept] = useState<Department | null>(null);
   const [formValues, setFormValues] = useState({
     department_name: "",
-    description:""
+    department_description:""
   });
 
   // Pagination states
@@ -64,7 +64,7 @@ const Departments = () => {
     setCurrentDept(dept);
     setFormValues({
       department_name: dept.department_name,
-      description:dept.description
+      department_description:dept.department_description
     });
     setModalOpen(true);
   };
@@ -73,7 +73,7 @@ const Departments = () => {
     setCurrentDept(null);
     setFormValues({
       department_name: "",
-      description:""
+      department_description:""
     });
     setModalOpen(true);
   };
@@ -84,7 +84,7 @@ const Departments = () => {
     try {
       const deptData = {
         department_name: formValues.department_name,
-        description:formValues.description
+        department_description:formValues.department_description
       };
 
       console.log(deptData)
@@ -164,13 +164,14 @@ const Departments = () => {
                   </td>
                   <td className="px-3 py-2 text-gray-900 text-sm">
                     <AlertDialog>
-                      <AlertDialogTrigger>
-                        <button
-                          onClick={() => setDeletingDepartment(department)}
-                          className="bg-red-500 rounded-xl text-white px-2 py-1 hover:bg-red-600"
-                        >
+                      <AlertDialogTrigger
+                                                onClick={() => setDeletingDepartment(department)}
+
+                                                className="bg-red-500 rounded-xl text-white px-2 py-1 hover:bg-red-600"
+
+                      >
+                    
                           <Trash />
-                        </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="w-full max-w-sm sm:max-w-xl lg:max-w-3xl rounded-lg">
                         <AlertDialogHeader>
@@ -246,12 +247,12 @@ const Departments = () => {
 
 
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Department Name:</label>
+                <label className="block text-sm font-medium mb-1">Department Description:</label>
                 <textarea
                   rows={7}
                   placeholder="Enter Description"
-                  value={formValues.description}
-                  onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
+                  value={formValues.department_description}
+                  onChange={(e) => setFormValues({ ...formValues, department_description: e.target.value })}
                   className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
                 />
               </div>

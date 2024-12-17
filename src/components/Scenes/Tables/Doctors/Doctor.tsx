@@ -18,7 +18,17 @@ import { useModal } from "@/hooks/useModal";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import SelectDropDown from "../../Select/Select";
 import { generateTimeSlotsForPeriod } from "@/utilis/slots";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 
+} from "@/components/ui/alert-dialog"
 
 
 
@@ -290,7 +300,7 @@ const Doctor: React.FC<DoctorProps> = ({
         <TableBody>
   {doctors?.length === 0 ? (
     <TableRow>
-                        <TableCell colSpan={8} className="px-3 py-2 translate-x-[400px] text-gray-900 text-sm text-center p-5">
+                        <TableCell colSpan={8} className="px-3 py-2  text-gray-900 text-sm text-center p-5">
                             <h3 className="text-base">No Doctors found</h3> 
                         </TableCell>
                       </TableRow>
@@ -467,29 +477,32 @@ const Doctor: React.FC<DoctorProps> = ({
         </form>
       </Modal>
 
-      {/* Modal for Delete */}
-      <Modal isOpen={isDeleteOpen} onClose={closeDialogs} title="Delete Doctor">
-        <div className="flex flex-col justify-center items-center w-full rounded-lg bg-white p-6">
-          <h3 className="text-center text-xl font-semibold text-gray-800 mb-2">Are you sure?</h3>
-          <p className="text-center text-sm text-gray-600 mb-6">
-            This action cannot be undone. This will permanently delete the doctor record.
-          </p>
-          <div className="flex justify-center gap-4 w-full">
-            <button
-              onClick={closeDialogs}
-              className="w-full rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDelete}
-              className="w-full p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </Modal>
+      
+
+
+      <AlertDialog open={isDeleteOpen } onOpenChange={closeDialogs}>
+              
+                  <AlertDialogContent className='lg:w-full max-w-sm rounded-lg'>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you asolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete this data
+                        and remove your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-full  border-blue-600  text-black hover:text-white hover:bg-blue-600">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+    type="submit"
+    onClick={handleDelete}
+    className="rounded-full bg-blue-500 text-white hover:bg-blue-600"
+  >
+    Delete
+  </AlertDialogAction>
+
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
     </div>
   );
 };

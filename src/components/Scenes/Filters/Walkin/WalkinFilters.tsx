@@ -162,9 +162,9 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
         
     
         // Department filter
-        // const matchesDept =
-        //   !dropdownValues.department ||
-        //   (item.doctor_id.department.department_name && item.doctor_id.department.department_name.toLowerCase().includes(dropdownValues.department.toLowerCase()));
+        const matchesDept =
+          !dropdownValues.department ||
+          (item.doctor_id.department.department_name && item.doctor_id.department.department_name.toLowerCase().includes(dropdownValues.department.toLowerCase()));
     
           console.log("Filtering by hospital:", dropdownValues.hospital);
           console.log("Hospital name:", item.hospital_id?.hospital_name);
@@ -191,9 +191,7 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
           (!endMoment || AppointmentCreatedDate.isSameOrBefore(endMoment));
     
         // Combine all conditions
-        return matchesGender && matchesDoctor &&   matchesHospital
-        
-        // &&  matchesDept 
+        return matchesGender && matchesDoctor &&   matchesHospital  &&  matchesDept 
         
         && matchesRegion && isWithinDateRange;
       });

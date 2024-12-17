@@ -199,10 +199,8 @@ const Hospitals = () => {
                   </td>
                   <td className="px-3 py-2 text-gray-900 text-sm">
                     <AlertDialog>
-                      <AlertDialogTrigger>
-                        <button onClick={() => setDeletingHospital(hospital)} className="bg-red-500 rounded-xl text-white px-2 py-1 hover:bg-red-600">
+                      <AlertDialogTrigger onClick={() => setDeletingHospital(hospital)} className="bg-red-500 rounded-xl text-white px-2 py-1 hover:bg-red-600">
                           <Trash />
-                        </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="w-full max-w-sm sm:max-w-xl lg:max-w-3xl rounded-lg">
                         <AlertDialogHeader>

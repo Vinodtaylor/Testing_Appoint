@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import WalkinFilters from '@/components/Scenes/Filters/Walkin/WalkinFilters';
 import { Walkin } from '@/components/Scenes/Tables/Walkin/Walkin';
 import { getWalkinData } from '@/routes/routes';
 import { Appointment } from '@/types/types';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+const WalkinFilters = dynamic(() => import('@/components/Scenes/Filters/Walkin/WalkinFilters'), {
+  ssr: false,
+});
 
 interface FilterValues {
   department: string;
@@ -67,12 +70,12 @@ const Page = () => {
     const filterAppointments = () => {
       const filtered = data.filter((appointment) => {
         // Check for department match
-        // const matchesDept =
-        //   !filterValues.department ||
-        //   (appointment.department &&
-        //     appointment.department
-        //       .toLowerCase()
-        //       .includes(filterValues.department.toLowerCase()));
+        const matchesDept =
+          !filterValues.department ||
+          (appointment.doctor_id.department.department_name &&
+            appointment.doctor_id.department.department_name
+              .toLowerCase()
+              .includes(filterValues.department.toLowerCase()));
 
         // Check for gender match
         const matchesGender =
@@ -116,7 +119,7 @@ const Page = () => {
 
         // Return true if all conditions match
         return (
-          // matchesDept &&
+          matchesDept &&
           matchesGender &&
           matchesHospital &&
           matchesDoctor &&

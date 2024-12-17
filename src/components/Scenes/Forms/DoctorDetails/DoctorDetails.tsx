@@ -687,7 +687,7 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
                 key={option.key}
                 className="cursor-pointer p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
                 onClick={() => {
-                  setSelectedDept(option.value);
+                  setSelectedDept(option.value!);
                   field.onChange(option.value); // Correctly update react-hook-form value
                   setIsDeptDropdownOpen(false);
                 }}
