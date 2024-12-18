@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Calendar, Trash } from "lucide-react";
 import EditDoctor from "../../Forms/DoctorDetails/EditDoctor";
-import { CreateSchedule, DeleteDoctor } from "@/routes/routes";
+import { CreateSchedule, DeleteDoctor,GetSchedulebydoctor,UpdateSchedule } from "@/routes/routes";
 import moment from 'moment'
 import {  getDoctor, Schedule } from "@/types/types";
 import Modal from "../../Modal/Modal";
@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 
 } from "@/components/ui/alert-dialog"
+import axios from "axios";
 
 
 
@@ -70,6 +71,7 @@ const Doctor: React.FC<DoctorProps> = ({
 }) => {
   const { isOpen: isDeleteOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
   const { isOpen: isScheduleOpen, openModal: openScheduleModal, closeModal: closeScheduleModal } = useModal();
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
   const [currentDoctor, setCurrentDoctor] = useState<getDoctor | null>(null);
   const [dropdownValues, setDropdownValues] = useState({
@@ -96,10 +98,63 @@ const Doctor: React.FC<DoctorProps> = ({
     openDeleteModal();
   };
 
-  const openScheduleDialog = (doctor: getDoctor) => {
+  // const openScheduleDialog = (doctor: getDoctor) => {
+  //   setCurrentDoctor(doctor);
+  //   openScheduleModal();
+  // };
+
+
+  const openScheduleDialog = async (doctor: getDoctor) => {
     setCurrentDoctor(doctor);
+
+    try {
+        // Fetch schedule data for the doctor
+        const res = await GetSchedulebydoctor(doctor._id!);
+        const scheduleData = res.data[0]; // Get the first schedule data from the response
+
+        if (scheduleData && scheduleData.schedules.length > 0) {
+            setIsEditMode(true); // Set to edit mode only if schedule data exists
+
+            // Log each part of the data that will populate the form
+            console.log("Start Year:", scheduleData.start_year);
+            console.log("End Year:", scheduleData.end_year);
+            console.log("Days of the week:", scheduleData.days);
+            console.log("Morning Schedule:", scheduleData.schedules[0].morning);
+            console.log("Afternoon Schedule:", scheduleData.schedules[0].afternoon);
+            console.log("Evening Schedule:", scheduleData.schedules[0].evening);
+
+            // Prepopulate the form with existing schedule data
+            setDropdownValues({
+                startYear: scheduleData.start_year || "",
+                endYear: scheduleData.end_year || "",
+            });
+
+            setSelectedDays(scheduleData.days || []);
+
+            // Prepopulate times for morning, afternoon, and evening
+            const morningSchedule = scheduleData.schedules[0].morning;
+            const afternoonSchedule = scheduleData.schedules[0].afternoon;
+            const eveningSchedule = scheduleData.schedules[0].evening;
+
+            setTimes({
+                morningStart: morningSchedule[0]?.time || "",
+                morningEnd: morningSchedule[morningSchedule.length - 1]?.time || "",
+                afternoonStart: afternoonSchedule[0]?.time || "",
+                afternoonEnd: afternoonSchedule[afternoonSchedule.length - 1]?.time || "",
+                eveningStart: eveningSchedule[0]?.time || "",
+                eveningEnd: eveningSchedule[eveningSchedule.length - 1]?.time || "",
+            });
+        } else {
+            setIsEditMode(false); // Set to non-edit mode if there's no schedule data
+        }
+    } catch (error) {
+        console.error("Error fetching schedule:", error);
+    }
+
     openScheduleModal();
-  };
+};
+
+
 
   const closeDialogs = () => {
     closeDeleteModal();
@@ -123,7 +178,7 @@ const Doctor: React.FC<DoctorProps> = ({
   const handleDelete = async () => {
     if (currentDoctor) {
       try {
-        await DeleteDoctor(currentDoctor._id);
+        await DeleteDoctor(currentDoctor._id!);
         setDoctors((prevDoctors) =>
           prevDoctors.filter((doctor) => doctor._id !== currentDoctor._id)
         );
@@ -185,6 +240,8 @@ const Doctor: React.FC<DoctorProps> = ({
   
 
 
+  
+
 
 
   const generateDatesForYear = (year: number, selectedDays: string[]) => {
@@ -206,64 +263,104 @@ const Doctor: React.FC<DoctorProps> = ({
   
 
 
-
-
   const handleScheduleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     // Validate required fields
     if (!currentDoctor || !dropdownValues.startYear || !dropdownValues.endYear) {
-      console.error("Missing required form data.");
-      return;
+        console.error("Missing required form data.");
+        return;
     }
-  
+
     // Generate time slots for morning, afternoon, and evening
     const morningSlots = generateTimeSlotsForPeriod(times.morningStart, times.morningEnd, 20);
     const afternoonSlots = generateTimeSlotsForPeriod(times.afternoonStart, times.afternoonEnd, 20);
     const eveningSlots = generateTimeSlotsForPeriod(times.eveningStart, times.eveningEnd, 20);
-  
+
     // Validate generated time slots
     if (morningSlots.length === 0 || afternoonSlots.length === 0 || eveningSlots.length === 0) {
-      console.error("Invalid time slots.");
-      return;
+        console.error("Invalid time slots.");
+        return;
     }
-  
+
     // Get all dates for the selected year range and filter by selected days
     const startYear = parseInt(dropdownValues.startYear, 10);
     const endYear = parseInt(dropdownValues.endYear, 10);
     let allDates: string[] = [];
-  
+
     for (let year = startYear; year <= endYear; year++) {
-      allDates = allDates.concat(generateDatesForYear(year, selectedDays));
+        allDates = allDates.concat(generateDatesForYear(year, selectedDays));
     }
-  
+
     // Create schedule data for each date
     const scheduleData: Schedule = {
-      doctor_id: currentDoctor._id,
-      start_year: dropdownValues.startYear,
-      end_year: dropdownValues.endYear,
-      days: selectedDays, // Include selected days here
-      schedules: allDates.map((date) => ({
-        date,
-        morning: morningSlots,
-        afternoon: afternoonSlots,
-        evening: eveningSlots,
-      })),
+        doctor_id: currentDoctor._id!,
+        start_year: dropdownValues.startYear,
+        end_year: dropdownValues.endYear,
+        days: selectedDays,
+        schedules: allDates.map((date) => ({
+            date,
+            morning: morningSlots,
+            afternoon: afternoonSlots,
+            evening: eveningSlots,
+        })),
     };
-  
-    console.log("Generated Schedule Data:", scheduleData);
-  
-    // Submit the schedule
-    try {
-      const res = await CreateSchedule(scheduleData);
 
-      console.log("Schedule created successfully:", res.data);
+    console.log("Generated Schedule Data:", scheduleData);
+
+    try {
+        if (isEditMode) {
+            // If it's in edit mode, fetch the existing schedule and update
+            const existingSchedule = await GetSchedulebydoctor(currentDoctor._id!);
+
+
+            
+            if (existingSchedule.data.length > 0) {
+                const existingScheduleData = existingSchedule.data[0]; // Assuming you are updating the first schedule
+                
+                const scheduleId=existingScheduleData._id
+
+                console.log(scheduleId,"current schedule object id")
+
+                // You can now use the existing data to pass into the update
+                const updatedScheduleData = {
+                    ...existingScheduleData, // Keep the existing data
+                    start_year: dropdownValues.startYear, // Update with new values
+                    end_year: dropdownValues.endYear,
+                    days: selectedDays,
+                    schedules: allDates.map((date) => ({
+                        date,
+                        morning: morningSlots,
+                        afternoon: afternoonSlots,
+                        evening: eveningSlots,
+                    })),
+                };
+
+                console.log("Existing Schedule Data to Update:", updatedScheduleData);
+
+                // Update the schedule with existing data
+                const updateRes = await UpdateSchedule(scheduleId!, updatedScheduleData);
+                console.log("Schedule updated successfully:", updateRes.data);
+            } else {
+                console.log("No existing schedule found for this doctor.");
+            }
+        } else {
+            // If it's in create mode, create a new schedule
+            console.log("Creating new schedule...");
+            const createRes = await CreateSchedule(scheduleData);
+            console.log("Schedule created successfully:", createRes.data);
+        }
+
+        console.log("Secondary update completed.");
+
     } catch (error) {
-      console.error("Error creating schedule:", error);
+        console.error("Error processing schedule:", error);
     }
-  
-    closeDialogs(); // Close modal and reset form
-  };
+
+    // Close modal and reset form
+    closeDialogs();
+};
+
   
 
 
@@ -359,7 +456,7 @@ const Doctor: React.FC<DoctorProps> = ({
 
 
       {/* Modal for Schedule */}
-      <Modal isOpen={isScheduleOpen} onClose={closeDialogs} title="Create Schedule">
+      <Modal isOpen={isScheduleOpen} onClose={closeDialogs} title={isEditMode ? "Edit Schedule" : "Create Schedule"}>
         <form onSubmit={handleScheduleSubmit}>
           <div className="w-full bg-white rounded-lg p-6">
             <h3 className="text-center text-2xl font-semibold text-gray-800 mb-6">Schedule</h3>
@@ -470,8 +567,8 @@ const Doctor: React.FC<DoctorProps> = ({
                 type="submit"
                 className="w-full p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
               >
-                Confirm
-              </button>
+          {isEditMode ? "Save Changes" : "Confirm"}
+          </button>
             </div>
           </div>
         </form>

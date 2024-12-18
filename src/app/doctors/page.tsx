@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import DoctorFilter from '@/components/Scenes/Filters/Doctor/DoctorFilter';
 import DoctorDetails from '@/components/Scenes/Forms/DoctorDetails/DoctorDetails';
 import Doctor from '@/components/Scenes/Tables/Doctors/Doctor';
 import { GetAllDoctorwithPagination } from '@/routes/routes';
 import { getDoctor } from '@/types/types';
 import moment from 'moment';
+import dynamic from 'next/dynamic';
+const DoctorFilter = dynamic(() => import('@/components/Scenes/Filters/Doctor/DoctorFilter'), {
+  ssr: false,
+});
 import React, { useEffect, useState, useCallback } from 'react';
-
 
 interface FilterValues {
   department: string;

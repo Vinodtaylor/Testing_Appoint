@@ -23,7 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/TableAlert"
 import SelectDropDown from "../../Select/Select";
-import { DeleteWalkinAppointment, getWalkinData } from "@/routes/routes";
+import { DeleteWalkinAppointment, getHomeVisitData, getWalkinData } from "@/routes/routes";
 import moment from "moment";
 
 // Table headers
@@ -74,12 +74,10 @@ export const DoctorVisit: React.FC = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const result = await getWalkinData();
-        const filteredData = result.data.filter(
-          (item:Appointment) => item.booking_type === "HomeVisit"
-        );
-        console.log(filteredData, "Filtered Data for Home Visit");
-        setData(filteredData);
+        const result = await getHomeVisitData();
+        console.log(result)
+      
+        setData(result.data);
       } catch (e) {
         console.error(e, "Error fetching data");
       }

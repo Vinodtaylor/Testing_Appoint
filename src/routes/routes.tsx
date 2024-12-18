@@ -38,6 +38,16 @@ export const GetDoctorbyId = async (id:string) => {
 
 
 
+
+export const GetSchedulebydoctor = async (id:string) => {
+  try {
+    const res = await axiosInstance.get(`/doctorschedule/${id}`);
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to get Schedule details");
+  }
+};
+
 export const DeleteDoctor = async (id:string) => {
   try {
     const res = await axiosInstance.delete(`/doctor/delete_doctor/${id}`);
@@ -272,14 +282,37 @@ export const UpdateSchedule = async (id:string,data:Schedule) => {
 };
 
 
-export const getWalkinData = async () => {
+export const DeleteSchedule = async (id:string) => {
   try {
-    const res = await axiosInstance.get(`/get_appointment`);
+    const res = await axiosInstance.put(`/schedule/delete_schedule/${id}`);
     return res.data;
   } catch (e) {
     handleError(e, "Failed to create doctor");
   }
 };
+
+
+export const getWalkinData = async () => {
+  try {
+    const res = await axiosInstance.get(`/get_appointment`);
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to get Walkin data");
+  }
+};
+
+
+
+export const getHomeVisitData = async () => {
+  try {
+    const res = await axiosInstance.get(`/gethomevisitappointments`);
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to get Home Visit data");
+  }
+};
+
+
 
 
 export const DeleteWalkinAppointment =async(id:string)=>{
@@ -377,5 +410,7 @@ export const UpdateHospital = async (id: string, data: HospitalSubmission | Form
     handleError(e, "Failed to update hospital");
   }
 };
+
+
 
 
