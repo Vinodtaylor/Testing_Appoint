@@ -1,5 +1,5 @@
 import { getAllRegion, createRegion, DeleteRegion,UpdateRegion } from "@/routes/routes"; // Adjust import paths
-import {  Regions } from "@/types/types";
+import {  NearbyRegion, Regions } from "@/types/types";
 import React, { useState, useEffect } from "react";
 import { EditIcon, Plus, Trash, UploadCloudIcon } from "lucide-react";
 import Image from "next/image";
@@ -23,6 +23,7 @@ const RegionsTable = () => {
   const [formValues, setFormValues] = useState({
     region_name: "",
     region_image: "",
+    nearby_region:""
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -32,11 +33,15 @@ const RegionsTable = () => {
 
   const [deletingRegion, setDeletingRegion] = useState<Regions | null>(null);
 
+  const [Regionoptions,setRegionoptions]=useState<Regions[]>([])
+  
   useEffect(() => {
     const getData = async () => {
       try {
         const res = await getAllRegion();
+
         setData(res.data);
+        setRegionoptions(res.data)
       } catch (e) {
         console.error("Error fetching regions:", e);
       }
@@ -45,10 +50,14 @@ const RegionsTable = () => {
     getData();
   }, []);
 
+
+  console.log(Regionoptions,"Regionselect")
+
+
   const handleDelete = async () => {
     if (deletingRegion) {
       try {
-        await DeleteRegion(deletingRegion._id);
+        await DeleteRegion(deletingRegion._id!);
         setData(data.filter((region) => region._id !== deletingRegion._id));
         setDeletingRegion(null);
       } catch (e) {
@@ -57,11 +66,15 @@ const RegionsTable = () => {
     }
   };
 
-  const handleEdit = (region: Regions) => {
+
+
+  const handleEdit = (region:NearbyRegion) => {
     setCurrentRegion(region);
     setFormValues({
-      region_name: region.region_name,
+      region_name: region?.region_name,
       region_image: region.region_image,
+
+      nearby_region:region?.nearby_region?.region_name
     });
     setImagePreview(region.region_image);
     setModalOpen(true);
@@ -72,6 +85,8 @@ const RegionsTable = () => {
     setFormValues({
       region_name: "",
       region_image: "",
+      nearby_region:""
+
     });
     setImagePreview(null);
     setModalOpen(true);
@@ -97,6 +112,8 @@ const RegionsTable = () => {
       // Create FormData for API submission
       const formData = new FormData();
       formData.append("region_name", formValues.region_name);
+      formData.append("nearby_region", formValues.nearby_region);
+
   
       // If there's an image file, append it to FormData
       if (imageFile) {
@@ -110,7 +127,7 @@ const RegionsTable = () => {
       if (currentRegion) {
         // If updating an existing region
         // Send FormData for both region name and image
-        response = await UpdateRegion(currentRegion._id, formData);
+        response = await UpdateRegion(currentRegion._id!, formData);
   
         // Update the local state to reflect changes
         setData(data.map((region) =>
@@ -119,11 +136,20 @@ const RegionsTable = () => {
             : region
         ));
       } else {
+
+        console.log("FormData entries:");
+
+
+        for (const [key, value] of formData.entries()) {
+          console.log(`${key}: ${value}`);
+        }
+
         // If creating a new region
         response = await createRegion(formData);
         setData([...data, response.data]);
       }
-  
+
+
       setModalOpen(false); // Close modal after submission
     } catch (error) {
       console.error("Error submitting region:", error);
@@ -166,6 +192,8 @@ const RegionsTable = () => {
               <tr>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">S.No</th>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Region Name</th>
+                <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Nearby Region</th>
+
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Region Image</th>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Edit</th>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Delete</th>
@@ -176,6 +204,8 @@ const RegionsTable = () => {
                 <tr key={region._id} className="text-center border-b border-gray-300">
                   <td className="px-3 py-2 text-gray-900 text-sm">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="px-3 py-2 text-gray-900 text-sm">{region.region_name}</td>
+                  <td className="px-3 py-2 text-gray-900 text-sm">{region?.nearby_region?.region_name}</td>
+
                   <td className="px-3 py-2 text-gray-900 text-sm">
                     <Image src={region.region_image} alt={region.region_name} width={50} height={100} className="mx-auto" />
                   </td>
@@ -242,7 +272,7 @@ const RegionsTable = () => {
       {/* Modal for Create/Edit */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
+          <div className="bg-white h-[400px] overflow-scroll rounded-lg p-6 w-96 shadow-lg">
             <h2 className="text-lg font-bold mb-4">{currentRegion ? "Edit Region" : "Create Region"}</h2>
             <form
               onSubmit={(e) => {
@@ -259,6 +289,26 @@ const RegionsTable = () => {
                   className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
                 />
               </div>
+
+         <div className="">
+         <select
+  value={formValues.nearby_region}
+  onChange={(e) => setFormValues({ ...formValues, nearby_region: e.target.value })}
+  className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
+
+>
+  <option value="" 
+  
+  >Select Region</option>
+  {Regionoptions.map((region) => (
+    <option key={region._id} value={region._id} 
+   
+    >
+      {region.region_name}
+    </option>
+  ))}
+</select>
+         </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Region Image:</label>
                 <div className="flex items-center gap-3">

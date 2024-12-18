@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Appointment, TableHeadertype } from "@/types/types";
+import {  HomeAppointment, TableHeadertype } from "@/types/types";
 import {  Trash } from "lucide-react";
 import {
   AlertDialog,
@@ -23,7 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/TableAlert"
 import SelectDropDown from "../../Select/Select";
-import { DeleteWalkinAppointment, getHomeVisitData, getWalkinData } from "@/routes/routes";
+import { DeleteWalkinAppointment, getHomeVisitData  } from "@/routes/routes";
 import moment from "moment";
 
 // Table headers
@@ -38,7 +38,6 @@ const tableHeader: TableHeadertype[] = [
   { name: "Date" },
   { name: "Time" },
   { name: "Booked Time" },
-  { name: "Hospital" },
   { name: "Doctor" },
 
   { name: "Status" },
@@ -68,8 +67,8 @@ export const DoctorVisit: React.FC = () => {
   
 
  
-  const [data, setData] = useState<Appointment[]>([]);
-  const [deleteWalkin, setdeleteWalkin] = useState<Appointment | null>(null);
+  const [data, setData] = useState<HomeAppointment[]>([]);
+  const [deleteWalkin, setdeleteWalkin] = useState<HomeAppointment | null>(null);
 
   useEffect(() => {
     const getData = async () => {
@@ -77,7 +76,7 @@ export const DoctorVisit: React.FC = () => {
         const result = await getHomeVisitData();
         console.log(result)
       
-        setData(result.data);
+        setData(result?.data);
       } catch (e) {
         console.error(e, "Error fetching data");
       }
@@ -136,7 +135,7 @@ export const DoctorVisit: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-              {data.map((row, index) => (
+              {data?.map((row, index) => (
                 <TableRow
                   key={index}
                   className="hover:bg-gray-50 transition-all ease-in-out"
@@ -145,10 +144,10 @@ export const DoctorVisit: React.FC = () => {
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.booking_type}</TableCell>
                   {/* <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.booking}</TableCell> */}
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.name}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.patient_id}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.patient_id}</TableCell>
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.visit_id}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.phone_number}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.email_id}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.phone_number}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.email_id}</TableCell>
                   <TableCell className="px-3 py-2 text-gray-900 text-sm">
     {moment(row.createdAt).format("YYYY-MM-DD")}
   </TableCell>
@@ -156,8 +155,7 @@ export const DoctorVisit: React.FC = () => {
     {moment(row.createdAt).format("h:mm A")} 
   </TableCell>
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.time}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.hospital_id.hospital_name}</TableCell>       
-                        <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.doctor_id.name}</TableCell>
+                        <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.accepted_doctor?.name || "NA"}</TableCell>
                         <TableCell className="px-3 py-2 text-gray-900 sm:text-sm">
     {row.payment_status ? "Paid" : "Pending"}
   </TableCell>

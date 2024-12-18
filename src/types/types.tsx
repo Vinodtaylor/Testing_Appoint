@@ -159,8 +159,9 @@ export interface Schedule {
     _id?: string;
     region_image: string;
     region_name: string;
-    createdAt: string;
-    updatedAt: string;
+    nearby_region:Regions
+    createdAt?: string;
+    updatedAt?: string;
   }
   
   interface Doctors {
@@ -180,12 +181,31 @@ export interface Schedule {
   }
 
   
+
+    
+  interface HomeDoctors {
+    _id?: string;
+    name: string;
+    doctor_image: string;
+    age: number;
+    gender: string;
+    doctor_id: Doctor;
+    speciality: string[];
+    experience: number;
+    hospital:Hospital;
+    email: string;
+    phone_number: string;
+    price: number;
+    rating: number;
+    department:Department;
+  }
   
   export interface Hospital {
     _id?: string;
     hospital_name: string;
     hospital_address: string;
     hospital_icon: string;
+    region:Regions
   }
   
   export interface Appointment {
@@ -206,8 +226,41 @@ export interface Schedule {
     updatedAt: string;
   }
 
+
+
+  export interface HomeAppointment {
+    _id?: string;
+    patient_id: Patient;
+    visit_id: string;
+    booking_type: string;
+    date: string;
+    time: string;
+    slot: string;
+    region: Regions;
+    accepted_doctor: HomeDoctors;
+    // hospital_id: Hospital;
+    disease: string;
+    payment_status: boolean;
+    price: number;
+    createdAt: string;
+    updatedAt: string;
+  }
+
   export interface Department{
     _id?:string
     department_name :string
     department_description:string
   }
+
+
+  export interface NearbyRegion {
+    _id?:string,
+    region_image: string;
+    region_name: string;
+    nearby_region:Regions
+}
+
+export interface DoctorPrice{
+  _id?:string
+  price:number
+}

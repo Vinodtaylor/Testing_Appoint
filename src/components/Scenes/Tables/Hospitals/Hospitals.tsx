@@ -1,7 +1,7 @@
 "use client";
 
-import { getAllHospital,  createHospital,  DeleteHospital, UpdateHospital } from "@/routes/routes";
-import { Hospital } from "@/types/types";
+import { getAllHospital,  createHospital,  DeleteHospital, UpdateHospital, getAllRegion } from "@/routes/routes";
+import { Hospital, Regions } from "@/types/types";
 import { EditIcon, Plus, Trash, UploadCloudIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
@@ -26,6 +26,7 @@ const Hospitals = () => {
     hospital_name: "",
     hospital_address: "",
     hospital_icon: "",
+    region:""
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -34,6 +35,20 @@ const Hospitals = () => {
   const itemsPerPage = 6;
 
   const [deletingHospital, setDeletingHospital] = useState<Hospital | null>(null);
+const [Regionoptions,setRegionoptions]=useState<Regions[]>([])
+
+    useEffect(() => {
+      const getData = async () => {
+        try {
+          const res = await getAllRegion();
+          setRegionoptions(res.data);
+        } catch (e) {
+          console.error("Error fetching regions:", e);
+        }
+      };
+  
+      getData();
+    }, []);
 
   useEffect(() => {
     const getData = async () => {
@@ -51,7 +66,7 @@ const Hospitals = () => {
   const handleDelete = async () => {
     if (deletingHospital) {
       try {
-        await DeleteHospital(deletingHospital._id);
+        await DeleteHospital(deletingHospital._id!);
         setData(data.filter((hospital) => hospital._id !== deletingHospital._id));
         setDeletingHospital(null); // Clear deletingHospital after deletion
       } catch (e) {
@@ -66,6 +81,8 @@ const Hospitals = () => {
       hospital_name: hospital.hospital_name,
       hospital_address: hospital.hospital_address,
       hospital_icon: hospital.hospital_icon,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+      region:hospital?.region?._id!
     });
     setImagePreview(hospital.hospital_icon);
     setModalOpen(true);
@@ -77,6 +94,7 @@ const Hospitals = () => {
       hospital_name: "",
       hospital_address: "",
       hospital_icon: "",
+      region:""
     });
     setImagePreview(null);
     setModalOpen(true);
@@ -103,6 +121,8 @@ const Hospitals = () => {
       const formData = new FormData();
       formData.append("hospital_name", formValues.hospital_name);
       formData.append("hospital_address", formValues.hospital_address);
+      formData.append("region", formValues.region);
+
   
       if (imageFile) {
         formData.append("hospital_icon", imageFile);
@@ -119,10 +139,10 @@ const Hospitals = () => {
         };
   
         // Send JSON data first (non-image fields)
-       await UpdateHospital(currentHospital._id, jsonData); // Send JSON request
+       await UpdateHospital(currentHospital._id!, jsonData); // Send JSON request
   
         // Then send FormData (image upload)
-       await UpdateHospital(currentHospital._id, formData); // Send FormData request
+       await UpdateHospital(currentHospital._id!, formData); // Send FormData request
   
         // Handle successful response from both requests
         setData(data.map(hospital =>
@@ -134,6 +154,9 @@ const Hospitals = () => {
         response = await createHospital(formData);
         setData([...data, response.data]);
       }
+
+      const res = await getAllHospital();
+      setData(res.data)
   
       setModalOpen(false); // Close modal after submission
     } catch (error) {
@@ -179,6 +202,8 @@ const Hospitals = () => {
               <tr>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">S.No</th>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Hospital Name</th>
+                <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Hospital Region</th>
+
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Hospital Icon</th>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Edit</th>
                 <th className="text-xs text-center sm:text-sm font-medium text-gray-700 uppercase px-3 py-2">Delete</th>
@@ -189,6 +214,8 @@ const Hospitals = () => {
                 <tr key={hospital._id} className="text-center border-b border-gray-300">
                   <td className="px-3 py-2 text-gray-900 text-sm">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td className="px-3 py-2 text-gray-900 text-sm">{hospital.hospital_name}</td>
+                  <td className="px-3 py-2 text-gray-900 text-sm">{hospital?.region?.region_name}</td>
+
                   <td className="px-3 py-2 text-gray-900 text-sm">
                     <Image src={hospital.hospital_icon} alt={hospital.hospital_name} width={50} height={100} className="mx-auto" />
                   </td>
@@ -255,8 +282,8 @@ const Hospitals = () => {
 
       {/* Modal for Create/Edit */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-96 shadow-lg">
+        <div className="fixed inset-0   bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white h-[400px] overflow-scroll rounded-lg p-6 w-96 shadow-lg">
             <h2 className="text-lg font-bold mb-4">{currentHospital ? "Edit Hospital" : "Create Hospital"}</h2>
             <form
               onSubmit={(e) => {
@@ -282,6 +309,30 @@ const Hospitals = () => {
                   className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
                 />
               </div>
+
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Region:</label>
+              <select
+  value={formValues.region}
+  onChange={(e) => setFormValues({ ...formValues, region: e.target.value })}
+  className="w-full placeholder:text-sm placeholder:px-4 p-2 shadow-md border border-gray-300 rounded-md outline-none"
+
+>
+  <option value="" 
+  
+  >Select Region</option>
+  {Regionoptions.map((region) => (
+    <option key={region._id} value={region._id} 
+   
+    >
+      {region.region_name}
+    </option>
+  ))}
+</select>
+
+              </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Hospital Icon:</label>
                 <div className="flex items-center gap-3">

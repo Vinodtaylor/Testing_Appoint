@@ -436,6 +436,7 @@ const SubmitDoctor = async (data: Doctor) => {
     const resDoctorWithImages = await UpdateDoctor(data._id, doctorData);
     console.log("Doctor details with image URLs response:", resDoctorWithImages);
 
+    
     methods.reset();
     closeModal();
     toast.success("Doctor updated successfully!");
@@ -720,14 +721,14 @@ console.log("Doctor Object at Execution:", doctor);
 
           <div className="flex  flex-nowrap gap-4">
           <div className="flex-1 ">
-              <label htmlFor="fees" className="block text-left mb-2 text-sm font-medium">
+              <label htmlFor="registration" className="block text-left mb-2 text-sm font-medium">
                Regsitration
               </label>
               <input
                 type="number"
                 id="registration"
                 {...methods.register("registration")}
-                placeholder="Fees"
+                placeholder="Registration"
                 className="w-full placeholder:text-sm placeholder:px-4   p-2 shadow-md border border-gray-300 rounded-md outline-none"
               />
                           <p className="text-red-500 text-left text-sm">{methods.formState.errors.registration?.message}</p>

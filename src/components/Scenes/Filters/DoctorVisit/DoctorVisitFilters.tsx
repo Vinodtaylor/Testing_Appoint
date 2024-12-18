@@ -75,7 +75,7 @@ const DoctorVisitFilters: React.FC = () => {
           // const hospitalNames = hospitalRes.data.map((hospital: { hospital_name: string }) => hospital.hospital_name);
           // setHospitalNames(hospitalNames);
     
-          const doctorNames = doctorRes.data.map((doctor: { name: string }) => doctor.name);
+          const doctorNames = doctorRes?.data.map((doctor: { name: string }) => doctor?.name);
           setdocNames(doctorNames);
        
           console.log("Doctor Names:", doctorNames);

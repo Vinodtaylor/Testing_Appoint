@@ -23,13 +23,13 @@ interface FilterValues {
   gender: string;
   doctor: string;
   region: string;
-  startdate: string | null;  // Add this line
-  enddate: string | null;    // Add this line
+  startdate: string | null;  
+  enddate: string | null;  
 }
 
 
 interface DoctorFilterProps {
-  onFilterChange: (newFilters: FilterValues) => void; // Accept FilterValues
+  onFilterChange: (newFilters: FilterValues) => void; 
   doctorData: getDoctor[];
   filteredDoctors: getDoctor[];
   filterValues: FilterValues; // Pass down the current filters
@@ -361,6 +361,9 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
 </Popover>
       </div>
     </div>
+
+
+    
         {/* Gender */}
         <div className="flex w-full  lg:flex-row flex-col lg:items-center gap-2 lg:pb-0  pb-4">
           <label className="font-medium ">Gender:</label>

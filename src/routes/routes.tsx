@@ -1,6 +1,6 @@
 "use client";
 
-import { Department, Doctor,   Schedule} from "@/types/types";
+import { Department, Doctor,   DoctorPrice,   Schedule} from "@/types/types";
 import { axiosInstance } from "./api";
 
 
@@ -305,7 +305,7 @@ export const getWalkinData = async () => {
 
 export const getHomeVisitData = async () => {
   try {
-    const res = await axiosInstance.get(`/gethomevisitappointments`);
+    const res = await axiosInstance.get(`/homeappointment/get_homeappointment`);
     return res.data;
   } catch (e) {
     handleError(e, "Failed to get Home Visit data");
@@ -413,4 +413,49 @@ export const UpdateHospital = async (id: string, data: HospitalSubmission | Form
 
 
 
+export const CreatePrice=async(data:DoctorPrice)=>{
+  try {
+    const res = await axiosInstance.post(`/price/create_price`,data
+    );
+    return res.data;
+    
+  } catch (e) {
+    handleError(e, "Failed to create Region");
+  }
+}
 
+
+export const getPrice=async()=>{
+  try {
+    const res = await axiosInstance.get(`/price/get_price`);
+    return res.data;
+    
+  } catch (e) {
+    handleError(e, "Failed to create Region");
+  }
+}
+
+
+export const UpdatePrice=async(id:string,data:DoctorPrice)=>{
+  try {
+    const res = await axiosInstance.put(`/price/update_price/${id}`,data
+    );
+    return res.data;
+    
+  } catch (e) {
+    handleError(e, "Failed to create Region");
+  }
+}
+
+
+
+
+export const deletePrice=async(id:string)=>{
+  try {
+    const res = await axiosInstance.delete(`/price/delete_price/${id}` );
+    return res.data;
+    
+  } catch (e) {
+    handleError(e, "Failed to create Region");
+  }
+}

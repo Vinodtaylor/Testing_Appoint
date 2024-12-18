@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
+import AddPayments from '@/components/Scenes/Forms/AddPayments/AddPayments';
 import DoctorDetails from '@/components/Scenes/Forms/DoctorDetails/DoctorDetails';
 import Doctor from '@/components/Scenes/Tables/Doctors/Doctor';
 import { GetAllDoctorwithPagination } from '@/routes/routes';
@@ -152,8 +153,9 @@ const Page = () => {
         doctorData={doctors}
         filteredDoctors={filteredDoctors}
       />
-      <div className="flex mb-4 justify-end">
+      <div className="flex mb-4 gap-4 justify-end">
         <DoctorDetails />
+        <AddPayments/>
       </div>
       <Doctor
         doctors={filteredDoctors}  
