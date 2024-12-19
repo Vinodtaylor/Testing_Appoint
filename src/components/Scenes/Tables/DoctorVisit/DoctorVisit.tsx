@@ -23,7 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/TableAlert"
 import SelectDropDown from "../../Select/Select";
-import { DeleteWalkinAppointment, getHomeVisitData  } from "@/routes/routes";
+import { deleteHomeAppointment, getHomeVisitData  } from "@/routes/routes";
 import moment from "moment";
 
 // Table headers
@@ -74,16 +74,27 @@ export const DoctorVisit: React.FC = () => {
     const getData = async () => {
       try {
         const result = await getHomeVisitData();
-        console.log(result)
-      
-        setData(result?.data);
-      } catch (e) {
-        console.error(e, "Error fetching data");
+  
+        if (result?.data) {
+          // Sort data by `createdAt` in descending order (latest first)
+          const sortedHomeVisit = result.data.sort((a: { createdAt: string }, b: { createdAt: string }) => {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+  
+          console.log(sortedHomeVisit); 
+          setData(sortedHomeVisit); 
+        } else {
+          console.warn("No data available in response");
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
     };
-
+  
     getData();
   }, []);
+  
+  
 
 
 
@@ -91,7 +102,7 @@ export const DoctorVisit: React.FC = () => {
     const handleDelete = async (id:string) => {
       if (deleteWalkin) {
         try {
-          await DeleteWalkinAppointment(id);
+          await deleteHomeAppointment(id);
           setData(data.filter((region) => region._id !== deleteWalkin._id));
 
           setdeleteWalkin(null); 

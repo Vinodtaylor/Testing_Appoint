@@ -459,3 +459,16 @@ export const deletePrice=async(id:string)=>{
     handleError(e, "Failed to create Region");
   }
 }
+
+
+export const deleteHomeAppointment=async(id:string)=>{
+  try {
+    const res = await axiosInstance.delete(`/homeappointment/delete_homeappointment/${id}` );
+    return res.data;
+    
+  } catch (e) {
+    handleError(e, "Failed to create Region");
+  }
+}
+
+
