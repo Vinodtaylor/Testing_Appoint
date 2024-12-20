@@ -26,6 +26,9 @@ import SelectDropDown from "../../Select/Select";
 import { deleteHomeAppointment, getHomeVisitData  } from "@/routes/routes";
 import moment from "moment";
 
+
+
+
 // Table headers
 const tableHeader: TableHeadertype[] = [
   { name: "SLNO" },
@@ -93,6 +96,12 @@ export const DoctorVisit: React.FC = () => {
   
     getData();
   }, []);
+  
+
+
+  const formatTime = (isoString:string) => {
+    return moment(isoString).utc().format("hh:mm A");
+  };
   
   
 
@@ -162,9 +171,11 @@ export const DoctorVisit: React.FC = () => {
                   <TableCell className="px-3 py-2 text-gray-900 text-sm">
     {moment(row.createdAt).format("YYYY-MM-DD")}
   </TableCell>
+ 
   <TableCell className="px-3 py-2 text-gray-900 text-sm">
-    {moment(row.createdAt).format("h:mm A")} 
-  </TableCell>
+  {formatTime(row.createdAt)}
+</TableCell>
+
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.time}</TableCell>
                         <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.accepted_doctor?.name || "NA"}</TableCell>
                         <TableCell className="px-3 py-2 text-gray-900 sm:text-sm">

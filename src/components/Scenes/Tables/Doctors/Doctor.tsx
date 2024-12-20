@@ -29,7 +29,6 @@ import {
   AlertDialogTitle,
 
 } from "@/components/ui/alert-dialog"
-import axios from "axios";
 
 
 
@@ -55,6 +54,7 @@ const tableHeader = [
 interface DoctorProps {
   doctors: getDoctor[];
   currentPage: number;
+  limit:number;
   totalPages: number;
   setDoctors: React.Dispatch<React.SetStateAction<getDoctor[]>>;
   onPrevPage: () => void;
@@ -67,6 +67,7 @@ const Doctor: React.FC<DoctorProps> = ({
   totalPages,
   setDoctors,
   onPrevPage,
+  limit,
   onNextPage,
 }) => {
   const { isOpen: isDeleteOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
@@ -260,6 +261,7 @@ const Doctor: React.FC<DoctorProps> = ({
     return dates;
   };
   
+
   
 
 
@@ -402,9 +404,9 @@ const Doctor: React.FC<DoctorProps> = ({
                         </TableCell>
                       </TableRow>
   ) : (
-    doctors?.map((doctor, index) => (
+    doctors?.map((doctor,index) => (
       <TableRow key={index} className="hover:bg-gray-50 text-center transition-all ease-in-out">
-        <TableCell className="px-3 py-2 text-gray-900 text-sm">{index + 1}</TableCell>
+        <TableCell className="px-3 py-2 text-gray-900 text-sm">    {(currentPage - 1) * limit + (index + 1)}        </TableCell>
         <TableCell className="px-3 py-2 text-gray-900 text-sm">{doctor?.name}</TableCell>
         <TableCell className="px-3 py-2 text-gray-900 text-sm">{doctor?.doctor_id}</TableCell>
         <TableCell className="px-3 py-2 text-gray-900 text-sm">{doctor?.email}</TableCell>
@@ -432,7 +434,8 @@ const Doctor: React.FC<DoctorProps> = ({
 
       {/* Pagination */}
     {/* Pagination */}
-{doctors.length > 6 && (
+    
+    {doctors.length > 0 &&  (
   <div className="flex mb-8 justify-center gap-4 items-center mt-4">
     <button
       onClick={onPrevPage}
@@ -453,6 +456,7 @@ const Doctor: React.FC<DoctorProps> = ({
     </button>
   </div>
 )}
+
 
 
       {/* Modal for Schedule */}

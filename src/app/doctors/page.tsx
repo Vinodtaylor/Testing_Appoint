@@ -50,9 +50,12 @@ const Page = () => {
 
         });
 
+
+        console.log(totalPages,"doctor total pages")
+
         console.log(sortedDoctors,"Latest")
-        setDoctors(sortedDoctors); // Set sorted doctors
-        setTotalPages(res.totalPages);
+        setDoctors(sortedDoctors);
+        setTotalPages(res?.data?.pagination?.total);
         setFilteredDoctors(sortedDoctors); 
       }
     } catch (e) {
@@ -108,9 +111,15 @@ const Page = () => {
         return matchesDept && matchesGender && matchesName && matchesRegion && isWithinDateRange;
       });
     
+
+      
       setFilteredDoctors(filtered);
+
+
+      
+      
     };
-    
+
   
     if (doctors && doctors.length > 0) {
       filterDoctors();  // Only filter when doctors data is available
@@ -161,6 +170,7 @@ const Page = () => {
         doctors={filteredDoctors}  
         setDoctors={setDoctors}
         currentPage={currentPage}
+        limit={limit}
         totalPages={totalPages}
         onPrevPage={handlePrevPage}   
         onNextPage={handleNextPage} 

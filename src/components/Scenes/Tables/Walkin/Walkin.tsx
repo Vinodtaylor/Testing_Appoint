@@ -52,6 +52,10 @@ const tableHeader: TableHeadertype[] = [
 
 
 
+  const formatTime = (isoString:string) => {
+    return moment(isoString).utc().format("hh:mm A");
+  };
+
 
 
 interface WalkinProps {
@@ -181,7 +185,7 @@ Appointmentdata,currentPage,totalPages,setAppointments,onNextPage,onPrevPage
     {moment(row.createdAt).format("YYYY-MM-DD")}
   </TableCell>
   <TableCell className="px-3 py-2 text-gray-900 text-sm">
-  {moment.utc(row.createdAt).local().format("h:mm A")}
+  {formatTime(row.createdAt)}
 </TableCell>
 
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.time}</TableCell>
