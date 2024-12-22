@@ -19,9 +19,9 @@ import { IoMdArrowDropdown } from "react-icons/io";
 
 
 interface Region{
-  _id:string
-  region_name:string,
-  region_image:string
+  _id?:string
+  region_name?:string,
+  region_image?:string
 }
 
 interface Doctor {
@@ -191,7 +191,7 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
 
     console.log("Selected Region ID:", value._id);  // Debug log
 
-    setSelectedRegion(value._id); 
+    setSelectedRegion(value._id!); 
 
     setIsDropdownOpen(false);
     methods.setValue('region', value._id as any);
@@ -216,11 +216,11 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
       membership:doctor.membership,
       phone_number: doctor.phone_number,
       registration: doctor.registration,
-      region:doctor.region?._id,
+      region:doctor.region,
       price: doctor.price,
       about_doctor: doctor.about_doctor,
-      department: doctor.department?._id || '', // Safe access
-      hospital: doctor.hospital?._id || '', 
+      department: doctor.department || '', // Safe access
+      hospital: doctor.hospital || '', 
       qualification: doctor.qualification,
       doctor_experience: doctor.doctor_experience,
       top_treatments: doctor.top_treatments,

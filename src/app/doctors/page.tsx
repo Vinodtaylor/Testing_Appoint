@@ -76,9 +76,12 @@ const Page = () => {
     const filterDoctors = () => {
       const filtered = doctors.filter((doctor) => {
         // Check for department match
+
+
         const matchesDept =
-          !filterValues.department ||
-          (doctor.department && doctor.department.department_name.toLowerCase().includes(filterValues.department.toLowerCase()));
+        !filterValues.department ||
+        (typeof doctor.department === 'string' && 
+         doctor.department.toLowerCase().includes(filterValues.department.toLowerCase()));
     
         // Check for gender match
         const matchesGender =

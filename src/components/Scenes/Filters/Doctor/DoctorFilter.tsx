@@ -161,10 +161,10 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
         !dropdownValues.doctor ||
         (item.name && item.name.toLowerCase().includes(dropdownValues.doctor.toLowerCase()));
   
-      // Department filter
-      const matchesDept =
+        const matchesDept =
         !dropdownValues.department ||
-        (item.department && item.department.department_name.toLowerCase().includes(dropdownValues.department.toLowerCase()));
+        (typeof item.department === 'string' && 
+         item.department.toLowerCase().includes(dropdownValues.department.toLowerCase()));
   
       // Region filter
       const matchesRegion =

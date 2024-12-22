@@ -61,6 +61,18 @@ interface DoctorProps {
   onNextPage: () => void;
 }
 
+
+type Period = "morning" | "afternoon" | "evening";
+
+interface Times {
+  morningStart: string;
+  morningEnd: string;
+  afternoonStart: string;
+  afternoonEnd: string;
+  eveningStart: string;
+  eveningEnd: string;
+}
+
 const Doctor: React.FC<DoctorProps> = ({
   doctors,
   currentPage,
@@ -80,7 +92,7 @@ const Doctor: React.FC<DoctorProps> = ({
     endYear: "",
   });
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [times, setTimes] = useState({
+  const [times, setTimes] = useState<Times>({
     morningStart: "",
     morningEnd: "",
     afternoonStart: "",
@@ -201,7 +213,7 @@ const Doctor: React.FC<DoctorProps> = ({
     );
   };
 
-  const handleTimeChange = (period: string, timeType: string, value: string) => {
+  const handleTimeChange = (period: Period, timeType: string, value: string) => {
     setTimes((prev) => ({
       ...prev,
       [`${period}${timeType}`]: value,
@@ -535,8 +547,8 @@ const Doctor: React.FC<DoctorProps> = ({
         <SelectDropDown
           id="start_time"
           options={timeOptions}
-          value={times[`${period.toLowerCase()}Start`]}
-          onChange={(value) => handleTimeChange(period.toLowerCase(), "Start", value)}
+          value={times[`${period.toLowerCase()}Start` as  `${Period}Start`] }
+          onChange={(value) => handleTimeChange(period.toLowerCase() as Period, "Start", value)}
           placeholder={`Select Start Time`}
           inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md border-gray-300 focus:ring-2 focus:ring-blue-500"
           containerClassName="w-full"
@@ -545,8 +557,8 @@ const Doctor: React.FC<DoctorProps> = ({
         <SelectDropDown
           id="end_time"
           options={timeOptions}
-          value={times[`${period.toLowerCase()}End`]}
-          onChange={(value) => handleTimeChange(period.toLowerCase(), "End", value)}
+          value={times[`${period.toLowerCase()}End` as `${Period}End`]}
+          onChange={(value) => handleTimeChange(period.toLowerCase() as Period, "End", value)}
           placeholder={`Select End Time`}
           inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md border-gray-300 focus:ring-2 focus:ring-blue-500"
           containerClassName="w-full"
