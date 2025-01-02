@@ -7,6 +7,7 @@ import { Appointment } from '@/types/types';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Navbar from '@/components/Scenes/Navbar/Navbar';
 const WalkinFilters = dynamic(() => import('@/components/Scenes/Filters/Walkin/WalkinFilters'), {
   ssr: false,
 });
@@ -81,7 +82,7 @@ const Page = () => {
         const matchesGender =
           !filterValues.gender ||
           (appointment?.patient_id?.gender &&
-            appointment.patient_id.gender.toLowerCase() === filterValues.gender.trim().toLowerCase());
+            appointment?.patient_id?.gender.toLowerCase() === filterValues.gender.trim().toLowerCase());
     
         // Check for doctor match
         const matchesDoctor =
@@ -93,7 +94,7 @@ const Page = () => {
         const matchesHospital =
           !filterValues.hospital ||
           (appointment?.hospital_id?.hospital_name &&
-            appointment.hospital_id.hospital_name
+            appointment.hospital_id?.hospital_name
               .toLowerCase()
               .includes(filterValues.hospital.trim().toLowerCase()));
     
@@ -158,7 +159,11 @@ const Page = () => {
 
 
   return (
-    <div>
+    <>
+
+    <Navbar/>
+    
+    <div  className='mx-auto p-4'>
       <WalkinFilters 
       
       onFilterChange={handleFilterChange} 
@@ -178,6 +183,8 @@ filteredData={filteredData}
       
       />
     </div>
+    </>
+ 
   );
 };
 

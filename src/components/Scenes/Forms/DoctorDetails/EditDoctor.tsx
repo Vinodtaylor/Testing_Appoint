@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -9,27 +10,24 @@ import {  UploadCloudIcon } from "lucide-react";
 import { FaTrash, FaUserDoctor } from "react-icons/fa6";
 import { useForm,   FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import DoctorSchema from "@/schema/Doctor";
 import ArrayField from "../../Fields/Array/Array";
-import {  getAllDept, getAllHospital, getAllRegion, UpdateCoverImage, UpdateDoctor, UpdateProfileImage } from "@/routes/routes";
+import {  getAllDept, getAllHospital, getAllRegion, UpdateCoverImage, UpdateDoctor, UpdateHomeDocProfile, UpdateProfileImage } from "@/routes/routes";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import { Department, getDoctor, Hospital, RegionsType } from "@/types/types";
 import { IoMdArrowDropdown } from "react-icons/io";
+import EditDoctorSchema from "@/schema/EditDoctor";
+import compressImage from "@/utilis/compressImage";
 
 
-interface Region{
-  _id?:string
-  region_name?:string,
-  region_image?:string
-}
+
 
 interface Doctor {
   _id?:string
   name: string;
   gender: string;
   age: number;
-  region: Region;
+  region: any;
   email: string;
   membership:string
   experience: number;
@@ -38,9 +36,11 @@ interface Doctor {
   registration: string;
   price: number;
   about_doctor: string;
-  department: string;
-  hospital:string;
+  department: any;
+  hospital:any;
  speciality: string[];
+ home_doc_profile:string,
+  like_cout:number,
   main_speciality: string[];
   qualification: string[];
   doctor_experience: string[];
@@ -73,7 +73,7 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
   
 
   const methods = useForm<getDoctor>({
-    resolver: zodResolver(DoctorSchema),
+    resolver: zodResolver(EditDoctorSchema),
     defaultValues: {
       main_speciality: [],
        speciality: [],
@@ -85,8 +85,8 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
       doctor_video: [],
       qualification: [],
       doctor_type:[],
-      hospital:"",
-      department:""
+      hospital:{},
+      department:{}
     },
 
   });
@@ -109,12 +109,16 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
   /* eslint-disable @typescript-eslint/no-unused-vars */
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+
+
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    const [HomeDocImage, setHomeDocImage] = useState<File | null>(null);
+    const [HomeImageUrl, setHomeImageUrl] = useState<string | null>(null);
   
   const [regiondata, setRegionData] = useState<RegionsType[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
 
-  console.log(doctor,"Current Doctor")
 
 
   useEffect(() => {
@@ -139,10 +143,6 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     getData();
   }, []); // Empty dependency array ensures it runs only once when the component mounts
 
-  
-  
-
-
     const DeptOptions = data.map(dept => ({
       label: dept?.department_name, 
       value: dept._id, 
@@ -157,55 +157,13 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     }));
 
 
-    const handleHospitalChange = (value:string) => {
-      setSelectedRegion(value); 
-      setIsDropdownOpen(false)
-      methods.setValue('hospital', value); 
-      console.log("Selected Hospital:", value);
-
-    };
-
-
-
-    const handleDeptChange = (value:string) => {
-      setSelectedRegion(value); 
-      setIsDropdownOpen(false)
-      console.log("department",value)
-
-      methods.setValue('department', value); 
-    };
-
-
-
-
- 
-
   const regionOptions = regiondata.map(region => ({
     label: region?.region_name,
     value: region, 
     key:region?._id         
   }));
-
-
-  const handleRegionChange = (value: Region) => {
-
-    console.log("Selected Region ID:", value._id);  // Debug log
-
-    setSelectedRegion(value._id!); 
-
-    setIsDropdownOpen(false);
-    methods.setValue('region', value._id as any);
-
-  };
-  
-  
-
-
  
   useEffect(() => {
-
-    console.log(doctor.region, "Doctor object"); 
-
     methods.reset({
       _id:doctor._id,
       name: doctor.name,
@@ -216,11 +174,13 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
       membership:doctor.membership,
       phone_number: doctor.phone_number,
       registration: doctor.registration,
-      region:doctor.region,
+      region:doctor?.region?._id || '',
       price: doctor.price,
       about_doctor: doctor.about_doctor,
-      department: doctor.department || '', // Safe access
-      hospital: doctor.hospital || '', 
+      department: doctor?.department?._id || '', 
+      hospital: doctor?.hospital?._id || '', 
+      home_doc_profile:doctor.home_doc_profile ,
+      like_cout:doctor.like_cout,
       qualification: doctor.qualification,
       doctor_experience: doctor.doctor_experience,
       top_treatments: doctor.top_treatments,
@@ -230,19 +190,18 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
       meta_name: doctor.meta_name,
       meta_description: doctor.meta_description,
       meta_tag: doctor.meta_tag,
-      doctor_image: doctor.doctor_image , // Replace string with File (if available)
-      doctor_cover_image: doctor.doctor_cover_image , // Replace string with File (if available)
+      doctor_image: doctor.doctor_image ,
+      doctor_cover_image: doctor.doctor_cover_image , 
       main_speciality: doctor.main_speciality || [],
       speciality: doctor.speciality || [],
       doctor_type: doctor.doctor_type || [],
-
-
     });
 
     setIsWalkinVisitTrue(doctor.doctor_type.includes("Walkin"));
     setIsdoctorVisitTrue(doctor.doctor_type.includes("Home"));  
     setSelectedRegion(doctor?.region?._id || null); 
     setProfileImageUrl(doctor.doctor_image);
+    setHomeImageUrl(doctor.home_doc_profile);
     setCoverImageUrl(doctor.doctor_cover_image);
   
   }, [doctor]);
@@ -252,7 +211,7 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
 
   useEffect(() => {
     const subscription = methods.watch((value) => {
-      console.log("Form values:", value);  // Log the entire form values
+      console.log("Form values:", value);  
     });
     return () => subscription.unsubscribe();
   }, [methods]);
@@ -263,7 +222,7 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
   
 
   const handleCloseModal = () => {
-    methods.reset(); // Reset the form state when closing the modal
+    methods.reset(); 
     closeModal(); 
   };
   
@@ -281,6 +240,10 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
   };
   
 
+  const handleRemoveHomeDocImage = () => {
+    setHomeDocImage(null);
+    setHomeImageUrl(null);  
+  };
 
   const renderImagePreview = (imageUrl: string | null, removeImage: () => void) => {
     if (!imageUrl) return null;
@@ -329,40 +292,43 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     methods.setValue("doctor_type", updatedDoctorType);  // Update the form value
   };
   
+  const handleHomeDocImageChange =async(event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+  
+    if (file) {
+      const compressedFile = await compressImage(file, 1, 800);
+      setHomeDocImage(compressedFile); 
+      const objectUrl = URL.createObjectURL(compressedFile);  
+      setHomeImageUrl(objectUrl);
+      methods.setValue("home_doc_profile", objectUrl); 
+    } else {
+      console.error("No file selected.");
+    }
+  };
+  const handleProfileImageChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+  
+    if (file) {
+      const compressedFile = await compressImage(file, 1, 800);
+
+      setProfileImage(compressedFile);
+      const objectUrl = URL.createObjectURL(compressedFile);  
+      setProfileImageUrl(objectUrl); 
+      methods.setValue("doctor_image", objectUrl); 
+    } else {
+      console.error("No file selected.");
+    }
+  };
   
 
-
-
-
-
-
-
-
-  
-
-
-
- 
-
-const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+const handleCoverImageChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files ? event.target.files[0] : null;
 
   if (file) {
-    setProfileImage(file);  // Save the file object
-    const objectUrl = URL.createObjectURL(file);  // Create a URL for the file for preview
-    setProfileImageUrl(objectUrl);  // Preview the image
-    methods.setValue("doctor_image", objectUrl);  // Set the URL for preview in the form (not the file object)
-  } else {
-    console.error("No file selected.");
-  }
-};
+    const compressedFile = await compressImage(file, 1, 800);
 
-const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files ? event.target.files[0] : null;
-
-  if (file) {
-    setCoverImage(file);  // Save the file object
-    const objectUrl = URL.createObjectURL(file);  // Create a URL for the file for preview
+    setCoverImage(compressedFile);  // Save the file object
+    const objectUrl = URL.createObjectURL(compressedFile);  // Create a URL for the file for preview
     setCoverImageUrl(objectUrl);  // Preview the image
     methods.setValue("doctor_cover_image", objectUrl);  // Set the URL for preview in the form (not the file object)
   } else {
@@ -381,13 +347,25 @@ const SubmitDoctor = async (data: Doctor) => {
   
   // Ensure data.region is an object (it could be a string, i.e., just the region ID)
   if (typeof data.region === 'string') {
-    data.region = { _id: data.region };  // Create the region object if it's a string
+    data.region = { _id: data.region }; 
+  }
+
+
+  if (typeof data.department === 'string') {
+    data.department = { _id: data.department }; 
+  }
+
+  if (typeof data.hospital === 'string') {
+    data.hospital = { _id: data.hospital }; 
   }
 
   if (!data.region?._id) {
-    data.region._id = doctor.region._id;  // Set region ID from the prop if it's missing
+    data.region._id = doctor.region._id;  
   }
 
+
+
+  
   // Check if data has the necessary values now
   if (!data._id || !data.region?._id) {
     console.error("Doctor ID or Region ID is missing:", data);
@@ -397,10 +375,30 @@ const SubmitDoctor = async (data: Doctor) => {
   try {
     console.log("Doctor data before processing:", data);
 
+
+    const formData = new FormData();
+
+
+    if (profileImage) {
+      formData.append("doctor_image", profileImage);
+    }
+
+    if (coverImage) {
+      formData.append("doctor_cover_image", coverImage);
+    }
+
+
+    
+    if (HomeDocImage) {
+      formData.append("home_doc_profile",HomeDocImage);
+    }
+
     // Prepare the doctor data (excluding images)
     const doctorData = {
       ...data,
       region: data.region._id,
+      department:data.department._id,
+      hospital:data.hospital._id
     };
     console.log("Prepared doctor data:", doctorData);
 
@@ -417,15 +415,28 @@ const SubmitDoctor = async (data: Doctor) => {
       ? UpdateProfileImage(data._id, profileImage)
       : Promise.resolve({ status: 200, data: { doctor_image: '' } });
 
+
+      const updateHomeDocImagePromise = HomeDocImage
+      ? UpdateHomeDocProfile(data._id, HomeDocImage)
+      : Promise.resolve({ status: 200, data: { home_doc_profile: '' } });
+
     // Wait for both image uploads to complete
-    const [resCoverImage, resProfileImage] = await Promise.all([updateCoverImagePromise, updateProfileImagePromise]);
+    const [resCoverImage, resProfileImage,resHomeDocImage] = await Promise.all([updateCoverImagePromise, updateProfileImagePromise,updateHomeDocImagePromise]);
 
     console.log("Cover image upload response:", resCoverImage);
     console.log("Profile image upload response:", resProfileImage);
+    console.log("Home Doc image upload response:", resHomeDocImage);
+
 
     // If images were uploaded, update the URLs in doctor data
     if (resCoverImage.status === 200 && resCoverImage.data?.doctor_cover_image) {
       doctorData.doctor_cover_image = resCoverImage.data.doctor_cover_image;
+    }
+
+
+    
+    if (resHomeDocImage.status === 200 && resHomeDocImage.data?.home_doc_profile) {
+      doctorData.home_doc_profile = resProfileImage.data.home_doc_profile;
     }
 
     if (resProfileImage.status === 200 && resProfileImage.data?.doctor_image) {
@@ -433,7 +444,7 @@ const SubmitDoctor = async (data: Doctor) => {
     }
 
     // Now, update the doctor details with the image URLs
-    const resDoctorWithImages = await UpdateDoctor(data._id, doctorData);
+    const resDoctorWithImages = await UpdateDoctor(data._id, doctorData,true);
     console.log("Doctor details with image URLs response:", resDoctorWithImages);
 
     
@@ -454,13 +465,9 @@ const SubmitDoctor = async (data: Doctor) => {
   
   
 
-  console.log(methods.formState.errors);
+  console.log(methods.formState.errors,"Validation Error");
 
 
-  console.log(doctor._id, "Passed Doctor Prop");
-
-  console.log("Doctor ID:", doctor?._id);
-console.log("Doctor Object at Execution:", doctor);
 
   return (
 
@@ -806,7 +813,7 @@ console.log("Doctor Object at Execution:", doctor);
       >
         <span className="text-sm">
           {field.value
-            ? DeptOptions.find(option => option.value === field.value)?.label
+            ? DeptOptions.find(option => option.value as any === field.value)?.label
             : "Select Department"}
         </span>
         <IoMdArrowDropdown size={20} />
@@ -846,7 +853,7 @@ console.log("Doctor Object at Execution:", doctor);
       >
         <span className="text-sm">
           {field.value
-            ? HospitalOptions.find((option) => option.value === field.value)?.label
+            ? HospitalOptions.find((option) => option.value as any === field.value)?.label
             : "Select Hospital"}
         </span>
         <IoMdArrowDropdown size={20} />
@@ -860,6 +867,7 @@ console.log("Doctor Object at Execution:", doctor);
               className="cursor-pointer p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
               onClick={() => {
                 field.onChange(option.value); 
+                console.log(option.value,`${option.label}`)
                 setIsHospitalDropdownOpen(false);
               }}
             >
@@ -908,11 +916,11 @@ console.log("Doctor Object at Execution:", doctor);
   </div>
           </div>
           {/* Images */}
-          <div className="flex lg:flex-row  sm:flex-row flex-col gap-4">
+          <div className="flex flex-col gap-4">
   {/* Profile Image Upload */}
   <div className="w-full">
     <label
-      htmlFor="profile-image"
+      htmlFor="doctor_image"
       className="flex items-center justify-center p-4 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-50 focus:outline-none outline-none"
     >
 
@@ -931,7 +939,7 @@ console.log("Doctor Object at Execution:", doctor);
     </label>
     <input
       type="file"
-      id="profile-image"
+      id="doctor_image"
       className="hidden"
       onChange={handleProfileImageChange}
 
@@ -945,7 +953,7 @@ console.log("Doctor Object at Execution:", doctor);
   <div className="w-full">
    
     <label
-      htmlFor="cover-image"
+      htmlFor="doctor_cover_image"
       className="flex items-center justify-center p-4 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-50 focus:outline-none outline-none"
     >
 
@@ -960,7 +968,7 @@ console.log("Doctor Object at Execution:", doctor);
     </label>
     <input
       type="file"
-      id="cover-image"
+      id="doctor_cover_image"
       className="hidden"
       onChange={handleCoverImageChange}
     />
@@ -968,6 +976,32 @@ console.log("Doctor Object at Execution:", doctor);
 <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_cover_image?.message}</p>
 
   </div>
+  <div className="w-full">
+   
+   <label
+     htmlFor="home_doc_profile"
+     className="flex items-center justify-center p-4 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-50 focus:outline-none outline-none"
+   >
+
+       <div className="flex justify-between w-full items-center">
+       <p className="text-sm">Home Visit Image</p>
+     <div className="flex border-black border p-3 rounded-full gap-2 items-center">
+     <p className="text-sm text-black ">Click to upload</p>
+
+<UploadCloudIcon size={30}/>
+     </div>
+       </div>   
+   </label>
+   <input
+     type="file"
+     id="home_doc_profile"
+     className="hidden"
+     onChange={handleHomeDocImageChange}
+   />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.home_doc_profile?.message}</p>
+
+ </div>
 </div>
 
 
@@ -994,6 +1028,23 @@ console.log("Doctor Object at Execution:", doctor);
             </div>           
           </div>
 <div className="">
+
+<div className="mb-4">
+              <label htmlFor="like_cout" className="block mb-2 text-left text-sm font-medium">
+                Like Count
+              </label>
+              <input
+    type="number"
+    id="like_cout"
+    {...methods.register("like_cout", {
+      setValueAs: (value) => (value === "" ? "" : Number(value)),
+    })}
+    placeholder="Like Count"
+    className="w-full p-2 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
+  />
+              <p className="text-red-500 text-left text-sm">{methods.formState.errors.like_cout?.message}</p>
+
+            </div>
 <div className="mb-4">
               <label htmlFor="meta_name" className="block mb-1 text-sm text-left font-medium">
                Meta Name
@@ -1032,9 +1083,11 @@ console.log("Doctor Object at Execution:", doctor);
 </div>
 
 
-<div className="grid grid-cols-2 gap-4">
+<div className="grid grid-cols-3 gap-4">
 
 { profileImageUrl && renderImagePreview(profileImageUrl,handleRemoveProfileImage)}
+{ HomeImageUrl && renderImagePreview(HomeImageUrl,handleRemoveHomeDocImage)}
+
 {coverImageUrl && renderImagePreview(coverImageUrl,handleRemoveCoverImage)}
 </div>
 

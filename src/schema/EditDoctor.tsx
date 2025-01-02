@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const DoctorSchema = z.object({
+const EditDoctorSchema = z.object({
   email: z.string().email("Enter Valid  email").nonempty("Email is required"),
   phone_number: z
     .string()
@@ -53,9 +53,9 @@ const DoctorSchema = z.object({
   qualification: z.array(z.string()).optional(),
 });
 
-export default DoctorSchema;
+export default EditDoctorSchema;
 
-export type CreateDoctorData = z.infer<typeof DoctorSchema>;
+export type EditDoctorData = z.infer<typeof EditDoctorSchema>;
 
 export interface Region {
   id: string;

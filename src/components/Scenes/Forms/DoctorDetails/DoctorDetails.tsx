@@ -55,6 +55,11 @@ useEffect(() => {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   /* eslint-disable @typescript-eslint/no-unused-vars */
 
+
+
+  const [homedocImage, sethomedocImage] = useState<File | null>(null);
+  const [homedocImageUrl, sethomedocImageUrl] = useState<string | null>(null);
+
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 
@@ -155,6 +160,19 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
       console.error("No file selected.");
     }
   };
+
+
+  const handleHomeDocImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      sethomedocImage(file); 
+      const fileUrl = URL.createObjectURL(file); 
+      sethomedocImageUrl(fileUrl); 
+      methods.setValue("home_doc_profile", fileUrl);
+    } else {
+      console.error("No file selected.");
+    }
+  };
   
   const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
@@ -185,6 +203,12 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
   const handleRemoveCoverImage = () => {
     setCoverImage(null);
     setCoverImageUrl(null);  
+  };
+
+    
+  const handleRemoveHomeDocImage = () => {
+    sethomedocImage(null);
+    sethomedocImageUrl(null);  
   };
   
 
@@ -276,6 +300,11 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
       if (profileImage) {
         formData.append("doctor_image", profileImage); 
       }
+      if (homedocImage) {
+        formData.append("home_doc_profile", homedocImage);
+      }
+
+
       if (coverImage) {
         formData.append("doctor_cover_image", coverImage);
       }
@@ -398,7 +427,7 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
 
             </div>
 
-
+         
 
          
           </div>
@@ -800,12 +829,12 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
 
 
           {/* Images */}
-          <div className="flex lg:flex-row  sm:flex-row flex-col gap-4">
+          <div className="flex flex-col gap-4">
   {/* Profile Image Upload */}
   <div className="w-full">
    
     <label
-      htmlFor="profile-image"
+      htmlFor="doctor_image"
       className="flex items-center justify-center p-4 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-50 focus:outline-none outline-none"
     >
 
@@ -822,18 +851,46 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     </label>
     <input
       type="file"
-      id="profile-image"
+      id="doctor_image"
       className="hidden"
       onChange={handleProfileImageChange}
 
     />
   </div>
 
+
+  <div className="w-full">
+   
+   <label
+     htmlFor="home_doc_profile"
+     className="flex items-center justify-center p-4 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-50 focus:outline-none outline-none"
+   >
+
+       <div className="flex justify-between w-full items-center">
+       <p className="text-sm">Home Visit Profile Pic</p>
+     <div className="flex border-black border p-3 rounded-full gap-2 items-center">
+     <p className="text-sm text-black ">Click to upload</p>
+
+<UploadCloudIcon size={30}/>
+     </div>
+       </div>
+
+    
+   </label>
+   <input
+     type="file"
+     id="home_doc_profile"
+     className="hidden"
+     onChange={handleHomeDocImageChange}
+
+   />
+ </div>
+
   {/* Cover Image Upload */}
   <div className="w-full">
    
     <label
-      htmlFor="cover-image"
+      htmlFor="doctor_cover_image"
       className="flex items-center justify-center p-4 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-50 focus:outline-none outline-none"
     >
 
@@ -848,7 +905,7 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     </label>
     <input
       type="file"
-      id="cover-image"
+      id="doctor_cover_image"
       className="hidden"
       onChange={handleCoverImageChange}
     />
@@ -878,6 +935,26 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
 
             </div>           
           </div>
+
+
+          <div className="">
+              <label htmlFor="age" className="block mb-2 text-left text-sm font-medium">
+                Like Count
+              </label>
+              <input
+    type="number"
+    id="like_cout"
+    {...methods.register("like_cout", {
+      setValueAs: (value) => (value === "" ? "" : Number(value)),
+    })}    placeholder="Like_count"
+    className="w-full p-2 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
+  />
+
+<p className="text-red-500 text-left text-sm">{methods.formState.errors.like_cout?.message}</p>
+
+            </div>
+
+          
 <div className="">
 <div className="mb-4">
               <label htmlFor="doctor-email" className="block mb-1 text-sm text-left font-medium">
@@ -917,10 +994,12 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
 </div>
 
 
-<div className="grid grid-cols-2 gap-4">
+<div className="grid grid-cols-3 gap-4">
 
 {profileImageUrl && renderImagePreview(profileImageUrl,handleRemoveProfileImage)}
-{coverImageUrl && renderImagePreview(coverImageUrl,handleRemoveCoverImage)}
+{homedocImageUrl && renderImagePreview(homedocImageUrl,handleRemoveProfileImage)}
+
+{coverImageUrl && renderImagePreview(coverImageUrl,handleRemoveHomeDocImage)}
 </div>
 
 

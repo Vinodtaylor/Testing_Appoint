@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Department, Doctor,   DoctorPrice,   Schedule} from "@/types/types";
@@ -58,20 +59,55 @@ export const DeleteDoctor = async (id:string) => {
 };
 
 
-export const UpdateDoctor = async (id: string, doctorData: Doctor) => {
+export const UpdateDoctor = async (id: string, doctorData: Doctor, isFormData = false) => {
   try {
-    // Send the doctor data as JSON (excluding images)
-    const res = await axiosInstance.put(`/doctor/update_doctor/${id}`, doctorData, {
+    const config = {
       headers: {
-        "Content-Type": "application/json", 
+        "Content-Type": isFormData ? "multipart/form-data" : "application/json", 
       },
-    });
+    };
+
+    const res = await axiosInstance.put(`/doctor/update_doctor/${id}`, doctorData, config);
     return res.data;
   } catch (e) {
     handleError(e, "Failed to update doctor");
     throw e;  
   }
 };
+
+
+
+
+
+export const UpdateHomeDocProfile = async (id: string, homeDocProfile: File | Record<string, any>, isFormData: boolean = true) => {
+  try {
+    let data: FormData | Record<string, any>;
+    let headers: Record<string, string>;
+
+    if (isFormData) {
+      const formData = new FormData();
+      formData.append("home_doc_profile", homeDocProfile as File); 
+      data = formData;
+      headers = { "Content-Type": "multipart/form-data" };
+    } else {
+      data = homeDocProfile; 
+      headers = { "Content-Type": "application/json" };
+    }
+
+    const res = await axiosInstance.put(
+      `/doctor/update_homedocprofile/${id}`,
+      data,
+      { headers }
+    );
+
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to update Home Doc  Image");
+    throw e
+  }
+};
+
+
 
 
 
@@ -134,6 +170,16 @@ export const GetAllDoctor = async () => {
     handleError(e, "Failed to fetch  Doctors");
   }
 };
+
+
+export const AllDoctors=async()=>{
+  try{
+    const res=await axiosInstance.get(`/getalldoctors`)
+    return res.data;
+  }catch(e){
+    handleError(e,"Failed to fetch all doctors")
+  }
+}
 
 
 export const GetAllDoctorNames = async () => {
