@@ -1,52 +1,48 @@
-"use client";
+import imageCompression from 'browser-image-compression';
 
-import Compressor from 'compressorjs';
-
-interface CompressorOptions {
-  quality?: number;
-  maxWidth?: number;
-  maxHeight?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any; 
+interface CompressOptions {
+  maxSizeMB: number;
+  maxWidthOrHeight: number;
+  previousCompressedFile?: File | null;
 }
 
-type SuccessCallback = (compressedFile: File | Blob) => void;
-type ErrorCallback = (error: Error) => void;
+const compressImage = async (
+  file: File,
+  maxSizeMB: number,
+  maxWidthOrHeight: number,
+  previousCompressedFile: File | null = null
+): Promise<File> => {
+  console.log('Starting image compression...');
+  console.log(`Original file size: ${(file.size / 1024).toFixed(2)} KB`);
+  console.log(`Target size: ${maxSizeMB} MB, Max dimensions: ${maxWidthOrHeight}px`);
 
-const handleCompressedUpload = (
-  event: React.ChangeEvent<HTMLInputElement>,
-  options: CompressorOptions = {},
-  onSuccess?: SuccessCallback,
-  onError?: ErrorCallback
-): void => {
-  const defaultOptions: CompressorOptions = {
-    quality: 0.8, // Default quality
+  const options: CompressOptions = {
+    maxSizeMB: maxSizeMB,
+    maxWidthOrHeight: maxWidthOrHeight,
+    previousCompressedFile,
   };
 
-  const image = event.target.files?.[0];
-  if (!image) {
-    console.warn('No file selected.');
-    return;
-  }
+  try {
+    console.log('Compressing the image...');
+    const compressedFile = await imageCompression(file, {
+      maxSizeMB: options.maxSizeMB,
+      maxWidthOrHeight: options.maxWidthOrHeight,
+      useWebWorker: true, 
+      fileType: 'image/png', 
+      initialQuality: options.previousCompressedFile
+        ? options.previousCompressedFile.size / file.size
+        : 0.8,
+    });
 
-  new Compressor(image, {
-    ...defaultOptions,
-    ...options, // Merge custom options
-    success: (compressedResult) => {
-      if (onSuccess) {
-        onSuccess(compressedResult);
-      } else {
-        console.warn('No onSuccess callback provided.');
-      }
-    },
-    error: (err) => {
-      if (onError) {
-        onError(err);
-      } else {
-        console.error('Compression failed:', err);
-      }
-    },
-  });
+    // Post compression log
+    console.log('Compression finished.');
+    console.log(`Compressed file size: ${(compressedFile.size / 1024).toFixed(2)} KB`);
+    console.log(`Compression quality: ${((compressedFile.size / file.size) * 100).toFixed(2)}%`);
+    return compressedFile;
+  } catch (error) {
+    console.error('Error during compression:', error);
+    throw new Error('Image compression failed');
+  }
 };
 
-export default handleCompressedUpload;
+export default compressImage;

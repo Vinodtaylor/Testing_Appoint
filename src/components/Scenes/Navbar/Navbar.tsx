@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { LogOut, X } from "lucide-react";
-import logo from "../../../../public/logo.png";
+import logo from "../../../../public/hod_logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
@@ -29,6 +29,7 @@ const Navbar: React.FC = () => {
   const path=usePathname()
   
 
+
   const navData = [
     {
       logo: logo,
@@ -38,7 +39,6 @@ const Navbar: React.FC = () => {
         { link: "/doctors", name: "Doctors" },
         { link: "/hospitals", name: "Hospitals" },
         { link: "/departments", name: "Departments" },
-        { link: "/regions", name: "Regions" },
 
 
         // { link: "/", name: "Lab Appointment" },
@@ -67,7 +67,7 @@ const Navbar: React.FC = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between p-4">
+      <div className="flex   shadow-md  mb-4 items-center justify-between p-4">
         <Link href="/">
           <Image
             src={navData[0].logo}
@@ -88,8 +88,8 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden  items-center gap-8 lg:flex">
-          <ul className="flex gap-8">
+        <nav className="hidden  w-full justify-between  items-center gap-8 lg:flex">
+          <ul className="flex w-full justify-center gap-8">
             {navData[0].Navlinks.map((navItem, index) => (
               <li key={index}>
                 <Link
@@ -97,8 +97,8 @@ const Navbar: React.FC = () => {
                   className={`  transition duration-300 
                     ${
                     path === navItem.link
-                      ? "text-[#000000] font-semibold"
-                      : ""
+                      ? "text-[#3498db] font-semibold"
+                      : " text-gray-500 font-semibold"
                   }
                     `}
                 >
@@ -203,8 +203,8 @@ const Navbar: React.FC = () => {
                     className={`  transition duration-300 
                       ${
                       path === navItem.link
-                        ? "text-[#000000] font-semibold"
-                        : ""
+                        ? "text-[#3498db] font-semibold"
+                        : "font-semibold text-gray-500"
                     }
                       `}                  >
                     {navItem.name}

@@ -106,8 +106,8 @@ export interface Schedule {
     doctor_id:string;
     main_speciality: string[];
     speciality:string[];
-    department: string;
-    hospital:string;
+    department: Department;
+    hospital:Hospital;
     email: string;
     phone_number: string;
     doctor_type: string[];
@@ -123,6 +123,8 @@ export interface Schedule {
     bookingType:string,
     doctor_best_known: string[];
     doctor_image: string;
+    home_doc_profile: string;
+    like_cout:number;
     doctor_cover_image: string;
     doctor_experience: string[];
     registration: string;

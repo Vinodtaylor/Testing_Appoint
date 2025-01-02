@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev -p 3001 --turbopack",
     "build": "next build",
-    "start": "next start",
+    "start": "next  start -p 3001",
     "lint": "next lint"
   },
   "dependencies": {
@@ -17,10 +17,12 @@
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "axios": "^1.7.9",
+    "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "compressorjs": "^1.2.1",
     "date-fns": "^3.6.0",
+    "input-otp": "^1.4.1",
     "lucide-react": "^0.462.0",
     "moment": "^2.30.1",
     "next": "15.0.3",

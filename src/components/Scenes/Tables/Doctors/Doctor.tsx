@@ -53,12 +53,8 @@ const tableHeader = [
 
 interface DoctorProps {
   doctors: getDoctor[];
-  currentPage: number;
-  limit:number;
-  totalPages: number;
+ 
   setDoctors: React.Dispatch<React.SetStateAction<getDoctor[]>>;
-  onPrevPage: () => void;
-  onNextPage: () => void;
 }
 
 
@@ -75,12 +71,9 @@ interface Times {
 
 const Doctor: React.FC<DoctorProps> = ({
   doctors,
-  currentPage,
-  totalPages,
+ 
   setDoctors,
-  onPrevPage,
-  limit,
-  onNextPage,
+ 
 }) => {
   const { isOpen: isDeleteOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
   const { isOpen: isScheduleOpen, openModal: openScheduleModal, closeModal: closeScheduleModal } = useModal();
@@ -103,7 +96,28 @@ const Doctor: React.FC<DoctorProps> = ({
 
 
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const [currentPage, setCurrentPage] = useState(1);
+  const doctorsPerPage = 10;
+  const totalPages = Math.ceil(doctors.length / doctorsPerPage);
 
+
+
+  const currentDoctors = doctors.slice(
+    (currentPage - 1) * doctorsPerPage,
+    currentPage * doctorsPerPage
+  );
+
+  const onNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const onPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
 
   const openDeleteDialog = (doctor: getDoctor) => {
@@ -409,16 +423,16 @@ const Doctor: React.FC<DoctorProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-  {doctors?.length === 0 ? (
+  {currentDoctors?.length === 0 ? (
     <TableRow>
                         <TableCell colSpan={8} className="px-3 py-2  text-gray-900 text-sm text-center p-5">
                             <h3 className="text-base">No Doctors found</h3> 
                         </TableCell>
                       </TableRow>
   ) : (
-    doctors?.map((doctor,index) => (
+    currentDoctors?.map((doctor,index) => (
       <TableRow key={index} className="hover:bg-gray-50 text-center transition-all ease-in-out">
-        <TableCell className="px-3 py-2 text-gray-900 text-sm">    {(currentPage - 1) * limit + (index + 1)}        </TableCell>
+        <TableCell className="px-3 py-2 text-gray-900 text-sm">    {(currentPage - 1) * doctorsPerPage + (index + 1)}        </TableCell>
         <TableCell className="px-3 py-2 text-gray-900 text-sm">{doctor?.name}</TableCell>
         <TableCell className="px-3 py-2 text-gray-900 text-sm">{doctor?.doctor_id}</TableCell>
         <TableCell className="px-3 py-2 text-gray-900 text-sm">{doctor?.email}</TableCell>
@@ -447,7 +461,7 @@ const Doctor: React.FC<DoctorProps> = ({
       {/* Pagination */}
     {/* Pagination */}
     
-    {doctors.length > 0 &&  (
+    {currentDoctors.length > 0 &&  (
   <div className="flex mb-8 justify-center gap-4 items-center mt-4">
     <button
       onClick={onPrevPage}

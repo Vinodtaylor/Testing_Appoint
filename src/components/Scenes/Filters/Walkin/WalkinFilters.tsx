@@ -146,7 +146,7 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
         // Gender filter
         const matchesGender =
           !dropdownValues.gender ||
-          (item.patient_id && item.patient_id.gender.toLowerCase() === dropdownValues.gender.toLowerCase());
+          (item.patient_id && item?.patient_id?.gender.toLowerCase() === dropdownValues.gender.toLowerCase());
     
         // Doctor filter (name)
         const matchesDoctor =

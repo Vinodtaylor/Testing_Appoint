@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash } from "lucide-react";
+import { Plus,  X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 
@@ -102,14 +102,14 @@ const ArrayField: React.FC<ArrayFieldProps> = ({ name, label, placeholder }) => 
       <ul className="mt-2 flex flex-wrap gap-4">
         {items.length > 0 ? (
           items.map((item, index) => (
-            <li key={index} className="flex justify-between items-center gap-2">
-              <div className="relative lg:w-full w-3/4  flex items-center gap-2">
+            <li key={index} className="flex justify-between  items-center gap-2">
+              <div className="relative lg:w-28 w-32   flex items-center gap-2">
                 <p
                   onClick={() => {
                     setEditingIndex(index);
                     setEditValue(item);
                   }}
-                  className="px-4  bg-white drop-shadow-sm shadow-lg p-2 rounded-full text-xs cursor-pointer w-full truncate"
+                  className="px-4  bg-white drop-shadow-sm shadow-lg p-2 rounded-lg text-xs cursor-pointer w-full  truncate"
                 >
                   {item}
                 </p>
@@ -117,9 +117,9 @@ const ArrayField: React.FC<ArrayFieldProps> = ({ name, label, placeholder }) => 
                 <button
                   type="button"
                   onClick={() => handleRemove(index)}
-                  className="absolute top-0 right-0 transform translate-x-2 -translate-y-1 flex justify-center items-center rounded-full text-red-500 hover:bg-gray-100 p-1 transition-all"
+                  className="absolute top-1 right-1 transform translate-x-2  flex justify-center items-center  text-red-500  p-1 transition-all"
                 >
-                  <Trash size={15} />
+                  <X size={18} />
                 </button>
               </div>
             </li>

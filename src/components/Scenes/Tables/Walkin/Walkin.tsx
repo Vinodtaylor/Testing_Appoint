@@ -177,10 +177,10 @@ Appointmentdata,currentPage,totalPages,setAppointments,onNextPage,onPrevPage
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.booking_type}</TableCell>
                   {/* <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.booking}</TableCell> */}
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.name}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.patient_id}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.patient_id}</TableCell>
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.visit_id}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.phone_number}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.patient_id.email_id}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.phone_number}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.patient_id?.email_id}</TableCell>
                   <TableCell className="px-3 py-2 text-gray-900 text-sm">
     {moment(row.createdAt).format("YYYY-MM-DD")}
   </TableCell>

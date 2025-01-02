@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Navbar from "@/components/Scenes/Navbar/Navbar";
 import { Toaster } from 'react-hot-toast';
 
 
@@ -33,9 +32,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased mx-auto p-4`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar/>
         {children}
 
         <Toaster/>
