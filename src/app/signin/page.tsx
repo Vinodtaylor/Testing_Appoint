@@ -124,7 +124,7 @@ const LoginPage: React.FC = () => {
           </div>
   
 
-  <span className='text-right text-red-600 text-sm  font-semibold cursor-pointer'>Resend Code</span>
+  {/* <span className='text-right text-red-600 text-sm  font-semibold cursor-pointer'>Resend Code</span> */}
 </div>
 
 
