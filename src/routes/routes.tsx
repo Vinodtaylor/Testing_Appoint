@@ -79,43 +79,41 @@ export const UpdateDoctor = async (id: string, doctorData: Doctor, isFormData = 
 
 
 
-export const UpdateHomeDocProfile = async (id: string, homeDocProfile: File | Record<string, any>, isFormData: boolean = true) => {
+export const UpdateHomeDocProfile = async (id: string, home_doc_profile: File) => {
   try {
-    let data: FormData | Record<string, any>;
-    let headers: Record<string, string>;
+    const formData = new FormData();
+    formData.append("home_doc_profile", home_doc_profile); 
 
-    if (isFormData) {
-      const formData = new FormData();
-      formData.append("home_doc_profile", homeDocProfile as File); 
-      data = formData;
-      headers = { "Content-Type": "multipart/form-data" };
-    } else {
-      data = homeDocProfile; 
-      headers = { "Content-Type": "application/json" };
-    }
+    console.log("Updating Home Visit image for doctor with ID:", id);
+    console.log("Received file:", home_doc_profile.name);
+
 
     const res = await axiosInstance.put(
       `/doctor/update_homedocprofile/${id}`,
-      data,
-      { headers }
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" }
+      }
     );
 
-    return res.data;
+    console.log("Response received:", res.data);
+
+    return res.data;  
   } catch (e) {
-    handleError(e, "Failed to update Home Doc  Image");
-    throw e
+    handleError(e, "Failed to update Cover Image");
   }
 };
-
-
-
 
 
 // Update profile image
 export const UpdateProfileImage = async (id: string, doctor_image: File) => {
   try {
+    console.log("Updating profile image for doctor with ID:", id);
+    console.log("Received file:", doctor_image.name);
+
     const formData = new FormData();
-    formData.append("doctor_image", doctor_image);  // Append the actual file here
+    formData.append("doctor_image", doctor_image); 
+    console.log("FormData prepared:", formData);
 
     const res = await axiosInstance.put(
       `/doctor/update_doctorimage/${id}`,
@@ -124,17 +122,26 @@ export const UpdateProfileImage = async (id: string, doctor_image: File) => {
         headers: { "Content-Type": "multipart/form-data" }
       }
     );
-    return res.data;  // This should return the response with the URL
+
+    console.log("Response received:", res.data);
+
+    return res.data;  
   } catch (e) {
+    console.error("Error occurred during profile image update:", e);
     handleError(e, "Failed to update Profile Image");
   }
 };
+
 
 // Update cover image
 export const UpdateCoverImage = async (id: string, doctor_cover_image: File) => {
   try {
     const formData = new FormData();
-    formData.append("doctor_cover_image", doctor_cover_image);  // Append the actual file here
+    formData.append("doctor_cover_image", doctor_cover_image); 
+
+    console.log("Updating profile image for doctor with ID:", id);
+    console.log("Received file:", doctor_cover_image.name);
+
 
     const res = await axiosInstance.put(
       `/doctor/update_doctorcoverimage/${id}`,
@@ -143,7 +150,10 @@ export const UpdateCoverImage = async (id: string, doctor_cover_image: File) => 
         headers: { "Content-Type": "multipart/form-data" }
       }
     );
-    return res.data;  // This should return the response with the URL
+
+    console.log("Response received:", res.data);
+
+    return res.data;  
   } catch (e) {
     handleError(e, "Failed to update Cover Image");
   }

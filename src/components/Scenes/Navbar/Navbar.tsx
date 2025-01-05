@@ -70,7 +70,7 @@ const Navbar: React.FC = () => {
       <div className="flex   shadow-md  mb-4 items-center justify-between p-4">
         <Link href="/">
           <Image
-            src={navData[0].logo}
+            src={logo}
             alt="Logo"
             className="w-[150px] h-[68px] object-contain"
           />
