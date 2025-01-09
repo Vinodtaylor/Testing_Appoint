@@ -78,7 +78,6 @@ const DoctorVisitFilters: React.FC = () => {
           const doctorNames = doctorRes?.data.map((doctor: { name: string }) => doctor?.name);
           setdocNames(doctorNames);
        
-          console.log("Doctor Names:", doctorNames);
     
         } catch (e) {
           console.error("Error fetching data:", e);
@@ -305,6 +304,7 @@ const DoctorVisitFilters: React.FC = () => {
             width={50}
             height={100}
             alt={region.region_name}
+            priority
             title={region.region_name}
             className="max-w-[60px] mb-1"
           />

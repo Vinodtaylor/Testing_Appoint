@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState } from 'react';
@@ -11,6 +12,11 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { IoIosArrowBack } from "react-icons/io";
+import { LoginUser, ResetNewPassword, ResetOTpPassword } from '@/types/types';
+import {  ResetPassword, SendResetEmail, VerifyOTP } from '@/routes/routes';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { signIn } from "next-auth/react";
 
 
 const ForgotPasswordSteps = {
@@ -22,8 +28,18 @@ const ForgotPasswordSteps = {
 
 const LoginPage: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email_id, setemail_id] = useState<string>("");
+  const [ otpforgotPassword, setotpforgotPassword] = useState<string>("");
+  const [ resetPasswordToken, setresetPasswordToken] = useState<string>("");
+
+  const [password, setpassword] = useState<string>("");
   const [currentStep, setCurrentStep] = useState<'LOGIN' | 'FORGOT_PASSWORD'>('LOGIN');
   const [forgotPasswordStep, setForgotPasswordStep] = useState<string>(ForgotPasswordSteps.INPUT_EMAIL);
+  const [login,SetLogin]=useState<LoginUser>({
+    email_id:"",
+    password:""
+  })
+  const router=useRouter()
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -36,26 +52,163 @@ const LoginPage: React.FC = () => {
 
   const handleBackToLoginClick = () => {
     setCurrentStep('LOGIN');
+  
+    // Reset all states
+    setForgotPasswordStep(ForgotPasswordSteps.INPUT_EMAIL);
+    setemail_id('');
+    setotpforgotPassword('');
+    setresetPasswordToken('');
+    setpassword('');
   };
+  
+
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    if (!login.email_id || !login.password) {
+      toast.error("Please fill out all fields.");
+      return;
+    }
+  
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email_id: login.email_id,
+        password: login.password,
+      });
+  
+      if (result?.error) {
+        const errorMessage = result.error === "CredentialsSignin"
+          ? "Invalid credentials. Please check your email and password."
+          : result.error;
+        toast.error(errorMessage);
+      } else {
+        router.push("/");
+        SetLogin({ email_id: "", password: "" });
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      // Check for backend error message or fallback to generic error
+      toast.error(error?.response?.data?.message || "An unexpected error occurred. Please try again later.");
+    }
+  };
+  
+  
+
+
+
+
+  const handleSendResetEmail = async () => {
+    try {
+
+
+      if (! email_id) {
+        toast.error("Please Enter the Email Address");
+        return;
+      }
+    
+      await SendResetEmail({email_id});
+      toast.success("Verification code sent to your email.");
+      setForgotPasswordStep(ForgotPasswordSteps.VERIFY_CODE);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Failed to send reset email.";
+
+      toast.error(errorMessage || "Failed to send reset email.");
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!otpforgotPassword) {
+      toast.error("Please Enter  OTP");
+      return;
+    }
+
+    if (otpforgotPassword.length !== 6) {
+      toast.error("OTP should be 6 digits.");
+      return;
+    }
+
+    try {
+      
+      const data:ResetOTpPassword={
+email_id:email_id,
+otpforgotPassword:otpforgotPassword
+      }
+ const res=   await VerifyOTP(data);
+setresetPasswordToken(res.token)
+      toast.success(res.message || "Verification successful. Please reset your password.");
+      setForgotPasswordStep(ForgotPasswordSteps.RESET_PASSWORD);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Invalid OTP. Please try again.");
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!password) {
+      toast.error("Please Enter a new password");
+      return;
+    }
+  
+    if (!resetPasswordToken) {
+      toast.error("No reset token found.");
+      return;
+    }
+  
+    try {
+      const data: ResetNewPassword = {
+        password: password,
+        token: resetPasswordToken,
+      };
+  
+  
+      const res = await ResetPassword(data, resetPasswordToken);
+  
+      if (res) {
+        toast.success("Password reset successfully.");
+        setForgotPasswordStep(ForgotPasswordSteps.SUCCESS);
+      } else {
+        toast.error("Failed to reset password.");
+      }
+    } catch (error: any) {
+      console.error("Error resetting password:", error);
+      toast.error(error.response?.data?.message || "Failed to reset password.");
+    }
+  };
+  
+  
+
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (currentStep === "LOGIN") {
+      handleLogin(event); 
+    }
+  };
+  
 
   const renderForgotPasswordScreen = () => {
     switch (forgotPasswordStep) {
       case ForgotPasswordSteps.INPUT_EMAIL:
         return (
-          <form>
+          <form onSubmit={(e) => e.preventDefault()}>
             <div className="mb-4">
               <label
-                htmlFor="forgot-email"
+                htmlFor="email_id"
                 className="block text-sm font-medium text-[#000000]"
               >
                 Email Address <span className="text-red-600">*</span>
               </label>
               <input
                 type="email"
-                id="forgot-email"
+                value={email_id}
+                onChange={(e) => setemail_id(e.target.value)}
+
+                id="email_id"
                 className="w-full placeholder:text-sm px-4 py-2 mt-2 border rounded-lg outline-none shadow-md"
                 placeholder="Enter your email address"
               />
+
             </div>
 
 <div className="flex justify-end mb-4">
@@ -70,7 +223,7 @@ const LoginPage: React.FC = () => {
             
             <button
               type="button"
-              onClick={() => setForgotPasswordStep(ForgotPasswordSteps.VERIFY_CODE)}
+           onClick={handleSendResetEmail}
               className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:bg-blue-600 transition-colors"
             >
               Next
@@ -78,95 +231,100 @@ const LoginPage: React.FC = () => {
           </form>
         );
 
-      case ForgotPasswordSteps.VERIFY_CODE:
-        return (
-          <form>
-        <div className="mb-4 flex flex-col  justify-center">
-          <label htmlFor="otp"                     className="block text-base mb-4 font-semibold text-shadow text-[#000000]"
-          >Enter the Verfication Code <span className='text-red-600 '>* </span></label>
-          <div className="mb-4 flex justify-end">
-          <InputOTP maxLength={6} className="flex  justify-center gap-4 outline-none">
-    {/* Group 1 */}
-    <InputOTPGroup className="flex gap-2 outline-none">
-      <InputOTPSlot
-        index={0}
-        className="w-12 h-12 text-center text-base font-semibold   rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-      />
-      <InputOTPSlot
-        index={1}
-        className="w-12 h-12 text-center text-base font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-      />
-      <InputOTPSlot
-        index={2}
-        className="w-12 h-12 text-center text-base font-semibold  rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-      />
-    </InputOTPGroup>
+        case ForgotPasswordSteps.VERIFY_CODE:
+          return (
+            <form onSubmit={(e) => e.preventDefault()}>
+              {/* Verification Code Input Section */}
+              <div className="mb-4 flex flex-col justify-center">
+                <label
+                  htmlFor="otpforgotPassword"
+                  className="block text-base mb-4 font-semibold text-shadow text-[#000000]"
+                >
+                  Enter the Verification Code <span className="text-red-600">*</span>
+                </label>
+                <div className="mb-4 flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={otpforgotPassword}
+                    onChange={setotpforgotPassword}
+                    className="flex justify-center gap-4 outline-none"
+                    aria-label="OTP Input"
+                  >
+                    {/* Group 1 */}
+                    <InputOTPGroup className="flex gap-2 outline-none">
+                      {[...Array(3)].map((_, index) => (
+                        <InputOTPSlot
+                          key={index}
+                          index={index}
+                          className="w-12 h-12 text-center text-base font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                        />
+                      ))}
+                    </InputOTPGroup>
+        
+                    {/* Separator */}
+                    <InputOTPSeparator className="text-lg font-bold mx-2 text-gray-500">
+                      -
+                    </InputOTPSeparator>
+        
+                    {/* Group 2 */}
+                    <InputOTPGroup className="flex gap-2">
+                      {[...Array(3)].map((_, index) => (
+                        <InputOTPSlot
+                          key={index + 3}
+                          index={index + 3}
+                          className="w-12 h-12 text-center text-base font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                        />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
 
-    {/* Separator */}
-    <InputOTPSeparator className="text-lg font-bold mx-2 text-gray-500">-</InputOTPSeparator>
-
-    {/* Group 2 */}
-    <InputOTPGroup className="flex gap-2">
-      <InputOTPSlot
-        index={3}
-        className="w-12 h-12 text-center text-base font-semibold  rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-      />
-      <InputOTPSlot
-        index={4}
-        className="w-12 h-12 text-center text-base font-semibold  rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-      />
-      <InputOTPSlot
-        index={5}
-        className="w-12 h-12 text-center text-base font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-      />
-    </InputOTPGroup>
-  </InputOTP>
-          </div>
-  
-
-  {/* <span className='text-right text-red-600 text-sm  font-semibold cursor-pointer'>Resend Code</span> */}
-</div>
-
-
-<div className="f">
-  <div className="flex justify-end mb-4">
-  <button
+              </div>
+        
+              {/* Back Button */}
+              <div className="flex justify-end mb-4">
+                <button
+                  type="button"
+                  onClick={() => setForgotPasswordStep(ForgotPasswordSteps.INPUT_EMAIL)}
+                  className="flex items-center text-blue-600 text-base border-none"
+                >
+                  <IoIosArrowBack size={20} /> Back
+                </button>
+              </div>
+        
+              {/* Verify Button */}
+              <button
                 type="button"
-                onClick={() => setForgotPasswordStep(ForgotPasswordSteps.INPUT_EMAIL)}
-                className='text-left border-none  items-center text-blue-600  text-base flex border'
+                onClick={handleVerifyOTP}
+                className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:bg-blue-600 transition-colors"
               >
-               <IoIosArrowBack size={20}/> Back 
+                Verify
               </button>
-  </div>
-
-</div>
-
-            <button
-              type="button"
-              onClick={() => setForgotPasswordStep(ForgotPasswordSteps.RESET_PASSWORD)}
-              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:bg-blue-600 transition-colors"
-            >
-              Verify
-            </button>
-          </form>
-        );
+            </form>
+          );
+        
 
       case ForgotPasswordSteps.RESET_PASSWORD:
         return (
           <form>
             <div className="mb-4">
               <label
-                htmlFor="new-password"
+                htmlFor="password"
                 className="block text-sm font-medium text-[#000000]"
               >
                 New Password <span className="text-red-600">*</span>
               </label>
               <input
                 type="password"
-                id="new-password"
+                value={password}
+
+                onChange={(e) => setpassword(e.target.value)}
+
+                id="password"
                 className="w-full placeholder:text-sm px-4 py-2 mt-2 border rounded-lg outline-none shadow-md"
                 placeholder="Enter your new password"
               />
+
             </div>
 
             <div className="flex justify-end mb-4">
@@ -180,7 +338,8 @@ const LoginPage: React.FC = () => {
   </div>
             <button
               type="button"
-              onClick={() => setForgotPasswordStep(ForgotPasswordSteps.SUCCESS)}
+              onClick={handleResetPassword}
+
               className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:bg-blue-600 transition-colors"
             >
               Reset Password
@@ -224,6 +383,7 @@ const LoginPage: React.FC = () => {
               src={logo}
               alt="Logo"
               width={350}
+              priority
               height={350}
               className="object-contain lg:w-full w-64"
             />
@@ -231,20 +391,25 @@ const LoginPage: React.FC = () => {
 
           <div className="w-full md:max-w-lg p-8">
             {currentStep === 'LOGIN' ? (
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                   <label
-                    htmlFor="email"
+                    htmlFor="email_id"
                     className="block text-sm font-medium text-[#000000]"
                   >
-                    ID or Email <span className="text-red-600">*</span>
+                     Email Id <span className="text-red-600">*</span>
                   </label>
                   <input
-                    type="text"
-                    id="email"
+                    type="email"
+                    id="email_id"
+                    onChange={(e) =>
+                      SetLogin((prev) => ({ ...prev, email_id: e.target.value }))
+                    }
+                    value={login.email_id || ""}
                     className="w-full placeholder:text-sm px-4 py-2 mt-2 border rounded-lg outline-none shadow-md"
                     placeholder="Enter your email or ID"
                   />
+
                 </div>
                 <div className="mb-4">
                   <label
@@ -257,6 +422,11 @@ const LoginPage: React.FC = () => {
                     <input
                       type={passwordVisible ? 'text' : 'password'}
                       id="password"
+                      value={login.password || ""}
+                      onChange={(e) =>
+                        SetLogin((prev) => ({ ...prev, password: e.target.value }))
+                      }
+
                       className="w-full placeholder:text-sm px-4 py-2 mt-2 border rounded-lg outline-none shadow-md"
                       placeholder="Enter your password"
                     />
@@ -268,6 +438,7 @@ const LoginPage: React.FC = () => {
                       {passwordVisible ? <Eye /> : <EyeOff />}
                     </button>
                   </div>
+
                   <button
                     type="button"
                     onClick={handleForgotPasswordClick}

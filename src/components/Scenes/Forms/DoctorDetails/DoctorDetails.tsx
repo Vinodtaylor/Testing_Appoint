@@ -39,11 +39,11 @@ const DoctorDetails = () => {
   });
 
 
-  const formValues = methods.watch(); // Watches the entire form
+  // const formValues = methods.watch(); // Watches the entire form
 
-useEffect(() => {
-  console.log("Form values updated:", formValues);
-}, [formValues]);
+// useEffect(() => {
+//   console.log("Form values updated:", formValues);
+// }, [formValues]);
 
 
 
@@ -120,7 +120,6 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     const handleHospitalChange = (value:string) => {
       setSelectedRegion(value); 
       setIsDropdownOpen(false)
-      console.log("hospital",value)
       methods.setValue('hospital', value); 
     };
 
@@ -129,7 +128,6 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     const handleDeptChange = (value:string) => {
       setSelectedRegion(value); 
       setIsDropdownOpen(false)
-      console.log("department",value)
 
       methods.setValue('department', value); 
     };
@@ -145,7 +143,6 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     setSelectedRegion(value); 
     setIsDropdownOpen(false)
     methods.setValue('region', value); 
-    console.log("region",value)
 
   };
  
@@ -347,7 +344,7 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
   
   
 
-  console.log(methods.formState.errors);
+  // console.log(methods.formState.errors);
 
 
   return (

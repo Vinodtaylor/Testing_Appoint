@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Department, Doctor,   DoctorPrice,   Schedule} from "@/types/types";
+import { Department, Doctor,   DoctorPrice,   LoginUser,   ResetNewPassword,   ResetOTpPassword,   Schedule} from "@/types/types";
 import { axiosInstance } from "./api";
-
 
 
 
@@ -13,6 +12,82 @@ const handleError = (error:any, defaultMessage: string): never => {
   const message = error.response?.data?.message || defaultMessage;
   throw new Error(message);
 };
+
+
+export const Logout = async () => {
+  try {
+    const res = await axiosInstance.post(`/admin_logout`, {},
+      {withCredentials:true}
+    );
+
+ 
+
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Login");
+  }
+};
+
+export const Login = async (data:LoginUser) => {
+  try {
+    const res = await axiosInstance.post(`/admin/login`,data,
+      {withCredentials:true}
+    );
+
+    console.log(res,"Signed IN")
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Login");
+  }
+};
+
+export const SendResetEmail = async ({ email_id }: { email_id: string })  => {
+  try {
+    const res = await axiosInstance.post(`/admin/forgotpasswordemailverify`, {email_id},
+      {withCredentials:true}
+    );
+
+    console.log(res,"Signed IN")
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Send Email");
+  }
+};
+
+
+export const  VerifyOTP = async (data:ResetOTpPassword) => {
+  try {
+    const res = await axiosInstance.post(`/admin/forgotpasswordotpverify`,data,
+      {withCredentials:true}
+    );
+
+    console.log(res,"Signed IN")
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Verify OTP");
+  }
+};
+
+export const ResetPassword = async (data: ResetNewPassword, token: string) => {
+  try {
+    const res = await axiosInstance.post(
+      `/admin/forgotpasswordotpset`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },
+        withCredentials: true,
+      }
+    );
+
+    console.log(res, "Password Reset Successfully");
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Reset Password");
+  }
+};
+
 
 export const CreateDoctor = async (data:FormData) => {
   try {
@@ -25,6 +100,7 @@ export const CreateDoctor = async (data:FormData) => {
     handleError(e, "Failed to create doctor");
   }
 };
+
 
 
 export const GetDoctorbyId = async (id:string) => {
@@ -174,7 +250,6 @@ export const GetAllDoctorwithPagination = async (currentPage:number,limit:number
 export const GetAllDoctor = async () => {
   try {
     const res = await axiosInstance.get(`/doctor/get_doctor`);
-    console.log(res,"All Doctors")
     return res.data;
   } catch (e) {
     handleError(e, "Failed to fetch  Doctors");
@@ -195,7 +270,6 @@ export const AllDoctors=async()=>{
 export const GetAllDoctorNames = async () => {
   try {
     const res = await axiosInstance.get(`/getalldoctors`);
-    console.log(res,"All Doctors")
     return res.data;
   } catch (e) {
     handleError(e, "Failed to fetch  Doctors");

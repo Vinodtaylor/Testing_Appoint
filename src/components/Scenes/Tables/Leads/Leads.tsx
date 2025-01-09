@@ -155,7 +155,7 @@ const Leads = () => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel className="rounded-full  border-blue-600  text-black hover:text-white hover:bg-blue-600">Cancel</AlertDialogCancel>
-                    <AlertDialogAction type='submit' onClick={() => { console.log("Deleted data") }} className="rounded-full   bg-blue-500 text-white hover:bg-blue-600">
+                    <AlertDialogAction type='submit'  className="rounded-full   bg-blue-500 text-white hover:bg-blue-600">
                       Delete
                     </AlertDialogAction>
                   </AlertDialogFooter>

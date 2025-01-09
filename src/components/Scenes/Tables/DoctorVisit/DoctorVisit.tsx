@@ -84,7 +84,6 @@ export const DoctorVisit: React.FC = () => {
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
   
-          console.log(sortedHomeVisit); 
           setData(sortedHomeVisit); 
         } else {
           console.warn("No data available in response");

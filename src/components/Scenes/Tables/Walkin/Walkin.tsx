@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -189,8 +190,8 @@ Appointmentdata,currentPage,totalPages,setAppointments,onNextPage,onPrevPage
 </TableCell>
 
                   <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.time}</TableCell>
-                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.hospital_id.hospital_name}</TableCell>       
-                        <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.doctor_id.name}</TableCell>
+                  <TableCell className="px-3 py-2 text-gray-900  text-sm">{row.hospital_id?.hospital_name}</TableCell>       
+                        <TableCell className="px-3 py-2 text-gray-900  text-sm">{row?.doctor_id?.name}</TableCell>
                         <TableCell className="px-3 py-2 text-gray-900 sm:text-sm">
     {row.payment_status ? "Paid" : "Pending"}
   </TableCell>
@@ -484,7 +485,7 @@ Appointmentdata,currentPage,totalPages,setAppointments,onNextPage,onPrevPage
             </TableBody>
         </Table>
 
-        {Appointmentdata.length > 6 && (
+        {/* {Appointmentdata.length > 6 && (
           <div className="flex mb-8 justify-center gap-4 items-center mt-4">
             <button
               onClick={onPrevPage}
@@ -504,7 +505,7 @@ Appointmentdata,currentPage,totalPages,setAppointments,onNextPage,onPrevPage
               <IoIosArrowForward />
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

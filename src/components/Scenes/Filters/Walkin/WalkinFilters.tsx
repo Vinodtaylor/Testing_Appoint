@@ -34,7 +34,7 @@ interface WalkinFilterProps {
   filterValues: FilterValues; // Pass down the current filters
 }
 
-const WalkinFilters:  React.FC<WalkinFilterProps>= ({onFilterChange,AppointmentData,filteredData}) => {
+const WalkinFilters:  React.FC<WalkinFilterProps>= ({onFilterChange,filteredData}) => {
  
   const [selectedRegion, setSelectedRegion] = useState<string>(""); 
    const [dropdownValues, setDropdownValues] = useState({
@@ -89,10 +89,7 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
   
         const doctorNames = doctorRes.data.map((doctor: { name: string }) => doctor.name);
         setdocNames(doctorNames);
-          console.log("Department Names:", departmentNames);
-        console.log("Hospital Names:", hospitalNames);
-        console.log("Doctor Names:", doctorNames);
-  
+     
       } catch (e) {
         console.error("Error fetching data:", e);
       }
@@ -141,61 +138,7 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
   };
 
   
-    const filterData = () => {
-      const filteredData = AppointmentData.filter((item) => {
-        // Gender filter
-        const matchesGender =
-          !dropdownValues.gender ||
-          (item.patient_id && item?.patient_id?.gender.toLowerCase() === dropdownValues.gender.toLowerCase());
-    
-        // Doctor filter (name)
-        const matchesDoctor =
-          !dropdownValues.doctor ||
-          (item.doctor_id && item.doctor_id.name.toLowerCase().includes(dropdownValues.doctor.toLowerCase()));
-
-
-          const matchesHospital = 
-          !dropdownValues.hospital || 
-          (item.hospital_id?.hospital_name && 
-           item.hospital_id.hospital_name.toLowerCase().includes(dropdownValues.hospital.toLowerCase()));
-        
-        
-    
-        // Department filter
-        const matchesDept =
-          !dropdownValues.department ||
-          (item?.doctor_id?.department?.department_name && item?.doctor_id?.department?.department_name.toLowerCase().includes(dropdownValues.department.toLowerCase()));
-    
-          console.log("Filtering by hospital:", dropdownValues.hospital);
-          console.log("Hospital name:", item.hospital_id?.hospital_name);
-          console.log(dropdownValues.department,"Department Filter")
-
-        // Region filter
-            const matchesRegion =
-  !selectedRegion ||
-  (item.region &&
-    item.region.region_name.toLowerCase() ===
-      selectedRegion.toLowerCase());
-
-    
-        // Date range filter
-        const AppointmentCreatedDate = moment(item.createdAt, "YYYY-MM-DD");
-    
-        // Check if start and end dates are valid moments
-        const startMoment = dropdownValues.startdate ? moment(dropdownValues.startdate).startOf('day') : null;
-        const endMoment = dropdownValues.enddate ? moment(dropdownValues.enddate).endOf('day') : null;
-    
-        // Check if doctor's creation date is within the date range
-        const isWithinDateRange =
-          (!startMoment || AppointmentCreatedDate.isSameOrAfter(startMoment)) &&
-          (!endMoment || AppointmentCreatedDate.isSameOrBefore(endMoment));
-    
-        // Combine all conditions
-        return matchesGender && matchesDoctor &&   matchesHospital  &&  matchesDept 
-        
-        && matchesRegion && isWithinDateRange;
-      });
-    
+    const filterData = () => {    
       // After filtering, pass the updated filter values to onFilterChange
       onFilterChange({
         gender: dropdownValues.gender,
@@ -207,7 +150,6 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
         enddate: dropdownValues.enddate,
       });
     
-      console.log(filteredData, "after filter");
     };
 
 
@@ -240,7 +182,6 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
   
     useEffect(() => {
   
-      console.log("Applying filters... on Walkin");
   
       filterData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -248,17 +189,6 @@ const [departmentNames, setDepartmentNames] = useState<string[]>([]);
     
     
   
-    useEffect(() => {
-      console.log("Selected Region  on Walkin:", selectedRegion);
-      console.log("Selected Gender  on Walkin:", dropdownValues.gender);
-      console.log("Selected Doctor  on Walkin:", dropdownValues.doctor);
-      console.log("Selected Start Date  on Walkin:", dropdownValues.startdate);
-      console.log("Selected End Date  on Walkin:", dropdownValues.enddate);
-      console.log("Selected End Date  on Walkin:", dropdownValues.hospital);
-
-      console.log("Selected Department:", dropdownValues.department);
-      console.log("Search Query:", searchQuery);
-    }, [selectedRegion, dropdownValues, searchQuery]);
 
   return (
     <div className="p-8 mb-8 text-white flex flex-col gap-8 rounded-tl-lg rounded-tr-lg space-y-4 bg-[#1A91FF]">

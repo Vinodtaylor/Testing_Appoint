@@ -38,7 +38,6 @@ const Page = () => {
     try {
       const res = await AllDoctors();
       if (res && res.data) {
-        console.log("Doctors Data:", res.data.data); 
         const sortedDoctors = res.data.sort((a: any, b: any) => {
           const dateA = new Date(a.createdAt);
           const dateB = new Date(b.createdAt);
@@ -82,10 +81,6 @@ const Page = () => {
     });
   }, [doctors, filterValues]);
 
-  useEffect(() => {
-    console.log("Current Filter Values:", filterValues);
-    console.log("Filtered Doctors:", filteredDoctors);
-  }, [filterValues, filteredDoctors]);
 
   const handleFilterChange = (newFilters: FilterValues) => {
     setFilterValues(newFilters); 

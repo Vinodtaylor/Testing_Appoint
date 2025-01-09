@@ -51,7 +51,6 @@ const RegionsTable = () => {
   }, []);
 
 
-  console.log(Regionoptions,"Regionselect")
 
 
   const handleDelete = async () => {
@@ -137,12 +136,9 @@ const RegionsTable = () => {
         ));
       } else {
 
-        console.log("FormData entries:");
 
 
-        for (const [key, value] of formData.entries()) {
-          console.log(`${key}: ${value}`);
-        }
+      
 
         // If creating a new region
         response = await createRegion(formData);

@@ -119,7 +119,6 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
 
-console.log(doctor,'curent Doc')
 
   useEffect(() => {
     const getData = async () => {
@@ -209,12 +208,12 @@ console.log(doctor,'curent Doc')
 
 
 
-  useEffect(() => {
-    const subscription = methods.watch((value) => {
-      console.log("Form values:", value);  
-    });
-    return () => subscription.unsubscribe();
-  }, [methods]);
+  // useEffect(() => {
+  //   const subscription = methods.watch((value) => {
+  //     console.log("Form values:", value);  
+  //   });
+  //   return () => subscription.unsubscribe();
+  // }, [methods]);
   
   
   
@@ -337,7 +336,6 @@ console.log(doctor,'curent Doc')
   };
 
 const SubmitDoctor = async (data: Doctor) => {
-  console.log("Form data before submission:", data);
 
   if (!data._id) {
     data._id = doctor._id; 
@@ -370,7 +368,6 @@ const SubmitDoctor = async (data: Doctor) => {
   }
 
   try {
-    console.log("Doctor data before processing:", data);
 
 
     const formData = new FormData();
@@ -397,14 +394,10 @@ const SubmitDoctor = async (data: Doctor) => {
       department:data.department._id,
       hospital:data.hospital._id
     };
-    console.log("Prepared doctor data:", doctorData);
-    console.log(coverImage,"Cover")
-    console.log(HomeDocImage,"HomeDoc")
-    console.log(profileImage,"ProfilePicture")
+   
 
     // First, update the doctor details (excluding images)
-    const resDoctor = await UpdateDoctor(data._id, doctorData);
-    console.log("Doctor update response:", resDoctor);
+   await UpdateDoctor(data._id, doctorData);
 
     // Upload images in parallel (if they exist)
     const updateCoverImagePromise = coverImage
@@ -424,9 +417,7 @@ const SubmitDoctor = async (data: Doctor) => {
     // Wait for both image uploads to complete
     const [resCoverImage, resProfileImage,resHomeDocImage] = await Promise.all([updateCoverImagePromise, updateProfileImagePromise,updateHomeDocImagePromise]);
 
-    console.log("Cover image upload response:", resCoverImage);
-    console.log("Profile image upload response:", resProfileImage);
-    console.log("Home Doc image upload response:", resHomeDocImage);
+ 
 
 
     // If images were uploaded, update the URLs in doctor data
@@ -445,8 +436,7 @@ const SubmitDoctor = async (data: Doctor) => {
     }
 
     // Now, update the doctor details with the image URLs
-    const resDoctorWithImages = await UpdateDoctor(data._id, doctorData,true);
-    console.log("Doctor details with image URLs response:", resDoctorWithImages);
+   await UpdateDoctor(data._id, doctorData,true);
 
     
     methods.reset();
@@ -466,7 +456,7 @@ const SubmitDoctor = async (data: Doctor) => {
   
   
 
-  console.log(methods.formState.errors,"Validation Error");
+  // console.log(methods.formState.errors,"Validation Error");
 
 
 
@@ -868,7 +858,6 @@ const SubmitDoctor = async (data: Doctor) => {
               className="cursor-pointer p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
               onClick={() => {
                 field.onChange(option.value); 
-                console.log(option.value,`${option.label}`)
                 setIsHospitalDropdownOpen(false);
               }}
             >
