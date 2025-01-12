@@ -144,7 +144,7 @@ const Navbar: React.FC = () => {
               onClick={handleDropdownToggle}
             >
               <AvatarImage src={session?.user?.admin_photo} />
-              <AvatarFallback>{session?.user.role}</AvatarFallback>
+              <AvatarFallback>{session?.user.name}</AvatarFallback>
             </Avatar>
 
             {show && (
@@ -162,7 +162,7 @@ const Navbar: React.FC = () => {
 
             <div className="">
               <p className="text-xs font-normal border">Logged in as </p>
-              <h1 className="text-sm font-semibold">{session?.user.name}</h1>
+              <h1 className="text-sm font-semibold">{session?.user.role}</h1>
             </div>
                 </div>
                   <li

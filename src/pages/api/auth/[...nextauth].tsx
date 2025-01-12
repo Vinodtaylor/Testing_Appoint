@@ -55,6 +55,8 @@ export const authOptions: AuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+
+
       if (user) {
         token._id = user._id;
         token.email_id = user.email_id;
@@ -64,16 +66,20 @@ export const authOptions: AuthOptions = {
         token.admin_photo = user.admin_photo; 
         token.expiresAt = Date.now() + TOKEN_EXPIRATION_TIME;
       }
-      // console.log("Token expires at:", token.expiresAt);
-      // console.log("Current time:", Date.now());
+     
       const isTokenExpired = typeof token.expiresAt === 'number' && Date.now() > token.expiresAt;
-      // console.log("Is token expired:", isTokenExpired);
+
+
         
       if (isTokenExpired || !token.token) {
-        try {
-          const response = await axiosInstance.post("/admin_refreshtoken", {}, { withCredentials: true });
+        console.log(token.token,"Token existing")
 
-  
+        try {
+          const response = await axiosInstance.post("/admin_refreshtoken", {},{withCredentials:true});
+
+
+
+          console.log(response.data,"Refresh Response");
           const { user, token: newToken } = response.data;
 
           console.log(user)
@@ -120,8 +126,8 @@ export const authOptions: AuthOptions = {
       options: {
         httpOnly: true,
         path: "/",
-        secure: process.env.NODE_ENV === "production", 
-      },
+        // sameSite: 'None',
+              },
     },
   },
   debug: true,  
