@@ -437,14 +437,14 @@ setresetPasswordToken(res.token)
                      Email Id <span className="text-red-600">*</span>
                   </label>
                   <input
-                    type="email"
+                    type="text"
                     id="email_id"
                     onChange={(e) =>
                       SetLogin((prev) => ({ ...prev, email_id: e.target.value }))
                     }
                     value={login.email_id || ""}
                     className="w-full placeholder:text-sm px-4 py-2 mt-2 border rounded-lg outline-none shadow-md"
-                    placeholder="Enter your email or ID"
+                    placeholder="Enter your email or Phone"
                   />
 
                 </div>
