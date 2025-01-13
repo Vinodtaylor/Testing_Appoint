@@ -434,7 +434,7 @@ setresetPasswordToken(res.token)
                     htmlFor="email_id"
                     className="block text-sm font-medium text-[#000000]"
                   >
-                     Email Id <span className="text-red-600">*</span>
+                     Email Id/Phone <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
