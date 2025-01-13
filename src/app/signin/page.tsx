@@ -46,6 +46,7 @@ const LoginPage: React.FC = () => {
 
 
   const [isClient, setIsClient] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false); 
 
 
   useEffect(() => {
@@ -87,6 +88,9 @@ if (!isClient) {
       toast.error("Please fill out all fields.");
       return;
     }
+
+    setLoading(false);
+
   
     try {
       const result = await signIn("credentials", {
@@ -95,6 +99,9 @@ if (!isClient) {
         password: login.password,
       });
   
+      setLoading(false);
+
+
       if (result?.error) {
         const errorMessage = result.error === "CredentialsSignin"
           ? "Invalid credentials. Please check your email and password."
@@ -468,8 +475,8 @@ setresetPasswordToken(res.token)
                   type="submit"
                   className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-full shadow-md hover:bg-blue-600 transition-colors"
                 >
-                  Submit
-                </button>
+  {loading ? 'Logging in...' : 'Submit'}
+  </button>
               </form>
             ) : (
               renderForgotPasswordScreen()
