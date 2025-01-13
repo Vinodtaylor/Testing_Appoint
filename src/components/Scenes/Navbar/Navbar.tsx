@@ -148,7 +148,7 @@ const Navbar: React.FC = () => {
             </Avatar>
 
             {show && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-20">
+              <div className="absolute right-0 mt-2 w-48 bg-white  rounded-lg shadow-lg z-20">
                 <ul>
                  
                 <div className=" gap-4 items-center  flex p-3">
