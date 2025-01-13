@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import React, { useState, useRef, useEffect } from "react";
@@ -7,23 +8,22 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { LogOut, X } from "lucide-react";
 import logo from "../../../../public/hod_logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { usePathname } from "next/navigation";
+
+import {  usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Logout } from "@/routes/routes";
+import { signOut } from "next-auth/react";
+import Cookies from "js-cookie"; 
 
 
 
 const Navbar: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { data: session } = useSession();
+  const [isLoggedOut, setIsLoggedOut] = useState(false);
+
+
+
   const [show, setShow] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const path=usePathname()
@@ -48,6 +48,34 @@ const Navbar: React.FC = () => {
     },
   ];
 
+  const handleLogout = async () => {
+    try {
+      await Logout();
+  
+      await signOut({
+        redirect: false,
+      });
+      Cookies.remove("next-auth.session-token", { path: "/" });
+      Cookies.remove("next-auth.csrf-token", { path: "/" });
+      Cookies.remove("next-auth.callback-url", { path: "/" });
+      
+      setIsLoggedOut(true);
+
+    } catch (e:any) {
+      console.error("Logout error:", e.response?.data?.message );
+    }
+  };
+
+
+  useEffect(() => {
+    if (isLoggedOut && typeof window !== 'undefined') {
+      // Redirect after logout is complete, ensuring it's only done client-side
+      window.location.href = "/signin";
+
+    }
+  }, [isLoggedOut]);
+
+
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   const handleDropdownToggle = () => setShow((prev) => !prev);
@@ -70,7 +98,8 @@ const Navbar: React.FC = () => {
       <div className="flex   shadow-md  mb-4 items-center justify-between p-4">
         <Link href="/">
           <Image
-            src={navData[0].logo}
+            src={logo}
+            priority
             alt="Logo"
             className="w-[150px] h-[68px] object-contain"
           />
@@ -109,56 +138,43 @@ const Navbar: React.FC = () => {
           </ul>
 
           {/* Avatar with Dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative " ref={dropdownRef}>
             <Avatar
               className="w-14 h-14 cursor-pointer"
               onClick={handleDropdownToggle}
             >
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>Vinod</AvatarFallback>
+              <AvatarImage src={session?.user?.admin_photo} />
+              <AvatarFallback>{session?.user.name}</AvatarFallback>
             </Avatar>
 
             {show && (
               <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-20">
                 <ul>
                  
-                <div className=" gap-4 items-center flex p-3">
+                <div className=" gap-4 items-center  flex p-3">
                 <Avatar
               className="w-14 h-14 cursor-pointer"
               onClick={handleDropdownToggle}
             >
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>Vinod</AvatarFallback>
+              <AvatarImage src={session?.user?.admin_photo} />
+              <AvatarFallback>{session?.user?.name}</AvatarFallback>
             </Avatar>
 
             <div className="">
-              <p className="text-xs font-normal">Logged in as </p>
-              <h1 className="text-sm font-semibold">Master Admin</h1>
+              <p className="text-xs font-normal border">Logged in as </p>
+              <h1 className="text-sm font-semibold">{session?.user.role}</h1>
             </div>
                 </div>
                   <li
                   >
+                    <div   className="p-2 flex items-center text-base gap-2  cursor-pointer text-red-500"
+                    onClick={handleLogout}
+                    >
+                                            <LogOut size={15}/> Logout
 
-                   <AlertDialog>
-  <AlertDialogTrigger 
-  
-  className="p-2 flex items-center text-base gap-2  cursor-pointer text-red-500"
+                      
+                    </div>
 
-  >                   <LogOut size={15}/> Logout
-  </AlertDialogTrigger >
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-      <AlertDialogDescription>
-        Are you sure you want to log out? You will need to sign in again to access your account.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel className="rounded-full ">Cancel</AlertDialogCancel>
-      <AlertDialogAction className="rounded-full bg-[#03318A] shadow-md hover:bg-[#03318A]">Logout</AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
                   </li>
 
                  
@@ -215,8 +231,7 @@ const Navbar: React.FC = () => {
 
            
 
-          <AlertDialog >
-  <AlertDialogTrigger 
+  <div
   
 className="outline-none"
   >      
@@ -229,16 +244,22 @@ className="outline-none"
               className="w-14 h-14 cursor-pointer"
               onClick={handleDropdownToggle}
             >
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>Vinod</AvatarFallback>
+              <AvatarImage src={session?.user?.admin_photo} />
+              <AvatarFallback>{session?.user?.name}</AvatarFallback>
             </Avatar>
 
 <div className="flex flex-col">
-<p className="font-semibold text-sm">Master Admin</p>
+<p className="font-semibold text-sm">{session?.user?.name}</p>
+<div className="flex gap-1" onClick={handleLogout}>
+
             <p   className=" flex text-sm items-center gap-1  cursor-pointer text-red-500"
             >
-             <LogOut size={15}/> Logout
+
+              <LogOut size={15}/> Logout
+
             </p>
+            </div>
+
 </div>
             
               </div>
@@ -246,20 +267,8 @@ className="outline-none"
 
            
           </div>           
-  </AlertDialogTrigger >
-  <AlertDialogContent className="max-w-sm rounded-lg">
-    <AlertDialogHeader>
-      <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-      <AlertDialogDescription>
-        Are you sure you want to log out? You will need to sign in again to access your account.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel className="rounded-full ">Cancel</AlertDialogCancel>
-      <AlertDialogAction className="rounded-full bg-[#03318A] shadow-md hover:bg-[#03318A]">Logout</AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+  </div>
+
             
           </div>
         </div>

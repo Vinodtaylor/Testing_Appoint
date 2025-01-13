@@ -60,7 +60,6 @@ const Departments = () => {
   
 
   const handleEdit = (dept: Department) => {
-    console.log(dept)
     setCurrentDept(dept);
     setFormValues({
       department_name: dept.department_name,
@@ -87,7 +86,6 @@ const Departments = () => {
         department_description:formValues.department_description
       };
 
-      console.log(deptData)
   
       if (Dept) {
         // Update department

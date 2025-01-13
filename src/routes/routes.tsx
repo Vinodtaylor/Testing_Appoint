@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Department, Doctor,   DoctorPrice,   Schedule} from "@/types/types";
+import { Department, Doctor,   DoctorPrice,   LoginUser,   ResetNewPassword,   ResetOTpPassword,   Schedule} from "@/types/types";
 import { axiosInstance } from "./api";
-
 
 
 
@@ -13,6 +12,82 @@ const handleError = (error:any, defaultMessage: string): never => {
   const message = error.response?.data?.message || defaultMessage;
   throw new Error(message);
 };
+
+
+export const Logout = async () => {
+  try {
+    const res = await axiosInstance.post(`/admin_logout`, {},
+      {withCredentials:true}
+    );
+
+ 
+
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Login");
+  }
+};
+
+export const Login = async (data:LoginUser) => {
+  try {
+    const res = await axiosInstance.post(`/admin/login`,data,
+      {withCredentials:true}
+    );
+
+    console.log(res,"Signed IN")
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Login");
+  }
+};
+
+export const SendResetEmail = async ({ email_id }: { email_id: string })  => {
+  try {
+    const res = await axiosInstance.post(`/admin/forgotpasswordemailverify`, {email_id},
+      {withCredentials:true}
+    );
+
+    console.log(res,"Signed IN")
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Send Email");
+  }
+};
+
+
+export const  VerifyOTP = async (data:ResetOTpPassword) => {
+  try {
+    const res = await axiosInstance.post(`/admin/forgotpasswordotpverify`,data,
+      {withCredentials:true}
+    );
+
+    console.log(res,"Signed IN")
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Verify OTP");
+  }
+};
+
+export const ResetPassword = async (data: ResetNewPassword, token: string) => {
+  try {
+    const res = await axiosInstance.post(
+      `/admin/forgotpasswordotpset`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },
+        withCredentials: true,
+      }
+    );
+
+    console.log(res, "Password Reset Successfully");
+    return res.data;
+  } catch (e) {
+    handleError(e, "Failed to Reset Password");
+  }
+};
+
 
 export const CreateDoctor = async (data:FormData) => {
   try {
@@ -25,6 +100,7 @@ export const CreateDoctor = async (data:FormData) => {
     handleError(e, "Failed to create doctor");
   }
 };
+
 
 
 export const GetDoctorbyId = async (id:string) => {
@@ -79,43 +155,41 @@ export const UpdateDoctor = async (id: string, doctorData: Doctor, isFormData = 
 
 
 
-export const UpdateHomeDocProfile = async (id: string, homeDocProfile: File | Record<string, any>, isFormData: boolean = true) => {
+export const UpdateHomeDocProfile = async (id: string, home_doc_profile: File) => {
   try {
-    let data: FormData | Record<string, any>;
-    let headers: Record<string, string>;
+    const formData = new FormData();
+    formData.append("home_doc_profile", home_doc_profile); 
 
-    if (isFormData) {
-      const formData = new FormData();
-      formData.append("home_doc_profile", homeDocProfile as File); 
-      data = formData;
-      headers = { "Content-Type": "multipart/form-data" };
-    } else {
-      data = homeDocProfile; 
-      headers = { "Content-Type": "application/json" };
-    }
+    console.log("Updating Home Visit image for doctor with ID:", id);
+    console.log("Received file:", home_doc_profile.name);
+
 
     const res = await axiosInstance.put(
       `/doctor/update_homedocprofile/${id}`,
-      data,
-      { headers }
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" }
+      }
     );
 
-    return res.data;
+    console.log("Response received:", res.data);
+
+    return res.data;  
   } catch (e) {
-    handleError(e, "Failed to update Home Doc  Image");
-    throw e
+    handleError(e, "Failed to update Cover Image");
   }
 };
-
-
-
 
 
 // Update profile image
 export const UpdateProfileImage = async (id: string, doctor_image: File) => {
   try {
+    console.log("Updating profile image for doctor with ID:", id);
+    console.log("Received file:", doctor_image.name);
+
     const formData = new FormData();
-    formData.append("doctor_image", doctor_image);  // Append the actual file here
+    formData.append("doctor_image", doctor_image); 
+    console.log("FormData prepared:", formData);
 
     const res = await axiosInstance.put(
       `/doctor/update_doctorimage/${id}`,
@@ -124,17 +198,26 @@ export const UpdateProfileImage = async (id: string, doctor_image: File) => {
         headers: { "Content-Type": "multipart/form-data" }
       }
     );
-    return res.data;  // This should return the response with the URL
+
+    console.log("Response received:", res.data);
+
+    return res.data;  
   } catch (e) {
+    console.error("Error occurred during profile image update:", e);
     handleError(e, "Failed to update Profile Image");
   }
 };
+
 
 // Update cover image
 export const UpdateCoverImage = async (id: string, doctor_cover_image: File) => {
   try {
     const formData = new FormData();
-    formData.append("doctor_cover_image", doctor_cover_image);  // Append the actual file here
+    formData.append("doctor_cover_image", doctor_cover_image); 
+
+    console.log("Updating profile image for doctor with ID:", id);
+    console.log("Received file:", doctor_cover_image.name);
+
 
     const res = await axiosInstance.put(
       `/doctor/update_doctorcoverimage/${id}`,
@@ -143,7 +226,10 @@ export const UpdateCoverImage = async (id: string, doctor_cover_image: File) => 
         headers: { "Content-Type": "multipart/form-data" }
       }
     );
-    return res.data;  // This should return the response with the URL
+
+    console.log("Response received:", res.data);
+
+    return res.data;  
   } catch (e) {
     handleError(e, "Failed to update Cover Image");
   }
@@ -164,7 +250,6 @@ export const GetAllDoctorwithPagination = async (currentPage:number,limit:number
 export const GetAllDoctor = async () => {
   try {
     const res = await axiosInstance.get(`/doctor/get_doctor`);
-    console.log(res,"All Doctors")
     return res.data;
   } catch (e) {
     handleError(e, "Failed to fetch  Doctors");
@@ -185,7 +270,6 @@ export const AllDoctors=async()=>{
 export const GetAllDoctorNames = async () => {
   try {
     const res = await axiosInstance.get(`/getalldoctors`);
-    console.log(res,"All Doctors")
     return res.data;
   } catch (e) {
     handleError(e, "Failed to fetch  Doctors");

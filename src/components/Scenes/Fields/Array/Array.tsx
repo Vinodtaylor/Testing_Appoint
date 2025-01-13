@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus,  X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 
@@ -17,12 +17,6 @@ const ArrayField: React.FC<ArrayFieldProps> = ({ name, label, placeholder }) => 
   const [editValue, setEditValue] = useState<string>("");
 
   useEffect(() => {
-    const form = getValues();
-    console.log(form, "Tracking fields");
-  }, [getValues]);
-
-
-  useEffect(() => {
     const existingItems = getValues(name) || [];
     if (Array.isArray(existingItems)) {
       setItems(existingItems);
@@ -32,33 +26,25 @@ const ArrayField: React.FC<ArrayFieldProps> = ({ name, label, placeholder }) => 
   const handleCreateOrEdit = (value: string) => {
     if (editingIndex !== null) {
       if (editValue.trim() !== "") {
-        setItems((prevItems) => {
-          const updatedItems = prevItems.map((item, idx) =>
-            idx === editingIndex ? editValue : item
-          );
-          setValue(name, updatedItems);
-          return updatedItems;
-        });
+        const updatedItems = items.map((item, idx) =>
+          idx === editingIndex ? editValue : item
+        );
+        setItems(updatedItems);
+        setValue(name, updatedItems);
         setEditingIndex(null);
         setEditValue("");
       }
-    } else {
-      if (value.trim() !== "") {
-        setItems((prevItems) => {
-          const updatedItems = [...prevItems, value];
-          setValue(name, updatedItems);
-          return updatedItems;
-        });
-      }
+    } else if (value.trim() !== "") {
+      const updatedItems = [...items, value];
+      setItems(updatedItems);
+      setValue(name, updatedItems);
     }
   };
 
   const handleRemove = (index: number) => {
-    setItems((prevItems) => {
-      const updatedItems = prevItems.filter((_, idx) => idx !== index);
-      setValue(name, updatedItems);
-      return updatedItems;
-    });
+    const updatedItems = items.filter((_, idx) => idx !== index);
+    setItems(updatedItems);
+    setValue(name, updatedItems);
   };
 
   return (
@@ -100,33 +86,29 @@ const ArrayField: React.FC<ArrayFieldProps> = ({ name, label, placeholder }) => 
       />
 
       <ul className="mt-2 flex flex-wrap gap-4">
-        {items.length > 0 ? (
-          items.map((item, index) => (
-            <li key={index} className="flex justify-between  items-center gap-2">
-              <div className="relative lg:w-28 w-32   flex items-center gap-2">
-                <p
-                  onClick={() => {
-                    setEditingIndex(index);
-                    setEditValue(item);
-                  }}
-                  className="px-4  bg-white drop-shadow-sm shadow-lg p-2 rounded-lg text-xs cursor-pointer w-full  truncate"
-                >
-                  {item}
-                </p>
+        {items.map((item, index) => (
+          <li key={index} className="flex justify-between items-center gap-2">
+            <div className="relative lg:w-28 w-32 flex items-center gap-2">
+              <p
+                onClick={() => {
+                  setEditingIndex(index);
+                  setEditValue(item);
+                }}
+                className="px-4 bg-white drop-shadow-sm shadow-lg p-2 rounded-lg text-xs cursor-pointer w-full truncate"
+              >
+                {item}
+              </p>
 
-                <button
-                  type="button"
-                  onClick={() => handleRemove(index)}
-                  className="absolute top-1 right-1 transform translate-x-2  flex justify-center items-center  text-red-500  p-1 transition-all"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            </li>
-          ))
-        ) : (
-          <></>
-        )}
+              <button
+                type="button"
+                onClick={() => handleRemove(index)}
+                className="absolute top-1 right-1 transform translate-x-2 flex justify-center items-center text-red-500 p-1 transition-all"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
   );

@@ -17,7 +17,7 @@ import Image from "next/image";
 import { Department, getDoctor, Hospital, RegionsType } from "@/types/types";
 import { IoMdArrowDropdown } from "react-icons/io";
 import EditDoctorSchema from "@/schema/EditDoctor";
-import compressImage from "@/utilis/compressImage";
+// import compressImage from "@/utilis/compressImage";
 
 
 
@@ -120,7 +120,6 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
 
 
 
-
   useEffect(() => {
     const getData = async () => {
       try {
@@ -209,12 +208,12 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
 
 
 
-  useEffect(() => {
-    const subscription = methods.watch((value) => {
-      console.log("Form values:", value);  
-    });
-    return () => subscription.unsubscribe();
-  }, [methods]);
+  // useEffect(() => {
+  //   const subscription = methods.watch((value) => {
+  //     console.log("Form values:", value);  
+  //   });
+  //   return () => subscription.unsubscribe();
+  // }, [methods]);
   
   
   
@@ -274,78 +273,74 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
 
   const handleWalkinToggle = () => {
     const updatedDoctorType = isWalkinVisitTrue
-      ? doctor.doctor_type.filter((type) => type !== "Walkin")  // Remove 'Walkin'
-      : [...new Set([...doctor.doctor_type, "Walkin"])]  // Add 'Walkin' only if it's not already in the array
+      ? doctor.doctor_type.filter((type) => type !== "Walkin")  
+      : [...new Set([...doctor.doctor_type, "Walkin"])]  
     
     // Update both the state and the form value
     setIsWalkinVisitTrue(!isWalkinVisitTrue);
-    methods.setValue("doctor_type", updatedDoctorType);  // Update the form value
+    methods.setValue("doctor_type", updatedDoctorType); 
   };
   
   const handleDoctorVisitToggle = () => {
     const updatedDoctorType = isdoctorVisitTrue
-      ? doctor.doctor_type.filter((type) => type !== "Home")  // Remove 'Home'
-      : [...new Set([...doctor.doctor_type, "Home"])]  // Add 'Home' only if it's not already in the array
+      ? doctor.doctor_type.filter((type) => type !== "Home") 
+      : [...new Set([...doctor.doctor_type, "Home"])] 
     
     // Update both the state and the form value
     setIsdoctorVisitTrue(!isdoctorVisitTrue);
-    methods.setValue("doctor_type", updatedDoctorType);  // Update the form value
+    methods.setValue("doctor_type", updatedDoctorType);
   };
   
-  const handleHomeDocImageChange =async(event: React.ChangeEvent<HTMLInputElement>) => {
+ 
+
+
+  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
-  
     if (file) {
-      const compressedFile = await compressImage(file, 1, 800);
-      setHomeDocImage(compressedFile); 
-      const objectUrl = URL.createObjectURL(compressedFile);  
-      setHomeImageUrl(objectUrl);
-      methods.setValue("home_doc_profile", objectUrl); 
+      setProfileImage(file); 
+      const fileUrl = URL.createObjectURL(file); 
+      setProfileImageUrl(fileUrl); 
+      methods.setValue("doctor_image", fileUrl);
     } else {
       console.error("No file selected.");
     }
   };
-  const handleProfileImageChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-  
-    if (file) {
-      const compressedFile = await compressImage(file, 1, 800);
 
-      setProfileImage(compressedFile);
-      const objectUrl = URL.createObjectURL(compressedFile);  
-      setProfileImageUrl(objectUrl); 
-      methods.setValue("doctor_image", objectUrl); 
+
+    const handleHomeDocImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files ? event.target.files[0] : null;
+      if (file) {
+        setHomeDocImage(file); 
+        const fileUrl = URL.createObjectURL(file); 
+        setHomeImageUrl(fileUrl); 
+        methods.setValue("home_doc_profile", fileUrl);
+      } else {
+        console.error("No file selected.");
+      }
+    };
+  
+
+
+
+  
+  const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      setCoverImage(file); 
+      const fileUrl = URL.createObjectURL(file);
+      setCoverImageUrl(fileUrl); 
+      methods.setValue("doctor_cover_image", fileUrl);
     } else {
       console.error("No file selected.");
     }
   };
-  
 
-const handleCoverImageChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files ? event.target.files[0] : null;
-
-  if (file) {
-    const compressedFile = await compressImage(file, 1, 800);
-
-    setCoverImage(compressedFile);  // Save the file object
-    const objectUrl = URL.createObjectURL(compressedFile);  // Create a URL for the file for preview
-    setCoverImageUrl(objectUrl);  // Preview the image
-    methods.setValue("doctor_cover_image", objectUrl);  // Set the URL for preview in the form (not the file object)
-  } else {
-    console.error("No file selected.");
-  }
-};
-
-// Function to submit the doctor data and upload images
 const SubmitDoctor = async (data: Doctor) => {
-  console.log("Form data before submission:", data);
 
-  // Ensure the doctor ID and region ID are included if not already set
   if (!data._id) {
-    data._id = doctor._id;  // Set doctor ID from the prop if it's missing
+    data._id = doctor._id; 
   }
-  
-  // Ensure data.region is an object (it could be a string, i.e., just the region ID)
+
   if (typeof data.region === 'string') {
     data.region = { _id: data.region }; 
   }
@@ -360,7 +355,7 @@ const SubmitDoctor = async (data: Doctor) => {
   }
 
   if (!data.region?._id) {
-    data.region._id = doctor.region._id;  
+    data.region._id = doctor?.region?._id;  
   }
 
 
@@ -373,7 +368,6 @@ const SubmitDoctor = async (data: Doctor) => {
   }
 
   try {
-    console.log("Doctor data before processing:", data);
 
 
     const formData = new FormData();
@@ -400,16 +394,16 @@ const SubmitDoctor = async (data: Doctor) => {
       department:data.department._id,
       hospital:data.hospital._id
     };
-    console.log("Prepared doctor data:", doctorData);
+   
 
     // First, update the doctor details (excluding images)
-    const resDoctor = await UpdateDoctor(data._id, doctorData);
-    console.log("Doctor update response:", resDoctor);
+   await UpdateDoctor(data._id, doctorData);
 
     // Upload images in parallel (if they exist)
     const updateCoverImagePromise = coverImage
       ? UpdateCoverImage(data._id, coverImage)
       : Promise.resolve({ status: 200, data: { doctor_cover_image: '' } });
+
 
     const updateProfileImagePromise = profileImage
       ? UpdateProfileImage(data._id, profileImage)
@@ -423,9 +417,7 @@ const SubmitDoctor = async (data: Doctor) => {
     // Wait for both image uploads to complete
     const [resCoverImage, resProfileImage,resHomeDocImage] = await Promise.all([updateCoverImagePromise, updateProfileImagePromise,updateHomeDocImagePromise]);
 
-    console.log("Cover image upload response:", resCoverImage);
-    console.log("Profile image upload response:", resProfileImage);
-    console.log("Home Doc image upload response:", resHomeDocImage);
+ 
 
 
     // If images were uploaded, update the URLs in doctor data
@@ -444,8 +436,7 @@ const SubmitDoctor = async (data: Doctor) => {
     }
 
     // Now, update the doctor details with the image URLs
-    const resDoctorWithImages = await UpdateDoctor(data._id, doctorData,true);
-    console.log("Doctor details with image URLs response:", resDoctorWithImages);
+   await UpdateDoctor(data._id, doctorData,true);
 
     
     methods.reset();
@@ -465,7 +456,7 @@ const SubmitDoctor = async (data: Doctor) => {
   
   
 
-  console.log(methods.formState.errors,"Validation Error");
+  // console.log(methods.formState.errors,"Validation Error");
 
 
 
@@ -867,7 +858,6 @@ const SubmitDoctor = async (data: Doctor) => {
               className="cursor-pointer p-3 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
               onClick={() => {
                 field.onChange(option.value); 
-                console.log(option.value,`${option.label}`)
                 setIsHospitalDropdownOpen(false);
               }}
             >

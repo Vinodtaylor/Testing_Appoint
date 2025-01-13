@@ -32,8 +32,14 @@ import {
 
 
 
-export const getDynamicYears = (endYear = new Date().getFullYear(), range = 20) => {
-  return Array.from({ length: range + 1 }, (_, index) => (endYear - index).toString());
+export const getStartDynamicYears = (startYear = new Date().getFullYear(), range = 20) => {
+  return Array.from({ length: range + 1 }, (_, index) => (startYear + index).toString());
+};
+
+
+
+export const getEndDynamicYears = (startYear = new Date().getFullYear(), range = 20) => {
+  return Array.from({ length: range + 1 }, (_, index) => (startYear + index).toString());
 };
 
 
@@ -143,12 +149,12 @@ const Doctor: React.FC<DoctorProps> = ({
             setIsEditMode(true); // Set to edit mode only if schedule data exists
 
             // Log each part of the data that will populate the form
-            console.log("Start Year:", scheduleData.start_year);
-            console.log("End Year:", scheduleData.end_year);
-            console.log("Days of the week:", scheduleData.days);
-            console.log("Morning Schedule:", scheduleData.schedules[0].morning);
-            console.log("Afternoon Schedule:", scheduleData.schedules[0].afternoon);
-            console.log("Evening Schedule:", scheduleData.schedules[0].evening);
+            // console.log("Start Year:", scheduleData.start_year);
+            // console.log("End Year:", scheduleData.end_year);
+            // console.log("Days of the week:", scheduleData.days);
+            // console.log("Morning Schedule:", scheduleData.schedules[0].morning);
+            // console.log("Afternoon Schedule:", scheduleData.schedules[0].afternoon);
+            // console.log("Evening Schedule:", scheduleData.schedules[0].evening);
 
             // Prepopulate the form with existing schedule data
             setDropdownValues({
@@ -209,7 +215,6 @@ const Doctor: React.FC<DoctorProps> = ({
         setDoctors((prevDoctors) =>
           prevDoctors.filter((doctor) => doctor._id !== currentDoctor._id)
         );
-        console.log(`Deleted doctor: ${currentDoctor.name}`);
       } catch (error) {
         console.error("Error deleting doctor:", error);
       }
@@ -334,7 +339,7 @@ const Doctor: React.FC<DoctorProps> = ({
         })),
     };
 
-    console.log("Generated Schedule Data:", scheduleData);
+    // console.log("Generated Schedule Data:", scheduleData);
 
     try {
         if (isEditMode) {
@@ -348,7 +353,7 @@ const Doctor: React.FC<DoctorProps> = ({
                 
                 const scheduleId=existingScheduleData._id
 
-                console.log(scheduleId,"current schedule object id")
+                // console.log(scheduleId,"current schedule object id")
 
                 // You can now use the existing data to pass into the update
                 const updatedScheduleData = {
@@ -364,22 +369,21 @@ const Doctor: React.FC<DoctorProps> = ({
                     })),
                 };
 
-                console.log("Existing Schedule Data to Update:", updatedScheduleData);
+                // console.log("Existing Schedule Data to Update:", updatedScheduleData);
 
                 // Update the schedule with existing data
-                const updateRes = await UpdateSchedule(scheduleId!, updatedScheduleData);
-                console.log("Schedule updated successfully:", updateRes.data);
+                 await UpdateSchedule(scheduleId!, updatedScheduleData);
+                // console.log("Schedule updated successfully:", updateRes.data);
             } else {
                 console.log("No existing schedule found for this doctor.");
             }
         } else {
             // If it's in create mode, create a new schedule
-            console.log("Creating new schedule...");
-            const createRes = await CreateSchedule(scheduleData);
-            console.log("Schedule created successfully:", createRes.data);
+            // console.log("Creating new schedule...");
+             await CreateSchedule(scheduleData);
+            // console.log("Schedule created successfully:", createRes.data);
         }
 
-        console.log("Secondary update completed.");
 
     } catch (error) {
         console.error("Error processing schedule:", error);
@@ -403,8 +407,8 @@ const Doctor: React.FC<DoctorProps> = ({
 
 
 
-
-  const yearOptions = getDynamicYears(new Date().getFullYear(), 20);
+  const startYearOptions = getStartDynamicYears(new Date().getFullYear(), 20); 
+  const endYearOptions = getEndDynamicYears(new Date().getFullYear(), 20); 
 
 
   return (
@@ -498,7 +502,7 @@ const Doctor: React.FC<DoctorProps> = ({
 
                 value={dropdownValues.startYear}
                 onChange={(value) => handleSelectChange("startYear", value)}
-                options={yearOptions}
+                options={startYearOptions}
                 placeholder="Select Start Year"
                 label="Start Year"
                 inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md border-gray-300 focus:ring-2 focus:ring-blue-500"
@@ -510,7 +514,7 @@ const Doctor: React.FC<DoctorProps> = ({
               id="end_year"
                 value={dropdownValues.endYear}
                 onChange={(value) => handleSelectChange("endYear", value)}
-                options={yearOptions}
+                options={endYearOptions}
                 placeholder="Select End Year"
                 label="End Year"
                 inputClassName="outline-none text-sm rounded-lg bg-transparent h-[48px] shadow-md border-gray-300 focus:ring-2 focus:ring-blue-500"

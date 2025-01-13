@@ -35,7 +35,7 @@ interface DoctorFilterProps {
   filterValues: FilterValues; // Pass down the current filters
 }
 
-const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,filteredDoctors}) => {
+const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,filteredDoctors}) => {
   const [selectedRegion, setSelectedRegion] = useState<string>("");
   
   const [dropdownValues, setDropdownValues] = useState({
@@ -78,12 +78,10 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
             getAllDept(),
             GetAllDoctorNames(),
           ]);
-          console.log(deptRes,"deptResponse")
     
           const departmentNames = deptRes.data.map((dept: { department_name: string }) => dept.department_name);
           setDepartmentNames(departmentNames);
 
-          console.log(departmentNames,"dept names")
     
           // const hospitalNames = hospitalRes.data.map((hospital: { hospital_name: string }) => hospital.hospital_name);
           // setHospitalNames(hospitalNames);
@@ -91,7 +89,6 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
           const doctorNames = doctorRes.data.map((doctor: { name: string }) => doctor.name);
           setdocNames(doctorNames);
        
-          console.log("Doctor Names:", doctorNames);
     
         } catch (e) {
           console.error("Error fetching data:", e);
@@ -128,7 +125,6 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
 
   useEffect(() => {
 
-    console.log("Applying filters...");
 
     filterData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,61 +132,51 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
   
   
 
-  useEffect(() => {
-    console.log("Selected Region:", selectedRegion);
-    console.log("Selected Gender:", dropdownValues.gender);
-    console.log("Selected Doctor:", dropdownValues.doctor);
-    console.log("Selected Start Date:", dropdownValues.startdate);
-    console.log("Selected End Date:", dropdownValues.enddate);
-
-    console.log("Selected Department:", dropdownValues.department);
-    console.log("Search Query:", searchQuery);
-  }, [selectedRegion, dropdownValues, searchQuery]);
   
 
 
   const filterData = () => {
-    const filteredData = doctorData.filter((item) => {
-      // Gender filter
-      const matchesGender =
-        !dropdownValues.gender ||
-        (item.gender && item.gender.toLowerCase() === dropdownValues.gender.toLowerCase());
+    // const filteredData = doctorData.filter((item) => {
+    //   // Gender filter
+    //   const matchesGender =
+    //     !dropdownValues.gender ||
+    //     (item.gender && item.gender.toLowerCase() === dropdownValues.gender.toLowerCase());
   
-      // Doctor filter (name)
-      const matchesDoctor =
-        !dropdownValues.doctor ||
-        (item.name && item.name.toLowerCase().includes(dropdownValues.doctor.toLowerCase()));
+    //   // Doctor filter (name)
+    //   const matchesDoctor =
+    //     !dropdownValues.doctor ||
+    //     (item.name && item.name.toLowerCase().includes(dropdownValues.doctor.toLowerCase()));
   
-        const matchesDept =
-        !dropdownValues.department ||
-        (typeof item.department?.department_name === 'string' &&
-         item?.department?.department_name.toLowerCase().includes(dropdownValues.department.toLowerCase()));
+    //     const matchesDept =
+    //     !dropdownValues.department ||
+    //     (typeof item.department?.department_name === 'string' &&
+    //      item?.department?.department_name.toLowerCase().includes(dropdownValues.department.toLowerCase()));
       
   
-      // Region filter
-      const matchesRegion =
-        !selectedRegion ||
-        (item.region &&
-          Array.isArray(item.region) &&
-          item.region.some(
-            (region) => region?.region_name?.toLowerCase() === selectedRegion.toLowerCase()
-          ));
+    //   // Region filter
+    //   const matchesRegion =
+    //     !selectedRegion ||
+    //     (item.region &&
+    //       Array.isArray(item.region) &&
+    //       item.region.some(
+    //         (region) => region?.region_name?.toLowerCase() === selectedRegion.toLowerCase()
+    //       ));
   
-      // Date range filter
-      const doctorCreatedDate = moment(item.createdAt, "YYYY-MM-DD");
+    //   // Date range filter
+    //   const doctorCreatedDate = moment(item.createdAt, "YYYY-MM-DD");
   
-      // Check if start and end dates are valid moments
-      const startMoment = dropdownValues.startdate ? moment(dropdownValues.startdate).startOf('day') : null;
-      const endMoment = dropdownValues.enddate ? moment(dropdownValues.enddate).endOf('day') : null;
+    //   // Check if start and end dates are valid moments
+    //   const startMoment = dropdownValues.startdate ? moment(dropdownValues.startdate).startOf('day') : null;
+    //   const endMoment = dropdownValues.enddate ? moment(dropdownValues.enddate).endOf('day') : null;
   
-      // Check if doctor's creation date is within the date range
-      const isWithinDateRange =
-        (!startMoment || doctorCreatedDate.isSameOrAfter(startMoment)) &&
-        (!endMoment || doctorCreatedDate.isSameOrBefore(endMoment));
+    //   // Check if doctor's creation date is within the date range
+    //   const isWithinDateRange =
+    //     (!startMoment || doctorCreatedDate.isSameOrAfter(startMoment)) &&
+    //     (!endMoment || doctorCreatedDate.isSameOrBefore(endMoment));
   
-      // Combine all conditions
-      return matchesGender && matchesDoctor && matchesDept && matchesRegion && isWithinDateRange;
-    });
+    //   // Combine all conditions
+    //   return matchesGender && matchesDoctor && matchesDept && matchesRegion && isWithinDateRange;
+    // });
   
     // After filtering, pass the updated filter values to onFilterChange
     onFilterChange({
@@ -202,7 +188,6 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
       enddate: dropdownValues.enddate,
     });
   
-    console.log(filteredData, "after filter");
   };
   
   
@@ -436,6 +421,7 @@ const DoctorFilter: React.FC<DoctorFilterProps>  = ({onFilterChange,doctorData,f
       >
         <div className="flex items-center flex-col w-full justify-center">
           <Image
+            priority
             src={region.region_image}
             width={50}
             height={100}

@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import { Department, Hospital, RegionsType } from "@/types/types";
 import { IoMdArrowDropdown } from "react-icons/io";
+// import compressImage from "@/utilis/compressImage";
 
 const DoctorDetails = () => {
   const { isOpen, openModal, closeModal } = useModal(); 
@@ -38,11 +39,11 @@ const DoctorDetails = () => {
   });
 
 
-  const formValues = methods.watch(); // Watches the entire form
+  // const formValues = methods.watch(); // Watches the entire form
 
-useEffect(() => {
-  console.log("Form values updated:", formValues);
-}, [formValues]);
+// useEffect(() => {
+//   console.log("Form values updated:", formValues);
+// }, [formValues]);
 
 
 
@@ -119,7 +120,6 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     const handleHospitalChange = (value:string) => {
       setSelectedRegion(value); 
       setIsDropdownOpen(false)
-      console.log("hospital",value)
       methods.setValue('hospital', value); 
     };
 
@@ -128,7 +128,6 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     const handleDeptChange = (value:string) => {
       setSelectedRegion(value); 
       setIsDropdownOpen(false)
-      console.log("department",value)
 
       methods.setValue('department', value); 
     };
@@ -144,22 +143,27 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     setSelectedRegion(value); 
     setIsDropdownOpen(false)
     methods.setValue('region', value); 
-    console.log("region",value)
 
   };
  
 
-  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleProfileImageChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
+  
     if (file) {
-      setProfileImage(file); 
-      const fileUrl = URL.createObjectURL(file); 
-      setProfileImageUrl(fileUrl); 
-      methods.setValue("doctor_image", fileUrl);
+      // const compressedFile = await compressImage(file, 1, 800);
+
+      setProfileImage(file);
+      const objectUrl = URL.createObjectURL(file);  
+      setProfileImageUrl(objectUrl); 
+      methods.setValue("doctor_image", objectUrl); 
     } else {
       console.error("No file selected.");
     }
   };
+
+  
 
 
   const handleHomeDocImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -340,7 +344,7 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
   
   
 
-  console.log(methods.formState.errors);
+  // console.log(methods.formState.errors);
 
 
   return (
@@ -946,7 +950,7 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
     id="like_cout"
     {...methods.register("like_cout", {
       setValueAs: (value) => (value === "" ? "" : Number(value)),
-    })}    placeholder="Like_count"
+    })}    placeholder="Like count"
     className="w-full p-2 placeholder:text-sm placeholder:px-4 shadow-md border border-gray-300 rounded-md outline-none"
   />
 
@@ -997,9 +1001,8 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
 <div className="grid grid-cols-3 gap-4">
 
 {profileImageUrl && renderImagePreview(profileImageUrl,handleRemoveProfileImage)}
-{homedocImageUrl && renderImagePreview(homedocImageUrl,handleRemoveProfileImage)}
-
-{coverImageUrl && renderImagePreview(coverImageUrl,handleRemoveHomeDocImage)}
+{homedocImageUrl && renderImagePreview(homedocImageUrl,handleRemoveHomeDocImage)}
+{coverImageUrl && renderImagePreview(coverImageUrl,handleRemoveCoverImage)}
 </div>
 
 
