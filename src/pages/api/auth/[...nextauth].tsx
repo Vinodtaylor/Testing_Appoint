@@ -6,9 +6,9 @@ import type { AuthOptions } from "next-auth";
 import { Token } from "@/types/next-auth";
 
 
-// const TOKEN_EXPIRATION_TIME = 3 * 60 * 60 * 1000; 
+const TOKEN_EXPIRATION_TIME = 3 * 60 * 60 * 1000; 
 
-const TOKEN_EXPIRATION_TIME = 10 * 1000; 
+// const TOKEN_EXPIRATION_TIME = 10 * 1000; 
 
 
 export const authOptions: AuthOptions = {
