@@ -126,8 +126,6 @@ export const authOptions: AuthOptions = {
       options: {
         httpOnly: true,
         path: "/",
-        secure: process.env.NODE_ENV === 'production', 
-        sameSite: 'None', 
       },
     }
   },
