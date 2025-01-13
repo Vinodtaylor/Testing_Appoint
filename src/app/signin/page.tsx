@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from "../../../public/hod_logo.png";
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
@@ -39,7 +39,24 @@ const LoginPage: React.FC = () => {
     email_id:"",
     password:""
   })
+
+
+
   const router=useRouter()
+
+
+  const [isClient, setIsClient] = useState(false);
+
+
+  useEffect(() => {
+    setIsClient(true); // Set to true after client-side mount
+  }, []);
+
+
+  // Conditionally render content based on whether it's client-side
+if (!isClient) {
+  return null; // Or a loading spinner if needed
+}
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);

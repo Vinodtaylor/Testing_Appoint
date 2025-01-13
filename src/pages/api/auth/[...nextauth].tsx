@@ -126,9 +126,8 @@ export const authOptions: AuthOptions = {
       options: {
         httpOnly: true,
         path: "/",
-        // sameSite: 'None',
-              },
-    },
+      },
+    }
   },
   debug: true,  
 };
