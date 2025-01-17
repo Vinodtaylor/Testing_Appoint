@@ -860,6 +860,9 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
       onChange={handleProfileImageChange}
 
     />
+
+<p className="text-left mt-1 text-red-600 font-medium text-sm">Width:300px ; height:300px</p>
+
   </div>
 
 
@@ -888,7 +891,11 @@ const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
      onChange={handleHomeDocImageChange}
 
    />
+
+<p className="text-left mt-1 text-red-600 font-medium text-sm">Width:650px ; height:980px</p>
+
  </div>
+
 
   {/* Cover Image Upload */}
   <div className="w-full">

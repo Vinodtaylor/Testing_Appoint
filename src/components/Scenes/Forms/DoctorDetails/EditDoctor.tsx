@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import { Department, getDoctor, Hospital, RegionsType } from "@/types/types";
 import { IoMdArrowDropdown } from "react-icons/io";
 import EditDoctorSchema from "@/schema/EditDoctor";
 // import compressImage from "@/utilis/compressImage";
+import imageCompression from 'browser-image-compression';
 
 
 
@@ -77,7 +79,6 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     defaultValues: {
       main_speciality: [],
        speciality: [],
-
       meta_tag: [],
       doctor_expert: [],
       top_treatments: [],
@@ -90,8 +91,6 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     },
 
   });
-
-
 
 
   // const { fields: qualificationFields, append, remove } = useFieldArray({
@@ -323,17 +322,34 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
 
 
   
-  const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      setCoverImage(file); 
-      const fileUrl = URL.createObjectURL(file);
-      setCoverImageUrl(fileUrl); 
-      methods.setValue("doctor_cover_image", fileUrl);
-    } else {
-      console.error("No file selected.");
-    }
-  };
+const handleCoverImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files ? event.target.files[0] : null;
+      if (file) {
+        try {
+          // Options for image compression
+          const options = {
+            maxSizeMB: 1, // Maximum file size in MB
+            maxWidthOrHeight: 1024, // Max width or height
+            useWebWorker: true, // Use web worker for better performance
+          };
+    
+          // Compress the image
+          const compressedFile = await imageCompression(file, options);
+    
+          // Generate a URL for the compressed file
+          const compressedFileUrl = URL.createObjectURL(compressedFile);
+    
+          // Update state and form values
+          setCoverImage(compressedFile);
+          setCoverImageUrl(compressedFileUrl);
+          methods.setValue("doctor_cover_image", compressedFileUrl);
+        } catch (error) {
+          console.error("Error during image compression:", error);
+        }
+      } else {
+        console.error("No file selected.");
+      }
+    };
 
 const SubmitDoctor = async (data: Doctor) => {
 
@@ -935,6 +951,8 @@ const SubmitDoctor = async (data: Doctor) => {
 
     />
 
+
+<p className="text-left mt-1 text-red-600 font-medium text-sm">Width:300px ; height:300px</p>
 <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_image?.message}</p>
 
   </div>
@@ -988,6 +1006,8 @@ const SubmitDoctor = async (data: Doctor) => {
      className="hidden"
      onChange={handleHomeDocImageChange}
    />
+
+<p className="text-left mt-1 text-red-600 font-medium text-sm">Width:650px ; height:980px</p>
 
 <p className="text-red-500 text-left text-sm">{methods.formState.errors.home_doc_profile?.message}</p>
 
