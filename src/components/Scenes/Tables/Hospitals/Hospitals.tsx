@@ -105,33 +105,48 @@ const [Regionoptions,setRegionoptions]=useState<Regions[]>([])
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
   
-    if (file) {
-      console.log('originalFile instanceof Blob', file instanceof Blob); // true
-      console.log(`originalFile size ${file.size / 1024 / 1024} MB`);
+    if (!file) {
+      return;
+    }
   
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
+    const options = {
+      maxSizeMB: 1, // Maximum file size in MB
+      maxWidthOrHeight: 1920, // Maximum width or height
+      useWebWorker: true, // Enable Web Worker for better performance
+    };
+  
+    try {
+      // Compress the image
+      const compressedFile = await imageCompression(file, options);
+  
+      const compressedImage = new File([compressedFile], file.name, {
+        type: file.type,
+        lastModified: Date.now(),
+      });
+  
+      // Read the compressed file as a data URL
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imagePreviewUrl = reader.result as string;
+  
+        // Update the state and form values
+        setImagePreview(imagePreviewUrl);
+        setFormValues((prevValues) => ({
+          ...prevValues,
+          hospital_icon: imagePreviewUrl,
+        }));
       };
   
-      try {
-        const compressedFile = await imageCompression(file, options);
+      reader.onerror = () => {
+        console.error("Error reading the compressed image file.");
+      };
   
-        console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
-        console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
-  
-        const reader = new FileReader();
-        reader.onload = () => {
-          setImagePreview(reader.result as string);
-          setFormValues({ ...formValues, hospital_icon: reader.result as string });
-        };
-        reader.readAsDataURL(compressedFile); // Use the compressed file here
-      } catch (error) {
-        console.error('Error compressing image:', error);
-      }
+      reader.readAsDataURL(compressedImage); 
+    } catch (error) {
+      console.error("Error compressing the image:", error);
     }
   };
+  
   
   const handleSubmit = async () => {
     try {

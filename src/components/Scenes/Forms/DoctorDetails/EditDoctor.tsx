@@ -292,40 +292,127 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
   
  
 
-
-  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfileImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
+    console.log("Profile image file selected:", file);
+  
     if (file) {
-      setProfileImage(file); 
-      const fileUrl = URL.createObjectURL(file); 
-      setProfileImageUrl(fileUrl); 
-      methods.setValue("doctor_image", fileUrl);
+      console.log("Profile image details before compression:", {
+        name: file.name,
+        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+        type: file.type,
+      });
+  
+      try {
+        // Options for image compression
+        const options = {
+          maxSizeMB: 1, // Maximum file size in MB
+          maxWidthOrHeight: 1024, // Max width or height
+          useWebWorker: true, // Use web worker for better performance
+        };
+  
+        // Compress the image
+        const compressedFile = await imageCompression(file, options);
+        console.log("Profile image details after compression:", {
+          name: compressedFile.name,
+          size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`,
+          type: compressedFile.type,
+        });
+  
+        const compressedImage = new File([compressedFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+        console.log("Profile image file recreated:", compressedImage);
+  
+        // Generate a URL for the compressed file
+        const compressedFileUrl = URL.createObjectURL(compressedImage);
+        console.log("Compressed profile image URL:", compressedFileUrl);
+  
+        // Update state and form values
+        setProfileImage(compressedImage);
+        setProfileImageUrl(compressedFileUrl);
+        methods.setValue("doctor_image", compressedFileUrl);
+        console.log("Form value for 'doctor_image' updated.");
+      } catch (error) {
+        console.error("Error during profile image compression:", error);
+      }
     } else {
-      console.error("No file selected.");
+      console.error("No profile image file selected.");
     }
   };
-
-
-    const handleHomeDocImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files ? event.target.files[0] : null;
-      if (file) {
-        setHomeDocImage(file); 
-        const fileUrl = URL.createObjectURL(file); 
-        setHomeImageUrl(fileUrl); 
-        methods.setValue("home_doc_profile", fileUrl);
-      } else {
-        console.error("No file selected.");
+  
+  const handleHomeDocImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    console.log("Home doctor image file selected:", file);
+  
+    if (file) {
+      console.log("Home doctor image details before compression:", {
+        name: file.name,
+        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+        type: file.type,
+      });
+  
+      try {
+        // Options for image compression
+        const options = {
+          maxSizeMB: 1, // Maximum file size in MB
+          maxWidthOrHeight: 1024, // Max width or height
+          useWebWorker: true, // Use web worker for better performance
+        };
+  
+        // Compress the image
+        const compressedFile = await imageCompression(file, options);
+        console.log("Home doctor image details after compression:", {
+          name: compressedFile.name,
+          size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`,
+          type: compressedFile.type,
+        });
+  
+        const compressedImage = new File([compressedFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+        console.log("Home doctor image file recreated:", compressedImage);
+  
+        // Generate a URL for the compressed file
+        const compressedFileUrl = URL.createObjectURL(compressedImage);
+        console.log("Compressed home doctor image URL:", compressedFileUrl);
+  
+        // Update state and form values
+        setHomeDocImage(compressedImage);
+        setHomeImageUrl(compressedFileUrl);
+        methods.setValue("home_doc_profile", compressedFileUrl);
+        console.log("Form value for 'home_doc_profile' updated.");
+      } catch (error) {
+        console.error("Error during home doctor image compression:", error);
       }
-    };
+    } else {
+      console.error("No home doctor image file selected.");
+    }
+  };
+  
   
 
 
 
+    
+
+
   
-const handleCoverImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCoverImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files ? event.target.files[0] : null;
+      console.log("File selected:", file);
+    
       if (file) {
         try {
+          console.log("Starting image compression...");
+          console.log("Original file details:", {
+            name: file.name,
+            size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+            type: file.type,
+          });
+    
           // Options for image compression
           const options = {
             maxSizeMB: 1, // Maximum file size in MB
@@ -335,14 +422,33 @@ const handleCoverImageChange = async (event: React.ChangeEvent<HTMLInputElement>
     
           // Compress the image
           const compressedFile = await imageCompression(file, options);
+          console.log("Image compression completed.");
+    
+          // Log details of the compressed file
+          console.log("Compressed file details:", {
+            name: compressedFile.name,
+            size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`,
+            type: compressedFile.type,
+          });
+    
+          const compressedImage = new File([compressedFile], file.name, {
+            type: file.type,
+            lastModified: Date.now(),
+          });
+    
+          // Log the final compressed file object
+          console.log("Final compressed file object created:", compressedImage);
     
           // Generate a URL for the compressed file
-          const compressedFileUrl = URL.createObjectURL(compressedFile);
+          const compressedFileUrl = URL.createObjectURL(compressedImage);
+          console.log("Compressed file URL generated:", compressedFileUrl);
     
           // Update state and form values
-          setCoverImage(compressedFile);
+          setCoverImage(compressedImage);
           setCoverImageUrl(compressedFileUrl);
           methods.setValue("doctor_cover_image", compressedFileUrl);
+    
+          console.log("State and form values updated.");
         } catch (error) {
           console.error("Error during image compression:", error);
         }
@@ -350,6 +456,7 @@ const handleCoverImageChange = async (event: React.ChangeEvent<HTMLInputElement>
         console.error("No file selected.");
       }
     };
+    
 
 const SubmitDoctor = async (data: Doctor) => {
 
