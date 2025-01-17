@@ -17,6 +17,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/TableAlert";
 import { AlertDialogDescription } from "@radix-ui/react-alert-dialog";
+import imageCompression from 'browser-image-compression';
+
 
 const Hospitals = () => {
   const [data, setData] = useState<Hospital[]>([]);
@@ -100,17 +102,51 @@ const [Regionoptions,setRegionoptions]=useState<Regions[]>([])
     setModalOpen(true);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+  
+    if (!file) {
+      return;
+    }
+  
+    const options = {
+      maxSizeMB: 1, // Maximum file size in MB
+      maxWidthOrHeight: 1920, // Maximum width or height
+      useWebWorker: true, // Enable Web Worker for better performance
+    };
+  
+    try {
+      // Compress the image
+      const compressedFile = await imageCompression(file, options);
+  
+      const compressedImage = new File([compressedFile], file.name, {
+        type: file.type,
+        lastModified: Date.now(),
+      });
+  
+      // Read the compressed file as a data URL
       const reader = new FileReader();
       reader.onload = () => {
-        setImagePreview(reader.result as string);
-        setFormValues({ ...formValues, hospital_icon: reader.result as string });
+        const imagePreviewUrl = reader.result as string;
+  
+        // Update the state and form values
+        setImagePreview(imagePreviewUrl);
+        setFormValues((prevValues) => ({
+          ...prevValues,
+          hospital_icon: imagePreviewUrl,
+        }));
       };
-      reader.readAsDataURL(file);
+  
+      reader.onerror = () => {
+        console.error("Error reading the compressed image file.");
+      };
+  
+      reader.readAsDataURL(compressedImage); 
+    } catch (error) {
+      console.error("Error compressing the image:", error);
     }
   };
+  
   
   const handleSubmit = async () => {
     try {

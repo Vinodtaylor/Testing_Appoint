@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import { Department, getDoctor, Hospital, RegionsType } from "@/types/types";
 import { IoMdArrowDropdown } from "react-icons/io";
 import EditDoctorSchema from "@/schema/EditDoctor";
 // import compressImage from "@/utilis/compressImage";
+import imageCompression from 'browser-image-compression';
 
 
 
@@ -77,7 +79,6 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     defaultValues: {
       main_speciality: [],
        speciality: [],
-
       meta_tag: [],
       doctor_expert: [],
       top_treatments: [],
@@ -90,8 +91,6 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
     },
 
   });
-
-
 
 
   // const { fields: qualificationFields, append, remove } = useFieldArray({
@@ -293,47 +292,171 @@ const [isHospitalDropdownOpen, setIsHospitalDropdownOpen] = useState(false);
   
  
 
-
-  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfileImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
+    console.log("Profile image file selected:", file);
+  
     if (file) {
-      setProfileImage(file); 
-      const fileUrl = URL.createObjectURL(file); 
-      setProfileImageUrl(fileUrl); 
-      methods.setValue("doctor_image", fileUrl);
+      console.log("Profile image details before compression:", {
+        name: file.name,
+        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+        type: file.type,
+      });
+  
+      try {
+        // Options for image compression
+        const options = {
+          maxSizeMB: 1, // Maximum file size in MB
+          maxWidthOrHeight: 1024, // Max width or height
+          useWebWorker: true, // Use web worker for better performance
+        };
+  
+        // Compress the image
+        const compressedFile = await imageCompression(file, options);
+        console.log("Profile image details after compression:", {
+          name: compressedFile.name,
+          size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`,
+          type: compressedFile.type,
+        });
+  
+        const compressedImage = new File([compressedFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+        console.log("Profile image file recreated:", compressedImage);
+  
+        // Generate a URL for the compressed file
+        const compressedFileUrl = URL.createObjectURL(compressedImage);
+        console.log("Compressed profile image URL:", compressedFileUrl);
+  
+        // Update state and form values
+        setProfileImage(compressedImage);
+        setProfileImageUrl(compressedFileUrl);
+        methods.setValue("doctor_image", compressedFileUrl);
+        console.log("Form value for 'doctor_image' updated.");
+      } catch (error) {
+        console.error("Error during profile image compression:", error);
+      }
     } else {
-      console.error("No file selected.");
+      console.error("No profile image file selected.");
     }
   };
+  
+  const handleHomeDocImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    console.log("Home doctor image file selected:", file);
+  
+    if (file) {
+      console.log("Home doctor image details before compression:", {
+        name: file.name,
+        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+        type: file.type,
+      });
+  
+      try {
+        // Options for image compression
+        const options = {
+          maxSizeMB: 1, // Maximum file size in MB
+          maxWidthOrHeight: 1024, // Max width or height
+          useWebWorker: true, // Use web worker for better performance
+        };
+  
+        // Compress the image
+        const compressedFile = await imageCompression(file, options);
+        console.log("Home doctor image details after compression:", {
+          name: compressedFile.name,
+          size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`,
+          type: compressedFile.type,
+        });
+  
+        const compressedImage = new File([compressedFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+        console.log("Home doctor image file recreated:", compressedImage);
+  
+        // Generate a URL for the compressed file
+        const compressedFileUrl = URL.createObjectURL(compressedImage);
+        console.log("Compressed home doctor image URL:", compressedFileUrl);
+  
+        // Update state and form values
+        setHomeDocImage(compressedImage);
+        setHomeImageUrl(compressedFileUrl);
+        methods.setValue("home_doc_profile", compressedFileUrl);
+        console.log("Form value for 'home_doc_profile' updated.");
+      } catch (error) {
+        console.error("Error during home doctor image compression:", error);
+      }
+    } else {
+      console.error("No home doctor image file selected.");
+    }
+  };
+  
+  
 
 
-    const handleHomeDocImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+    
+
+
+  
+    const handleCoverImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files ? event.target.files[0] : null;
+      console.log("File selected:", file);
+    
       if (file) {
-        setHomeDocImage(file); 
-        const fileUrl = URL.createObjectURL(file); 
-        setHomeImageUrl(fileUrl); 
-        methods.setValue("home_doc_profile", fileUrl);
+        try {
+          console.log("Starting image compression...");
+          console.log("Original file details:", {
+            name: file.name,
+            size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+            type: file.type,
+          });
+    
+          // Options for image compression
+          const options = {
+            maxSizeMB: 1, // Maximum file size in MB
+            maxWidthOrHeight: 1024, // Max width or height
+            useWebWorker: true, // Use web worker for better performance
+          };
+    
+          // Compress the image
+          const compressedFile = await imageCompression(file, options);
+          console.log("Image compression completed.");
+    
+          // Log details of the compressed file
+          console.log("Compressed file details:", {
+            name: compressedFile.name,
+            size: `${(compressedFile.size / (1024 * 1024)).toFixed(2)} MB`,
+            type: compressedFile.type,
+          });
+    
+          const compressedImage = new File([compressedFile], file.name, {
+            type: file.type,
+            lastModified: Date.now(),
+          });
+    
+          // Log the final compressed file object
+          console.log("Final compressed file object created:", compressedImage);
+    
+          // Generate a URL for the compressed file
+          const compressedFileUrl = URL.createObjectURL(compressedImage);
+          console.log("Compressed file URL generated:", compressedFileUrl);
+    
+          // Update state and form values
+          setCoverImage(compressedImage);
+          setCoverImageUrl(compressedFileUrl);
+          methods.setValue("doctor_cover_image", compressedFileUrl);
+    
+          console.log("State and form values updated.");
+        } catch (error) {
+          console.error("Error during image compression:", error);
+        }
       } else {
         console.error("No file selected.");
       }
     };
-  
-
-
-
-  
-  const handleCoverImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      setCoverImage(file); 
-      const fileUrl = URL.createObjectURL(file);
-      setCoverImageUrl(fileUrl); 
-      methods.setValue("doctor_cover_image", fileUrl);
-    } else {
-      console.error("No file selected.");
-    }
-  };
+    
 
 const SubmitDoctor = async (data: Doctor) => {
 
@@ -935,6 +1058,8 @@ const SubmitDoctor = async (data: Doctor) => {
 
     />
 
+
+<p className="text-left mt-1 text-red-600 font-medium text-sm">Width:300px ; height:300px</p>
 <p className="text-red-500 text-left text-sm">{methods.formState.errors.doctor_image?.message}</p>
 
   </div>
@@ -988,6 +1113,8 @@ const SubmitDoctor = async (data: Doctor) => {
      className="hidden"
      onChange={handleHomeDocImageChange}
    />
+
+<p className="text-left mt-1 text-red-600 font-medium text-sm">Width:650px ; height:980px</p>
 
 <p className="text-red-500 text-left text-sm">{methods.formState.errors.home_doc_profile?.message}</p>
 
